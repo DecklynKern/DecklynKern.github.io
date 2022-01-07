@@ -10,10 +10,16 @@ function drop(ev) {
   ev.preventDefault();
   var data = ev.dataTransfer.getData("text");
 
+  console.log(ev.target.tagName);
+
   if(ev.target.parentElement.className == "imagelistelem") {
   	ev.target.parentElement.parentElement.insertBefore(document.getElementById(data), ev.target.parentElement);
+
   } else if (ev.target.tagName == "DIV" && ev.target.className == "tierslot") {
   	ev.target.children[0].appendChild(document.getElementById(data));
+  
+  } else if (ev.target.tagName == "UL" && ev.target.className == "tierlist") {
+  	ev.target.appendChild(document.getElementById(data));
   }
 }
 
@@ -78,16 +84,20 @@ function addImage(tier, tag, char) {
 	}
 
 	if(characterNames.includes(char)) {
+
 		document.getElementById("tagentry").value = "";
 		document.getElementById("charentry").value = "";
+
 		img = document.createElement("li");
 		path = "char images\\" + char + ".png";
 		img.id = tag + Math.random();
 		img.className = "imagelistelem"
+
 		img.innerHTML = `
 			<img class="char-image" src = "` + path + `" draggable="true" ondragstart="drag(event)" onmouseover="setDeleteButtonVisibility(this, true)" onmouseout="setDeleteButtonVisibility(this, false)">
 			<img class="deleteimagebutton" src="deletebutton.png" onclick="deleteImage(this)" onmouseover="setDeleteButtonVisibility(this, true)">
 			<p class="tagtext">` + tag + `</p>`
+
 		document.getElementById("tier" + tier).children[1].children[0].appendChild(img);
 	}
 }

@@ -67,11 +67,9 @@ body {
 }
 
 .char-image {
-	top: 0;
-	left: 0;
-	position: relative;
-	width: 100px;
-	height: 100px;
+	width: 100%;
+	height: 100%;
+	object-fit: contain;
 	cursor: grab;
 }
 
@@ -81,21 +79,22 @@ body {
 
 .deleteimagebutton {
 	z-index: 2;
-	top: -100px;
-	left: 80px;
+	top: 0;
+	right: 0;
 	visibility: hidden;
-	position: relative;
+	position: absolute;
 	cursor: pointer;
 }
 
 .imagelistelem {
 	width: 100px;
 	height: 100px;
+	position: relative;
 }
 
 .tagtext {
 	z-index: 1;
-	bottom: 60px;
+	bottom: 22px;
 	position: relative;
 	text-align: center;
 	margin: 0;
