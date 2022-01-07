@@ -37,16 +37,6 @@ function addRow(text, color) {
 
 }
 
-function addImage(row, src) {
-
-	img = document.createElement("li");
-	img.id = src;
-	img.innerHTML = `
-		<img id="` + src + `" class="char-image" src = "` + src + `" draggable="true" ondragstart="drag(event)" onmouseover="setDeleteButtonVisibility(this, true)" onmouseout="setDeleteButtonVisibility(this, false)">
-		<img class="deleteimagebutton" src="deletebutton.png" onclick="deleteImage(this)" onmouseover="setDeleteButtonVisibility(this, true)">`
-	document.getElementById("tier" + row).children[1].children[0].appendChild(img);
-}
-
 function setCurrentTier(tier) {
 
 	oldTier = document.getElementById("currenttier").value;
@@ -88,9 +78,16 @@ function createImage() {
 	if(characterNames.includes(char)) {
 		document.getElementById("tagentry").value = "";
 		document.getElementById("charentry").value = "";
-		addImage(1, "char images\\" + char + ".png");
+		img = document.createElement("li");
+		path = "char images\\" + char + ".png";
+		img.id = tag + Math.random();
+		img.className = "imagelistelem"
+		img.innerHTML = `
+			<img id="` + path + `" class="char-image" src = "` + path + `" draggable="true" ondragstart="drag(event)" onmouseover="setDeleteButtonVisibility(this, true)" onmouseout="setDeleteButtonVisibility(this, false)">
+			<img class="deleteimagebutton" src="deletebutton.png" onclick="deleteImage(this)" onmouseover="setDeleteButtonVisibility(this, true)">
+			<p class="tagtext">` + tag + `</p>`
+		document.getElementById("tier1").children[1].children[0].appendChild(img);
 	} else {
-
 	}
 }
 

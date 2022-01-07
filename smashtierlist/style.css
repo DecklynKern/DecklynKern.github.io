@@ -2,6 +2,11 @@ body {
 	margin: 0px;
 }
 
+@font-face {
+  font-family: smashtext;
+  src: url(super_smash_4_1_by_pokemon_diamond-d7zxu6d.ttf);
+}
+
 .sidebar {
 	top: 0;
 	left: 0;
@@ -67,11 +72,27 @@ body {
 
 .deleteimagebutton {
 	z-index: 1;
-	top: -80px;
-	left: -25px;
+	top: -100px;
+	left: 80px;
 	visibility: hidden;
 	position: relative;
 	cursor: pointer;
+}
+
+.imagelistelem {
+	width: 100px;
+	height: 100px;
+}
+
+.tagtext {
+	bottom: 60px;
+	position: relative;
+	text-align: center;
+	margin: 0;
+	color: white;
+  	-webkit-text-stroke: 1.5px black;
+  	font-size: 16pt;
+	font-family: smashtext;
 }
 
 .colorbutton1 {background-color: red;}
