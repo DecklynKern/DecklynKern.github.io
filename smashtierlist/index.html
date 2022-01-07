@@ -31,6 +31,13 @@
 						</button>
 					</td>
 				</tr>
+				<tr>
+					<td colspan="2">
+						<button onclick="createLink()">
+							Get Link
+						</button>
+					</td>
+				</tr>
 			</table>
 			<div id="imagelist">
 			</div>
@@ -38,21 +45,7 @@
 		<div class="mainpage">
 			<img class="clickbutton" id="addrowbutton" src="addbutton.png" onclick="addRow('NEW', '#eee')">
 			<input type="hidden" id="currenttier" value="0">
-			<table>
-				<tr>
-					<td>
-						Edit tier
-					</td>
-				</tr>
-				<tr>
-					<td>
-						Tier name: 
-					</td>
-					<td>
-						<input type="text" id="nameentry" oninput="setText()">
-					</td>
-				</tr>
-			</table>
+			Edit tier
 			<div>
 				<input type="button" class="colorbutton1" onclick="setColour('red')">
 				<input type="button" class="colorbutton2" onclick="setColour('orange')">
@@ -63,10 +56,9 @@
 				<input type="button" class="colorbutton7" onclick="setColour('black')">
 				<input type="button" class="colorbutton8" onclick="setColour('white')">
 			</div>
-			<table id="tiertable">
-				<tr>
-				</tr>
-			</table>
+			<div id=tiertable>
+				<div></div>
+			</div>
 		</div>
 	</body>
 	<script>
@@ -75,5 +67,6 @@
 		addRow("B", "#dd4");
 		addRow("C", "#4d4");
 		addRow("D", "#44d");
+		loadParams();
 	</script>
 </html>

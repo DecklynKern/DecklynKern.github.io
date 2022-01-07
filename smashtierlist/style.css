@@ -26,37 +26,44 @@ body {
 }
 
 .tierrow {
-	height: 100px;
+	width: 900px;
+	min-height: 100px;
 	border-spacing: 0px;
-	display: block;
 	border-width: 2px;
 	border-color: black;
 	border-style: solid;
+	display: flex;
 }
 
 .tiertitle {
-	height: 100px;
 	width: 75px;
+	max-width: 75px;
 	text-align: center;
-	word-wrap: normal;
 	padding: 0;
 	cursor: pointer;
 	user-select: none;
-}
+	-webkit-user-modify: read-write;
+    overflow-wrap: break-word;
+    -webkit-line-break: after-white-space;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+}	
 
 .tierslot {
-	height: 100px;
-	width: 750px;
+	height: inherit;
 	background-color: #444;
 	cursor: pointer;
 	padding: 0;
 }
 
 .tierlist {
+	width: 825px;
 	padding: 0;
 	margin: 0;
 	list-style-type: none;
 	display: inline-flex;
+	flex-wrap: wrap;
 }
 
 .char-image {
