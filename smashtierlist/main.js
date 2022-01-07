@@ -10,8 +10,6 @@ function drop(ev) {
   ev.preventDefault();
   var data = ev.dataTransfer.getData("text");
 
-  console.log(ev.target.parentElement.className);
-
   if(ev.target.parentElement.className == "imagelistelem") {
   	ev.target.parentElement.parentElement.insertBefore(document.getElementById(data), ev.target.parentElement);
   } else if (ev.target.tagName == "DIV" && ev.target.className == "tierslot") {
@@ -127,7 +125,6 @@ function loadParams() {
 		}
 
 		for(j = 0; j < row[2].length; j++) {
-			console.log(document.getElementById("tiertable").children[i + 1]);
 			addImage(i + 1, row[2][j][0], row[2][j][1]);
 		}
 
