@@ -3,16 +3,18 @@ function allowDrop(ev) { // don't look here this is all bad
 }
 
 function drag(ev) {
-  ev.dataTransfer.setData("text", ev.target.id);
+  ev.dataTransfer.setData("text", ev.target.parentElement.id);
 }
 
 function drop(ev) {
   ev.preventDefault();
   var data = ev.dataTransfer.getData("text");
 
-  if(ev.target.tagName == "IMG") {
+  console.log(ev.target.parentElement.className);
+
+  if(ev.target.parentElement.className == "imagelistelem") {
   	ev.target.parentElement.parentElement.insertBefore(document.getElementById(data), ev.target.parentElement);
-  } else {
+  } else if (ev.target.tagName == "TD" && ev.target.className == "tierslot") {
   	ev.target.children[0].appendChild(document.getElementById(data));
   }
 }
@@ -83,7 +85,7 @@ function createImage() {
 		img.id = tag + Math.random();
 		img.className = "imagelistelem"
 		img.innerHTML = `
-			<img id="` + path + `" class="char-image" src = "` + path + `" draggable="true" ondragstart="drag(event)" onmouseover="setDeleteButtonVisibility(this, true)" onmouseout="setDeleteButtonVisibility(this, false)">
+			<img id="` + path + img.id + `" class="char-image" src = "` + path + `" draggable="true" ondragstart="drag(event)" onmouseover="setDeleteButtonVisibility(this, true)" onmouseout="setDeleteButtonVisibility(this, false)">
 			<img class="deleteimagebutton" src="deletebutton.png" onclick="deleteImage(this)" onmouseover="setDeleteButtonVisibility(this, true)">
 			<p class="tagtext">` + tag + `</p>`
 		document.getElementById("tier1").children[1].children[0].appendChild(img);
