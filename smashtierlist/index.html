@@ -2,11 +2,39 @@
 <html>
 	<head>
 		<script src="main.js"></script>
+		<script src="aliases.js"></script>
 		<link rel="stylesheet" href="style.css">
 	</head>
 	<body>
 		<div class="sidebar">
 			left sidebar!
+			<table>
+				<tr>
+					<td>
+						Tag:
+					</td>
+					<td>
+						<input type="text" id="tagentry">
+					</td>
+				</tr>
+				<tr>
+					<td>
+						Character:
+					</td>
+					<td>
+						<input type="text" id="charentry">
+					</td>
+				</tr>
+				<tr>
+					<td colspan="2">
+						<button onclick="createImage()">
+							Add
+						</button>
+					</td>
+				</tr>
+			</table>
+			<div id="imagelist">
+			</div>
 		</div>
 		<div class="mainpage">
 			<img class="clickbutton" id="addrowbutton" src="addbutton.png" onclick="addRow('NEW', '#eee')">

@@ -29,11 +29,10 @@ function addRow(text, color) {
 		<td class="tiertitle" bgcolor="` + color + `" onclick="setCurrentTier('` + tier + `')">
 			` + text + `
 		</td>
-		<td class="tierslot" ondrop="drop(event)" ondragover="allowDrop(event)">
+		<td class="tierslot" ondrop="drop(event)" ondragover="allowDrop(event)" onclick="setCurrentTier('` + tier + `')">
 			<ul class="tierlist">
 			</ul>
-		</td>
-	`;
+		</td>`;
 	tableBody.appendChild(row);
 
 }
@@ -42,7 +41,9 @@ function addImage(row, src) {
 
 	img = document.createElement("li");
 	img.id = src;
-	img.innerHTML = `<img id="` + src + `" class="char-image" src = "` + src + `" draggable="true" ondragstart="drag(event)">`
+	img.innerHTML = `
+		<img id="` + src + `" class="char-image" src = "` + src + `" draggable="true" ondragstart="drag(event)" onmouseover="setDeleteButtonVisibility(this, true)" onmouseout="setDeleteButtonVisibility(this, false)">
+		<img class="deleteimagebutton" src="deletebutton.png" onclick="deleteImage(this)" onmouseover="setDeleteButtonVisibility(this, true)">`
 	document.getElementById("tier" + row).children[1].children[0].appendChild(img);
 }
 
@@ -71,4 +72,36 @@ function setText() {
 
 function setColour(color) {
 	document.getElementById("tier" + document.getElementById("currenttier").value).children[0].style.backgroundColor = color;
+}
+
+function createImage() {
+	
+	tag = document.getElementById("tagentry").value;
+	char = document.getElementById("charentry").value.trim().toLowerCase().replace(" ", "").replace(".", "").replace("/", "").replace("-", "");
+
+	aliassedChar = aliasMap.get(char);
+
+	if(aliassedChar != undefined) {
+		char = aliassedChar;
+	}
+
+	if(characterNames.includes(char)) {
+		document.getElementById("tagentry").value = "";
+		document.getElementById("charentry").value = "";
+		addImage(1, "char images\\" + char + ".png");
+	} else {
+
+	}
+}
+
+function setDeleteButtonVisibility(img, visible) {
+	if(visible) {
+		img.parentElement.children[1].style.visibility = "visible";
+	} else {
+		img.parentElement.children[1].style.visibility = "hidden";
+	}
+}
+
+function deleteImage(button) {
+	button.parentElement.remove();
 }
