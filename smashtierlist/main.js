@@ -42,7 +42,6 @@ function addRow(text, color) {
 
 	row.children[0].style.backgroundColor = color;
 	tableBody.appendChild(row);
-
 }
 
 function setCurrentTier(tier) {
@@ -72,7 +71,6 @@ function createImage() {
 	tag = document.getElementById("tagentry").value;
 	char = document.getElementById("charentry").value.trim().toLowerCase().replace(" ", "").replace(".", "").replace("/", "").replace("-", "");
 	addImage(1, tag, char);
-
 }
 
 function addImage(tier, tag, char) {
@@ -120,9 +118,9 @@ function loadParams() {
 
 	for(i = 0; i < obj["rows"].length; i++) {
 
-		row = obj["rows"][i];
-		rowTitle = row[0];
-		color = row[1];
+		r = obj["rows"][i];
+		rowTitle = r[0];
+		color = r[1];
 
 		if(i == document.getElementById("tiertable").children.length - 1) {
 			addRow(rowTitle, color);
@@ -134,12 +132,10 @@ function loadParams() {
 			tierRow.children[0].innerHTML = rowTitle;
 		}
 
-		for(j = 0; j < row[2].length; j++) {
-			addImage(i + 1, row[2][j][0], row[2][j][1]);
+		for(j = 0; j < r[2].length; j++) {
+			addImage(i + 1, r[2][j][0], r[2][j][1]);
 		}
-
 	}
-
 }
 
 function createLink() {
@@ -161,11 +157,9 @@ function createLink() {
 			char = imgUrl[imgUrl.length - 1].split(".")[0];
 			obj["rows"][i - 1][2].push([tag, char]);
 		}
-
 	}
 
 	string = btoa(JSON.stringify(obj));
 
-	console.log(obj);
 	console.log(url + "?d=" + string);
 }
