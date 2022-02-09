@@ -1,4 +1,5 @@
-function allowDrop(ev) { // don't look here this is all bad
+// don't look here this is all bad
+function allowDrop(ev) {
   ev.preventDefault();
 }
 
@@ -7,15 +8,14 @@ function drag(ev) {
 }
 
 function drop(ev) {
+
   ev.preventDefault();
   var data = ev.dataTransfer.getData("text");
-
-  console.log(ev.target.tagName);
 
   if(ev.target.parentElement.className == "imagelistelem") {
   	ev.target.parentElement.parentElement.insertBefore(document.getElementById(data), ev.target.parentElement);
 
-  } else if (ev.target.tagName == "DIV" && ev.target.className == "tierslot") {
+  } else if (ev.target.tagName == "DIV" && (ev.target.className == "tierslot" || ev.target.className == "imagelist")) {
   	ev.target.children[0].appendChild(document.getElementById(data));
   
   } else if (ev.target.tagName == "UL" && ev.target.className == "tierlist") {
@@ -28,7 +28,14 @@ function addRow(text, color) {
 	tableBody = document.getElementById("tiertable");
 	row = document.createElement("div");
 	row.className = "tierrow";
-	tier = tableBody.children.length;
+
+	if(tableBody.children.length == 1) {
+		tier = 1;
+
+	} else {
+		tier = tableBody.children[tableBody.children.length - 1].id.slice(4) - 0 + 1;
+	
+	}
 	row.id = "tier" + tier;
 
 	row.innerHTML = `
@@ -44,18 +51,34 @@ function addRow(text, color) {
 	tableBody.appendChild(row);
 }
 
+function deleteRow() {
+
+	tier = document.getElementById("tier" + document.getElementById("currenttier").value);
+
+	for(i=0; i < tier.children[1].children[0].children.length; i++) {
+		document.getElementById("createdimagelist").children[0].appendChild(tier.children[1].children[0].children[i]);
+	}
+
+	document.getElementById("tiertable").removeChild(tier);
+
+}
+
 function setCurrentTier(tier) {
+
+	document.getElementById("edittiertext").innerHTML = "Edit tier"
 
 	oldTier = document.getElementById("currenttier").value;
 
 	if(oldTier != "0") {
-		document.getElementById("tier" + oldTier).children[1].style.backgroundColor = "#444";
+		try{
+			document.getElementById("tier" + oldTier).children[1].style.backgroundColor = "#444";
+		} catch {
+		}
 	}
 
 	if(oldTier != tier) {
 		document.getElementById("currenttier").value = tier;
 		document.getElementById("tier" + tier).children[1].style.backgroundColor = "#555";
-		document.getElementById("nameentry").value = document.getElementById("tier" + tier).children[0].innerHTML.trim();
 
 	} else {
 		document.getElementById("currenttier").value = "0";
@@ -70,7 +93,7 @@ function createImage() {
 	
 	tag = document.getElementById("tagentry").value;
 	char = document.getElementById("charentry").value.trim().toLowerCase().replace(" ", "").replace(".", "").replace("/", "").replace("-", "");
-	addImage(1, tag, char);
+	addImage(0, tag, char);
 }
 
 function addImage(tier, tag, char) {
@@ -96,7 +119,13 @@ function addImage(tier, tag, char) {
 			<img class="deleteimagebutton" src="deletebutton.png" onclick="deleteImage(this)" onmouseover="setDeleteButtonVisibility(this, true)">
 			<p class="tagtext">` + tag + `</p>`
 
-		document.getElementById("tier" + tier).children[1].children[0].appendChild(img);
+		if(tier == 0){
+			document.getElementById("createdimagelist").children[0].appendChild(img);
+
+		} else {
+			document.getElementById("tier" + tier).children[1].children[0].appendChild(img);
+
+		}
 	}
 }
 
@@ -161,5 +190,5 @@ function createLink() {
 
 	string = btoa(JSON.stringify(obj));
 
-	console.log(url + "?d=" + string);
+	document.getElementById("linkbox").innerHTML = url + "?d=" + string;
 }

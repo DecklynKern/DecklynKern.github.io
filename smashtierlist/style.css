@@ -21,8 +21,15 @@ body {
 }
 
 .imagelist {
-	width: 100px;
-	height: 500px;
+	min-width: 90%;
+	min-height: 40%;
+	background-color: #333;
+	padding: 0;
+}
+
+.textbox {
+	resize: none;
+	min-height: 30%;
 }
 
 .mainpage {
