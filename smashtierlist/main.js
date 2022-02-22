@@ -84,6 +84,7 @@ function setCurrentTier(tier) {
 
 	} else {
 		document.getElementById("currenttier").value = "0";
+		document.getElementById("edittiertext").innerHTML = "Edit tier (click a tier to select it)"
 	}
 }
 

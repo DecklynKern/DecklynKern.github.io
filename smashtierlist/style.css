@@ -20,6 +20,11 @@ body {
 	padding: 0;
 }
 
+.edittier {
+	padding: 1%;
+	background-color: #999;
+}
+
 .imagelist {
 	min-width: 90%;
 	min-height: 40%;
@@ -30,10 +35,10 @@ body {
 .textbox {
 	resize: none;
 	min-height: 30%;
+	width: 80%;
 }
-
 .mainpage {
-	margin-left: 25%;
+	padding-left: 20%;
 }
 
 .tierrow {

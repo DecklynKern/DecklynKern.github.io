@@ -120,40 +120,57 @@
 					</td>
 				</tr>
 			</table>
-			<div id="createdimagelist" class="imagelist" ondrop="drop(event)" ondragover="allowDrop(event)">
-				<ul class="tierlist">
-				</ul>
-			</div>
-			<button onclick="createLink()">
-				Get Link
-			</button>
-			<textarea id="linkbox" class="textbox	"></textarea>
+			<table style="margin-top: 5%">
+				<td>
+					<tr>
+						<div id="createdimagelist" class="imagelist" ondrop="drop(event)" ondragover="allowDrop(event)">
+							<ul class="tierlist">
+							</ul>
+						</div>
+					</td>
+				</tr>
+				<tr>
+					<td>
+						<button onclick="createLink()">
+							Get Link
+						</button>
+					</td>
+				</tr>
+			</table>
+			<textarea id="linkbox" class="textbox"></textarea>
+			<a href="https:\\twitter.com\___Deck___" target="_blank">
+				<img src="twittericon.png" width="50px" style="position: absolute; bottom: 0; left:0">
+			</a>
 		</div>
 		<div class="mainpage">
-			<input type="hidden" id="currenttier" value="0">
-			<div id="edittiertext">
-				Edit tier (click a tier to select it)
+			<div class="edittier">
+				<input type="hidden" id="currenttier" value="0">
+				<div id="edittiertext">
+					Edit tier (click a tier to select it)
+				</div>
+				<div>
+					<input type="button" class="colorbutton1" onclick="setColour('#ff0000')">
+					<input type="button" class="colorbutton2" onclick="setColour('#ff8000')">
+					<input type="button" class="colorbutton3" onclick="setColour('#ffff00')">
+					<input type="button" class="colorbutton4" onclick="setColour('#00c000')">
+					<input type="button" class="colorbutton5" onclick="setColour('#0000ff')">
+					<input type="button" class="colorbutton6" onclick="setColour('#800080')">
+					<input type="button" class="colorbutton7" onclick="setColour('#000000')">
+					<input type="button" class="colorbutton8" onclick="setColour('#ffffff')">
+					<input type="color" id="colorselector" value="#ffffff">
+				</div>
+				<button onclick="deleteRow()">
+					Delete Tier
+				</button>
 			</div>
-			<div>
-				<input type="button" class="colorbutton1" onclick="setColour('#ff0000')">
-				<input type="button" class="colorbutton2" onclick="setColour('#ff8000')">
-				<input type="button" class="colorbutton3" onclick="setColour('#ffff00')">
-				<input type="button" class="colorbutton4" onclick="setColour('#00c000')">
-				<input type="button" class="colorbutton5" onclick="setColour('#0000ff')">
-				<input type="button" class="colorbutton6" onclick="setColour('#800080')">
-				<input type="button" class="colorbutton7" onclick="setColour('#000000')">
-				<input type="button" class="colorbutton8" onclick="setColour('#ffffff')">
-				<input type="color" id="colorselector" value="#ffffff">
+			<div style="padding:20px">
+				<div id=tiertable>
+					<div></div>
+				</div>
+				<button class="clickbutton" id="addrowbutton" onclick="addRow('NEW', '#eee')">
+					+
+				</button>
 			</div>
-			<button onclick="deleteRow()">
-				Delete Tier
-			</button>
-			<div id=tiertable>
-				<div></div>
-			</div>
-			<button class="clickbutton" id="addrowbutton" onclick="addRow('NEW', '#eee')">
-				+
-			</button>
 		</div>
 	</body>
 	<script>
