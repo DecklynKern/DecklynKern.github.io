@@ -64,6 +64,8 @@ body {
 	display: flex;
 	justify-content: center;
 	align-items: center;
+	font-family: sans-serif;
+	font-size: medium;
 }	
 
 .tierslot {
@@ -121,9 +123,22 @@ body {
 	text-align: center;
 	margin: 0;
 	color: white;
-  	-webkit-text-stroke: 0.8px black;
-  	font-size: 16pt;
 	font-family: smashtext;
+}
+
+.smalltag {
+	font-size: 16pt;
+  	-webkit-text-stroke: 0.75px black;
+}
+
+.mediumtag {
+	font-size: 14pt;
+  	-webkit-text-stroke: 0.55px black;
+}
+
+.largetag {
+	font-size: 12pt;
+  	-webkit-text-stroke: 0.35px black;
 }
 
 .colorbutton1 {background-color: red;}

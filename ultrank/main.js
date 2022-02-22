@@ -123,10 +123,20 @@ function addImage(tier, tag, char) {
 		img.id = tag + Math.random();
 		img.className = "imagelistelem"
 
+		if(tag.length < 8) {
+			textClass = "smalltag";
+		
+		} else if(tag.length < 10) {
+			textClass = "mediumtag";
+		
+		} else {
+			textClass = "largetag";
+		}
+
 		img.innerHTML = `
 			<img class="char-image" src = "` + path + `" draggable="true" ondragstart="drag(event)" onmouseover="setDeleteButtonVisibility(this, true)" onmouseout="setDeleteButtonVisibility(this, false)">
 			<img class="deleteimagebutton" src="deletebutton.png" onclick="deleteImage(this)" onmouseover="setDeleteButtonVisibility(this, true)" onmouseout="setDeleteButtonVisibility(this, false)">
-			<p class="tagtext">` + tag + `</p>`
+			<p class="tagtext ` + textClass + `">` + tag + `</p>`
 
 		if(tier == 0){
 			document.getElementById("createdimagelist").children[0].appendChild(img);
