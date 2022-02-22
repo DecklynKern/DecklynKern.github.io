@@ -116,7 +116,7 @@ body {
 	text-align: center;
 	margin: 0;
 	color: white;
-  	-webkit-text-stroke: 1.5px black;
+  	-webkit-text-stroke: 0.8px black;
   	font-size: 16pt;
 	font-family: smashtext;
 }
