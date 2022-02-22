@@ -11,6 +11,7 @@ function drop(ev) {
 
   ev.preventDefault();
   var data = ev.dataTransfer.getData("text");
+  console.log("hi");
 
   if(ev.target.parentElement.className == "imagelistelem") {
   	ev.target.parentElement.parentElement.insertBefore(document.getElementById(data), ev.target.parentElement);
@@ -39,7 +40,7 @@ function addRow(text, color) {
 	row.id = "tier" + tier;
 
 	row.innerHTML = `
-		<div class="tiertitle" onclick="setCurrentTier('` + tier + `')">
+		<div class="tiertitle" onclick="setCurrentTier('` + tier + `')" ondragstart="return false;" ondrop="return false;">
 			` + text + `
 		</div>
 		<div class="tierslot" ondrop="drop(event)" ondragover="allowDrop(event)" onclick="setCurrentTier('` + tier + `')">
