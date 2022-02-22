@@ -59,7 +59,7 @@ body {
 	cursor: pointer;
 	user-select: none;
 	-webkit-user-modify: read-write;
-    overflow-wrap: break-word;
+    overflow-wrap: anywhere;
     -webkit-line-break: after-white-space;
 	display: flex;
 	justify-content: center;
