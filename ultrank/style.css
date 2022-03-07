@@ -129,16 +129,22 @@ body {
 .smalltag {
 	font-size: 16pt;
   	-webkit-text-stroke: 0.75px black;
+    inline-size: 100px;
+    overflow-wrap: break-word;
 }
 
 .mediumtag {
 	font-size: 14pt;
   	-webkit-text-stroke: 0.55px black;
+    inline-size: 100px;
+    overflow-wrap: break-word;
 }
 
 .largetag {
 	font-size: 12pt;
   	-webkit-text-stroke: 0.35px black;
+    inline-size: 100px;
+    overflow-wrap: break-word;
 }
 
 .colorbutton1 {background-color: red;}
