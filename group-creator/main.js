@@ -1,6 +1,7 @@
 function addPerson() {
 
     var name = document.createElement("div");
+    name.className = "namerow";
 
     name.innerHTML = `
         <div class="name">
@@ -12,6 +13,7 @@ function addPerson() {
     `
 
     document.getElementById("namelist").appendChild(name);
+
 }
 
 function deleteName(button) {
@@ -33,7 +35,6 @@ function generateGroups() {
     }
 
     var names = [];
-
     var namelist = document.getElementById("namelist");
 
     for (i = 0; i < namelist.childElementCount; i++) {

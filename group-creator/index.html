@@ -8,7 +8,7 @@
         <div class="sidebar">
             <div>
                 Number of groups: 
-                <input type="number" id="groupnum" min="1" value="3">
+                <input id="groupnum" class="numentry" type="number" min="1" value="3" maxlength="2">
             </div>
             <div>
                 <button id="addbutton" onclick="addPerson()">
@@ -18,6 +18,7 @@
                     Generate Groups
                 </button>
             </div>
+            <hr>
             <div id="namelist"> 
             </div>
         </div>
