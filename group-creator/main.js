@@ -31,8 +31,11 @@ function generateGroups() {
     var numGroups = document.getElementById("groupnum").value;
 
     for (i = 0; i < numGroups; i++) {
-        headerRow.insertCell(i).innerHTML = "Group " + (i + 1);
+        var header = headerRow.insertCell(i);
+        header.innerHTML = "Group " + (i + 1);
+        header.className = "tableheader";
     }
+    headerRow.insertCell(numGroups);
 
     var names = [];
     var namelist = document.getElementById("namelist");
@@ -41,16 +44,25 @@ function generateGroups() {
         names.push(namelist.children[i].children[0].innerHTML);
     }
 
+    while (names.length % numGroups > 0) {
+        names.push("");
+    }
+
     var col = 0;
 
     for (i = 0; i < names.length; i++) {
         if (col == 0) {
+            try{
+                row.insertCell(numGroups);
+            } catch {}
             var row = table.insertRow();
         }
         row.insertCell(col).innerHTML = names[i];
         col += 1;
         col %= numGroups;
     }
+
+    row.insertCell(numGroups);
 
     document.getElementById("mainpage").appendChild(table);
 }

@@ -11,6 +11,7 @@
 	font-size: medium;
     width: 60%;
     float: left;
+    background-color: #eee;
 }
 
 .sidebar {
@@ -23,12 +24,43 @@
 	float: left;
 	margin: 0;
 	padding: 0;
+    background-color: #fff;
 }
 
 .mainpage {
+    padding: 0;
 	padding-left: 15%;
+    min-width: 85%;
+    min-height: 100%;
 }
 
 .numentry {
     width: 3em;
+}
+
+.namerow {
+    padding: 1%;
+    margin-right: 5px;
+    margin-left: 5%;
+}
+
+.tableheader {
+    border-bottom: 1px grey solid;
+}
+
+table {
+    border-spacing: 0;
+}
+
+td {
+    border-left: 2px black solid;
+    font-size: larger;
+    padding: 10px;
+    padding-top: 5px;
+    padding-bottom: 5px;
+}
+
+html {
+    background-color: aliceblue;
+    font-family: Verdana, Geneva, Tahoma, sans-serif;
 }
