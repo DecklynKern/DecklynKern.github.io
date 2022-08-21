@@ -1,0 +1,29 @@
+.name {
+	text-align: center;
+	padding: 0;
+	cursor: pointer;
+	user-select: none;
+	-webkit-user-modify: read-write;
+    overflow-wrap: anywhere;
+    -webkit-line-break: after-white-space;
+	display: flex;
+	align-items: center;
+	font-family: sans-serif;
+	font-size: medium;
+}
+
+.sidebar {
+	top: 0;
+	left: 0;
+	width: 20%;
+	height: 100%;
+	position: fixed;
+	overflow-x: hidden;
+	float: left;
+	margin: 0;
+	padding: 0;
+}
+
+.mainpage {
+	padding-left: 20%;
+}
