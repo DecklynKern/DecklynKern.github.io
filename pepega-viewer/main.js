@@ -50,4 +50,10 @@ function generate() {
         pepegaList.insertBefore(image, pepegaList.firstElementChild);
 
     }
+
+    html2canvas(pepegaList, {backgroundColor:null}).then(canvas => {
+        pepegaList.innerHTML = "";
+        pepegaList.appendChild(canvas);
+    });
+
 }
