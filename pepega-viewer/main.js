@@ -40,6 +40,9 @@ function generate() {
             case 'a':
                 img = "5";
                 break;
+            case ' ':
+                img = "6";
+                break;
             default:
                 continue;
         }
