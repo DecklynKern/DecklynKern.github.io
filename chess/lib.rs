@@ -5,9 +5,6 @@ use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsValue;
 use web_sys::console;
 
-//static hashtable: chess::hash::HashTable<usize> = chess::hash::HashTable::new();
-//static player: chess::player::AlphaBetaSearchPlayer = chess::player::AlphaBetaSearchPlayer::new(6);
-
 #[wasm_bindgen]
 extern {
     // javascript functions we might need to call in here
@@ -31,7 +28,7 @@ pub fn get_possible_moves(fen: &str) -> Vec<JsValue> {
 pub fn calc_engine_move(fen: &str) -> String {
 
     let mut board = chess::game::Board::from_fen(String::from(fen));
-    let mut player: chess::player::AlphaBetaSearchPlayer = chess::player::AlphaBetaSearchPlayer::new(4);
+    let mut player: chess::player::AlphaBetaSearchPlayer = chess::player::AlphaBetaSearchPlayer::new(6);
     
     let possible_moves = chess::game::get_possible_moves(&board);
     let best_move = player.get_move(&mut board, &possible_moves);
