@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <link href="style.css" rel="stylesheet">    
+        <script src="main.js" ></script>
+        <script type="module">
+            import init, {calc_engine_move, get_possible_moves, play_human_move} from "./chess_web.js";
+            init().then(() => {
+                getPossibleMoves = get_possible_moves;
+                playEngineMove = function() {
+                    setToFen(calc_engine_move(board_fen));
+                };
+                playHumanMove = play_human_move;
+                setToFen('rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1');
+            })
+        </script>
+    </head>
+    <body onload="setupBoard()">
+        <div id="chess-board">
+        </div>
+    </body>
+</html>

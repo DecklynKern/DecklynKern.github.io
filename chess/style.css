@@ -1,0 +1,20 @@
+.board-square {
+    width: 60px;
+    height: 60px;
+    -webkit-user-drag: none;
+    user-select: none;
+    -moz-user-select: none;
+    -webkit-user-select: none;
+    -ms-user-select: none;
+}
+.rank {
+    display: flex;
+}
+.chess-piece {
+    padding: 0;
+    -webkit-user-drag: none;
+    user-select: none;
+    -moz-user-select: none;
+    -webkit-user-select: none;
+    -ms-user-select: none;
+}
