@@ -85,10 +85,10 @@ function setupBoard() {
             square.className = "board-square";
 
             if ((row + col) % 2 == 1) {
-                square.classList.add("light-square");
+                square.classList.add("dark-square");
 
             } else {
-                square.classList.add("dark-square");
+                square.classList.add("light-square");
             }
     
             square.onmousedown = getOnClick(row, col);

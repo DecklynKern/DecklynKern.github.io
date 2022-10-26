@@ -21,15 +21,15 @@
 }
 
 .dark-square {
-    background-color: midnightblue;
+    background-color: rgb(54, 54, 189);
 }
 
 .selected-square {
-    background-color: red;
+    background-color: rgb(238, 39, 39);
 }
 
 .possible-move-square {
-    background-color: lightblue;
+    background-color: rgb(34, 238, 204);
 }
 
 .rank {
