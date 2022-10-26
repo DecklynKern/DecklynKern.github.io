@@ -11,12 +11,19 @@
                     setToFen(calc_engine_move(board_fen));
                 };
                 playHumanMove = play_human_move;
+                setupBoard();
                 setToFen('rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1');
             })
         </script>
     </head>
-    <body onload="setupBoard()">
+    <body>
         <div id="chess-board">
+        </div>
+        <div>
+            <input type="text" id="fen-entry" size="60">
+            <button onclick="setToFen(document.getElementById('fen-entry').value)">
+                Update
+            </button>
         </div>
     </body>
 </html>

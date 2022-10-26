@@ -25,6 +25,10 @@ function setupBoard() {
                 if (row == possible_move[1] && col == possible_move[2]) {
                     board.children[selected_square[0]].children[selected_square[1]].classList.remove("selected-square");
                     selected_square = null;
+                    for (var p2 = 0; p2 < selected_piece_possible_moves.length; p2++) {
+                        var possible_move2 = selected_piece_possible_moves[p2];
+                        board.children[possible_move2[1]].children[possible_move2[2]].classList.remove("possible-move-square");
+                    }
                     selected_piece_possible_moves = [];
                     setToFen(playHumanMove(board_fen, possible_move[0]));
                     return;
@@ -95,9 +99,15 @@ function setupBoard() {
 }
 
 function setToFen(fen) {
+
+    if (fen == board_fen) {
+        return;
+    }
     
     var board = document.getElementById("chess-board");
     board_fen = fen;
+
+    document.getElementById("fen-entry").value = fen;
 
     for (var row = 0; row < 8; row++) {
         for (var col = 0; col < 8; col++) {
@@ -207,65 +217,3 @@ function longAnToRowCol(pos) {
 function rowColToLongAn(row, col) {
     return String.fromCharCode(97 + col) + (8 - row)
 }
-
-/*
-function getBoardFen() {
-
-    var board = document.getElementById("chess-board");
-    var fen = "";
-
-    for (var row = 0; row < 8; row++) {
-
-        if (row != 0) {
-            fen += "/";
-        }
-
-        var spaces = 0;
-
-        for (var col = 0; col < 8; col++) {
-
-            var children = board.children[row].children[col].children;
-
-            if (children.length == 0) {
-                spaces += 1;
-                continue;
-            }
-
-            if (spaces > 0) {
-                fen += spaces;
-                spaces = 0;
-            }
-
-            fen += children[0].classList[1];
-
-        }
-
-        if (spaces != 0) {
-            fen += spaces;
-        }
-
-    }
-
-    return fen + " " + current_turn + " " + castling_rights + " - 0 1";
-
-}
-
-function playMove(move) {
-
-    [row1, col1] = longAnToRowCol(move);
-    [row2, col2] = longAnToRowCol(move.slice(2, 4));
-
-    var board = document.getElementById("chess-board");
-
-    [board.children[row1].children[col1].innerHTML, board.children[row2].children[col2].innerHTML] = ["", board.children[row1].children[col1].innerHTML];
-
-    if (current_turn == "w") {
-        current_turn = "b";
-    } else {
-        current_turn = "w";
-    }
-
-    board_fen = getBoardFen();
-    possible_moves = getPossibleMoves(board_fen);
-
-}*/
