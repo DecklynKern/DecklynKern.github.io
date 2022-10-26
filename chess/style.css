@@ -1,3 +1,9 @@
+#chess-board {
+    border: 2px solid black;
+    width: min-content;
+    background-color: grey;
+}
+
 .board-square {
     width: 60px;
     height: 60px;
@@ -6,12 +12,34 @@
     -moz-user-select: none;
     -webkit-user-select: none;
     -ms-user-select: none;
+    border: 1px solid black;
+    border-radius: 8px;
 }
+
+.light-square {
+    background-color: wheat;
+}
+
+.dark-square {
+    background-color: midnightblue;
+}
+
+.selected-square {
+    background-color: red;
+}
+
+.possible-move-square {
+    background-color: lightblue;
+}
+
 .rank {
     display: flex;
 }
+
 .chess-piece {
     padding: 0;
+    width: 60px;
+    height: 60px;
     -webkit-user-drag: none;
     user-select: none;
     -moz-user-select: none;

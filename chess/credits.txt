@@ -1,0 +1,9 @@
+chess pieces:
+By Cburnett - Own work, CC BY-SA 3.0, https://commons.wikimedia.org/w/index.php?curid=1499803
+
+inspiration:
+https://www.youtube.com/watch?v=U4ogK0MIzqk
+https://github.com/adam-mcdaniel/chess-engine
+
+endless supply of chess programming help:
+https://chessprogramming.org/

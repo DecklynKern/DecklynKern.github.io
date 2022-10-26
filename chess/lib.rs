@@ -17,7 +17,7 @@ fn log(string: &str) {
 #[wasm_bindgen]
 pub fn get_possible_moves(fen: &str) -> Vec<JsValue> {
 
-    let mut board = chess::game::Board::from_fen(String::from(fen));
+    let board = chess::game::Board::from_fen(String::from(fen));
     let possible_moves = chess::game::get_possible_moves(&board);
 
     return possible_moves.iter().map(|m| JsValue::from_str(m.to_long_an().as_str())).collect();
@@ -28,15 +28,13 @@ pub fn get_possible_moves(fen: &str) -> Vec<JsValue> {
 pub fn calc_engine_move(fen: &str) -> String {
 
     let mut board = chess::game::Board::from_fen(String::from(fen));
-    let mut player: chess::player::AlphaBetaSearchPlayer = chess::player::AlphaBetaSearchPlayer::new(6);
+    let mut player: chess::player::AlphaBetaSearchPlayer = chess::player::AlphaBetaSearchPlayer::new(6, &chess::player::advanced_eval);
     
     let possible_moves = chess::game::get_possible_moves(&board);
-    let best_move = player.get_move(&mut board, &possible_moves);
 
-    match best_move {
-        Some(legal_move) => board.make_move(&legal_move),
-        None => {}
-    };
+    if let Some(legal_move) = player.get_move(&mut board, &possible_moves) {
+        board.make_move(legal_move);
+    }
 
     return board.to_fen();
 

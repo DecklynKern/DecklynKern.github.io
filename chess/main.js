@@ -8,44 +8,9 @@ var player_is_computer = [false, true];
 var selected_square = null;
 var selected_piece_possible_moves = [];
 
-var white_square_colour = "wheat";
-var black_square_colour = "darkblue";
-var selected_square_colour = "red";
-var possible_move_square_colour = "lightblue";
-
 var getPossibleMoves;
 var playEngineMove;
 var playHumanMove;
-
-function colourSquare(square, row, col) {
-    if ((row + col) % 2 == 0) {
-        square.style.backgroundColor = white_square_colour;
-
-    } else {
-        square.style.backgroundColor = black_square_colour;
-    }
-}
-
-function clearPossibleMoveSquares() {
-
-    var board = document.getElementById("chess-board");
-
-    for (var p = 0; p < selected_piece_possible_moves.length; p++) {
-        [_, row, col] = selected_piece_possible_moves[p];
-        colourSquare(board.children[row].children[col], row, col);
-    }
-
-    selected_piece_possible_moves = [];
-}
-
-function clearSelectedSquare() {
-
-    var board = document.getElementById("chess-board");
-
-    if (selected_square != null) {
-        colourSquare(board.children[selected_square[0]].children[selected_square[1]], ...selected_square);
-    }
-}
 
 function setupBoard() {
 
@@ -58,30 +23,34 @@ function setupBoard() {
             for (var p = 0; p < selected_piece_possible_moves.length; p++) {
                 var possible_move = selected_piece_possible_moves[p];
                 if (row == possible_move[1] && col == possible_move[2]) {
-                    clearSelectedSquare();
+                    board.children[selected_square[0]].children[selected_square[1]].classList.remove("selected-square");
                     selected_square = null;
-                    clearPossibleMoveSquares();
+                    selected_piece_possible_moves = [];
                     setToFen(playHumanMove(board_fen, possible_move[0]));
                     return;
                 }
             }
-
-            if (ev.target.className == "board-square") {
-                ev.target.style.backgroundColor = selected_square_colour;
-
-            } else {
-                ev.target.parentElement.style.backgroundColor = selected_square_colour;
+            
+            for (var p = 0; p < selected_piece_possible_moves.length; p++) {
+                var [_, r, c] = selected_piece_possible_moves[p];
+                board.children[r].children[c].classList.remove("possible-move-square");
             }
-
-            clearSelectedSquare();
-            clearPossibleMoveSquares();
+            
+            selected_piece_possible_moves = [];
 
             if (selected_square != null && (selected_square[0] == row && selected_square[1] == col)) {
+                board.children[selected_square[0]].children[selected_square[1]].classList.remove("selected-square");
                 selected_square = null;
 
             } else {
 
+                if (selected_square != null) {
+                    board.children[selected_square[0]].children[selected_square[1]].classList.remove("selected-square");
+                }
+
                 selected_square = [row, col];
+
+                board.children[row].children[col].classList.add("selected-square");
             
                 for (var p = 0; p < possible_moves.length; p++) {
 
@@ -92,7 +61,7 @@ function setupBoard() {
                         [endRow, endCol] = longAnToRowCol(possible_move.slice(2, 4));
                         var possible_square = board.children[endRow].children[endCol];
                         selected_piece_possible_moves.push([possible_move, endRow, endCol]);
-                        possible_square.style.backgroundColor = possible_move_square_colour;
+                        possible_square.classList.add("possible-move-square");
 
                     }
                 }
@@ -110,8 +79,14 @@ function setupBoard() {
     
             var square = document.createElement("div");
             square.className = "board-square";
+
+            if ((row + col) % 2 == 1) {
+                square.classList.add("light-square");
+
+            } else {
+                square.classList.add("dark-square");
+            }
     
-            colourSquare(square, row, col);
             square.onmousedown = getOnClick(row, col);
             rank.appendChild(square);
     
@@ -137,7 +112,7 @@ function setToFen(fen) {
         var img = document.createElement("img");
         img.classList.add("chess-piece")
         img.classList.add(pieceName);
-        img.src = "images/" + src + ".png";
+        img.src = "images/" + src + ".svg";
         board.children[row].children[col].appendChild(img);   
     }
     
