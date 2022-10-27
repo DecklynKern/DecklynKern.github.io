@@ -28,7 +28,7 @@ pub fn get_possible_moves(fen: &str) -> Vec<JsValue> {
 pub fn calc_engine_move(fen: &str) -> String {
 
     let mut board = chess::game::Board::from_fen(String::from(fen));
-    let mut player: chess::player::AlphaBetaSearchPlayer = chess::player::AlphaBetaSearchPlayer::new(6, &chess::player::advanced_eval);
+    let mut player: chess::player::AlphaBetaSearchPlayer = chess::player::AlphaBetaSearchPlayer::new(5, &chess::player::advanced_eval);
     
     let possible_moves = chess::game::get_possible_moves(&board);
 
