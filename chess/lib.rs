@@ -37,7 +37,7 @@ pub fn calc_engine_move(fen: &str) -> String {
     }
 
     return board.to_fen();
-
+    
 }
 
 #[wasm_bindgen]

@@ -23,7 +23,7 @@ checksum = "baf1de4339761588bc0619e3cbc0120ee582ebb74b53b4efbf79117bd2da40fd"
 [[package]]
 name = "chess"
 version = "0.1.0"
-source = "git+https://github.com/DecklynKern/chess#0cac5f787ac13d4e24ca3a394d331ef75d0f4b05"
+source = "git+https://github.com/DecklynKern/chess#8ac5a8b4d33f3426c58ecaa472873dde55721981"
 dependencies = [
  "array-init",
 ]
