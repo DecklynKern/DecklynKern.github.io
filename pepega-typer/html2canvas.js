@@ -6622,17 +6622,17 @@
             _this.canvas = options.canvas ? options.canvas : document.createElement('canvas');
             _this.ctx = _this.canvas.getContext('2d');
             if (!options.canvas) {
-                _this.canvas.width = Math.floor(options.width * options.scale);
-                _this.canvas.height = Math.floor(options.height * options.scale);
+                _this.canvas.width = Math.floor(options.width * options.magnitude);
+                _this.canvas.height = Math.floor(options.height * options.magnitude);
                 _this.canvas.style.width = options.width + "px";
                 _this.canvas.style.height = options.height + "px";
             }
             _this.fontMetrics = new FontMetrics(document);
-            _this.ctx.scale(_this.options.scale, _this.options.scale);
+            _this.ctx.magnitude(_this.options.magnitude, _this.options.magnitude);
             _this.ctx.translate(-options.x, -options.y);
             _this.ctx.textBaseline = 'bottom';
             _this._activeEffects = [];
-            _this.context.logger.debug("Canvas renderer initialized (" + options.width + "x" + options.height + ") with scale " + options.scale);
+            _this.context.logger.debug("Canvas renderer initialized (" + options.width + "x" + options.height + ") with magnitude " + options.magnitude);
             return _this;
         }
         CanvasRenderer.prototype.applyEffects = function (effects) {
@@ -6752,8 +6752,8 @@
                                             .reverse()
                                             .forEach(function (textShadow) {
                                             _this.ctx.shadowColor = asString(textShadow.color);
-                                            _this.ctx.shadowOffsetX = textShadow.offsetX.number * _this.options.scale;
-                                            _this.ctx.shadowOffsetY = textShadow.offsetY.number * _this.options.scale;
+                                            _this.ctx.shadowOffsetX = textShadow.offsetX.number * _this.options.magnitude;
+                                            _this.ctx.shadowOffsetY = textShadow.offsetY.number * _this.options.magnitude;
                                             _this.ctx.shadowBlur = textShadow.blur.number;
                                             _this.renderTextWithLetterSpacing(text, styles.letterSpacing, baseline);
                                         });
@@ -6869,7 +6869,7 @@
                         case 12:
                             if (!(container instanceof IFrameElementContainer && container.tree)) return [3 /*break*/, 14];
                             iframeRenderer = new CanvasRenderer(this.context, {
-                                scale: this.options.scale,
+                                magnitude: this.options.magnitude,
                                 backgroundColor: container.backgroundColor,
                                 x: 0,
                                 y: 0,
@@ -7568,13 +7568,13 @@
             _this.canvas = options.canvas ? options.canvas : document.createElement('canvas');
             _this.ctx = _this.canvas.getContext('2d');
             _this.options = options;
-            _this.canvas.width = Math.floor(options.width * options.scale);
-            _this.canvas.height = Math.floor(options.height * options.scale);
+            _this.canvas.width = Math.floor(options.width * options.magnitude);
+            _this.canvas.height = Math.floor(options.height * options.magnitude);
             _this.canvas.style.width = options.width + "px";
             _this.canvas.style.height = options.height + "px";
-            _this.ctx.scale(_this.options.scale, _this.options.scale);
+            _this.ctx.magnitude(_this.options.magnitude, _this.options.magnitude);
             _this.ctx.translate(-options.x, -options.y);
-            _this.context.logger.debug("EXPERIMENTAL ForeignObject renderer initialized (" + options.width + "x" + options.height + " at " + options.x + "," + options.y + ") with scale " + options.scale);
+            _this.context.logger.debug("EXPERIMENTAL ForeignObject renderer initialized (" + options.width + "x" + options.height + " at " + options.x + "," + options.y + ") with magnitude " + options.magnitude);
             return _this;
         }
         ForeignObjectRenderer.prototype.render = function (element) {
@@ -7583,15 +7583,15 @@
                 return __generator(this, function (_a) {
                     switch (_a.label) {
                         case 0:
-                            svg = createForeignObjectSVG(this.options.width * this.options.scale, this.options.height * this.options.scale, this.options.scale, this.options.scale, element);
+                            svg = createForeignObjectSVG(this.options.width * this.options.magnitude, this.options.height * this.options.magnitude, this.options.magnitude, this.options.magnitude, element);
                             return [4 /*yield*/, loadSerializedSVG(svg)];
                         case 1:
                             img = _a.sent();
                             if (this.options.backgroundColor) {
                                 this.ctx.fillStyle = asString(this.options.backgroundColor);
-                                this.ctx.fillRect(0, 0, this.options.width * this.options.scale, this.options.height * this.options.scale);
+                                this.ctx.fillRect(0, 0, this.options.width * this.options.magnitude, this.options.height * this.options.magnitude);
                             }
-                            this.ctx.drawImage(img, -this.options.x * this.options.scale, -this.options.y * this.options.scale);
+                            this.ctx.drawImage(img, -this.options.x * this.options.magnitude, -this.options.y * this.options.magnitude);
                             return [2 /*return*/, this.canvas];
                     }
                 });
@@ -7764,7 +7764,7 @@
                     renderOptions = {
                         canvas: opts.canvas,
                         backgroundColor: backgroundColor,
-                        scale: (_o = (_m = opts.scale) !== null && _m !== void 0 ? _m : defaultView.devicePixelRatio) !== null && _o !== void 0 ? _o : 1,
+                        magnitude: (_o = (_m = opts.magnitude) !== null && _m !== void 0 ? _m : defaultView.devicePixelRatio) !== null && _o !== void 0 ? _o : 1,
                         x: ((_p = opts.x) !== null && _p !== void 0 ? _p : 0) + left,
                         y: ((_q = opts.y) !== null && _q !== void 0 ? _q : 0) + top,
                         width: (_r = opts.width) !== null && _r !== void 0 ? _r : Math.ceil(width),
