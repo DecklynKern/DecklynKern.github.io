@@ -69,9 +69,34 @@ Iterator iterHeart(Iterator iter) {
 }
 
 Iterator iterDeck(Iterator iter) {
+
+    float mag = iter.z_real * iter.z_real + iter.z_imag * iter.z_imag;
+
+    if (mag < 0.25) {
+        iter.z_real *= 4.0;
+        iter.z_imag *= 4.0;
     
-    iter.z_real = iter.z_imag + iter.c_real;
-    iter.z_imag = iter.z_real * iter.z_real + iter.c_imag;
+    } else if (mag < 1.0) {
+        iter.z_real /= mag;
+        iter.z_imag /= mag;
+    }
+
+    iter.z_real = -1.5 * iter.z_real + iter.c_real;
+    iter.z_imag = -1.5 * iter.z_imag + iter.c_imag;
+    
+    if (iter.z_real > 1.0) {
+        iter.z_real = 2.0 - iter.z_real;
+    
+    } else if (iter.z_real < -1.0) {
+        iter.z_real = -2.0 - iter.z_real;
+    }
+    
+    if (iter.z_imag > 1.0) {
+        iter.z_imag = 2.0 - iter.z_imag;
+    
+    } else if (iter.z_imag < -1.0) {
+        iter.z_imag = -2.0 - iter.z_imag;
+    }
     
     return iter;
 
