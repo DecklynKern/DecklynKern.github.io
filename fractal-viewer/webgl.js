@@ -29,6 +29,7 @@ var colouring_type = new Param(0);
 var trapped_colour = new Param([0.0, 0.0, 0.0]);
 var close_colour = new Param([0.0, 0.0, 1.0]);
 var far_colour = new Param([0.0, 0.0, 0.0]);
+var samples = new Param(1);
 
 var julia_canvas_context;
 
@@ -53,6 +54,7 @@ function main() {
     document.getElementById("trapped_colour").onchange = updateTrappedColour;
     document.getElementById("close_colour").onchange = updateCloseColour;
     document.getElementById("far_colour").onchange = updateFarColour;
+    document.getElementById("samples").onchange = updateSamples;
 
     julia_canvas_context = document.getElementById("julia_selector").getContext("2d");
     julia_canvas_context.fillStyle = "black";
@@ -124,6 +126,7 @@ function initWebGL() {
     trapped_colour.attr = gl.getUniformLocation(gl.program, "trapped_colour");
     close_colour.attr = gl.getUniformLocation(gl.program, "close_colour");
     far_colour.attr = gl.getUniformLocation(gl.program, "far_colour");
+    samples.attr = gl.getUniformLocation(gl.program, "samples");
 
     ready = true;
 
@@ -154,6 +157,7 @@ function redraw() {
     gl.uniform3f(trapped_colour.attr, ...trapped_colour.value);
     gl.uniform3f(close_colour.attr, ...close_colour.value);
     gl.uniform3f(far_colour.attr, ...far_colour.value);
+    gl.uniform1i(samples.attr, samples.value);
 
     gl.clear(gl.COLOR_BUFFER_BIT);
     gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
@@ -164,8 +168,8 @@ function updateFractalType(_ev) {
 
     fractal_type.value = document.getElementById("fractal_type").value;
 
-    scaling_style = document.getElementById("scaling_div").style;
-    exponent_style = document.getElementById("exponent_div").style;
+    const scaling_style = document.getElementById("scaling_div").style;
+    const exponent_style = document.getElementById("exponent_div").style;
 
     scaling_style.display = "none";
     exponent_style.display = "none";
@@ -207,8 +211,20 @@ function updateIsJulia(_ev) {
 }
 
 function updateColouringType(_ev) {
+
     colouring_type.value = document.getElementById("colouring_type").value;
+
+    const colour_select_style = document.getElementById("colour_select").style;
+
+    if (colouring_type.value == 3) {
+        colour_select_style.display = "none";
+
+    } else {
+        colour_select_style.display = "block";
+    }
+
     redraw();
+
 }
 
 function updateMaxIterations(_ev) {
@@ -261,6 +277,11 @@ function updateJuliaCoord(event) {
     julia_canvas_context.arc(event.offsetX, event.offsetY, 4, 0, 2 * Math.PI);
     julia_canvas_context.stroke();
 
+}
+
+function updateSamples(_ev) {
+    samples.value = document.getElementById("samples").value;
+    redraw();
 }
 
 function keyhandler(event) {

@@ -10,17 +10,17 @@
     </head>
     <body onload="main()">
         <div class="main">
-            <canvas id="compute-surface" width="800px" height="800px"></canvas>
+            <canvas id="compute-surface" width="1000px" height="1000px"></canvas>
             <div class="sidebar">
                 <div class="input-div">
                     Fractal:
                     <select id="fractal_type">
-                        <option value="0">Mandelbrot (faster than multibrot)</option>
+                        <option value="0">Mandelbrot</option>
                         <option value="1">Burning Ship</option>
                         <option value="2">Tricorn</option>
                         <option value="3">Heart</option>
                         <option value="4">Mandelbox</option>
-                        <option value="5">Multibrot</option>
+                        <option value="5">Multibrot (slower than Mandelbrot)</option>
                         <option value="6">CodeParade's Feather</option>
                         <option value="7">Chirikov Map</option>
                     </select>
@@ -46,6 +46,8 @@
                     <select id="colouring_type">
                         <option value="0">Banded</option>
                         <option value="1">Smooth</option>
+                        <option value="2">Rings</option>
+                        <option value="3">Hue Cycle</option>
                     </select>
                 </div>
                 <div class="input-div">
@@ -55,7 +57,7 @@
                     Escape Radius:
                     <input type="number" value="2.0" id="escape_radius" step="0.25" min="0">
                 </div>
-                <table class="input-div">
+                <table class="input-div"  id="colour_select">
                     <tr>
                         <td>
                             Trapped Colour:
@@ -81,6 +83,11 @@
                         </td>
                     </tr>
                 </table>
+                <div class="input-div">
+                    Samples:
+                    <input type="number" value="1" id="samples" min="1" max="10">
+                    (higher values will significantly slow performance)
+                </div>
                 Use WASD to move, +/- to zoom in and out, and R to reset zoom.
             </div>
         </div>
