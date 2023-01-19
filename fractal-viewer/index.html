@@ -2,12 +2,87 @@
 <html lang="en">
     <head>
         <title>Fractal Viewer</title>
+        <link href="style.css" rel="stylesheet">
         <script src="lib/webgl-utils.js"></script>
         <script src="lib/webgl-debug.js"></script>
         <script src="lib/cuon-utils.js"></script>
         <script src="webgl.js"></script>
     </head>
     <body onload="main()">
-        <canvas id="compute-surface" width="1000px" height="1000px"></canvas>
+        <div class="main">
+            <canvas id="compute-surface" width="800px" height="800px"></canvas>
+            <div class="sidebar">
+                <div class="input-div">
+                    Fractal:
+                    <select id="fractal_type">
+                        <option value="0">Mandelbrot (faster than multibrot)</option>
+                        <option value="1">Burning Ship</option>
+                        <option value="2">Tricorn</option>
+                        <option value="3">Heart</option>
+                        <option value="4">Mandelbox</option>
+                        <option value="5">Multibrot</option>
+                        <option value="6">CodeParade's Feather</option>
+                        <option value="7">Chirikov Map</option>
+                    </select>
+                </div>
+                <div class="input-div" id="scaling_div" style="display: none">
+                    Scale:
+                    <input type="number" value="2.0" id="scaling" step="0.1">
+                </div>
+                <div class="input-div" id="exponent_div" style="display: none">
+                    Exponent:
+                    <input type="number" value="2.0" id="exponent" step="0.1">
+                </div>
+                <div class="input-div">
+                    Julia:
+                    <input type="checkbox" id="is_julia">
+                </div>
+                <div class="input-div" id="julia_options" style="display: none">
+                    Julia C Value:
+                    <canvas width="100px" height="100px" id="julia_selector" class="julia-selector"></canvas>
+                </div>
+                <div class="input-div">
+                    Colouring Style:
+                    <select id="colouring_type">
+                        <option value="0">Banded</option>
+                        <option value="1">Smooth</option>
+                    </select>
+                </div>
+                <div class="input-div">
+                    Max Iterations:
+                    <input type="number" value="30" id="max_iterations" min="0">
+                    <br>
+                    Escape Radius:
+                    <input type="number" value="2.0" id="escape_radius" step="0.25" min="0">
+                </div>
+                <table class="input-div">
+                    <tr>
+                        <td>
+                            Trapped Colour:
+                        </td>
+                        <td>
+                            <input type="color" id="trapped_colour" value="#000000">
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            Close Colour:
+                        </td>
+                        <td>
+                            <input type="color" id="close_colour" value="#0000FF">
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            Far Colour:
+                        </td>
+                        <td>
+                            <input type="color" id="far_colour" value="#000000">
+                        </td>
+                    </tr>
+                </table>
+                Use WASD to move, +/- to zoom in and out, and R to reset zoom.
+            </div>
+        </div>
     </body>
 </html>

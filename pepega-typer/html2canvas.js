@@ -984,11 +984,11 @@
             }
             c++;
         }
-        var exponent = [];
+        var fractal_param = [];
         while (isDigit(codePoints[c])) {
-            exponent.push(codePoints[c++]);
+            fractal_param.push(codePoints[c++]);
         }
-        var exp = exponent.length ? parseInt(fromCodePoint$1.apply(void 0, exponent), 10) : 0;
+        var exp = fractal_param.length ? parseInt(fromCodePoint$1.apply(void 0, fractal_param), 10) : 0;
         return sign * (int + frac * Math.pow(10, -fracd)) * Math.pow(10, expsign * exp);
     };
     var LEFT_PARENTHESIS_TOKEN = {
