@@ -10,7 +10,7 @@
     </head>
     <body onload="main()">
         <div class="main">
-            <canvas id="compute-surface" width="1000px" height="1000px"></canvas>
+            <canvas id="fractal_canvas" width="1000px" height="1000px"></canvas>
             <div class="sidebar">
                 <div class="input-div">
                     Fractal:
@@ -27,11 +27,11 @@
                 </div>
                 <div class="input-div" id="scaling_div" style="display: none">
                     Scale:
-                    <input type="number" value="2.0" id="scaling" step="0.1">
+                    <input type="number" value="2.0" id="scaling" step="0.025">
                 </div>
                 <div class="input-div" id="exponent_div" style="display: none">
                     Exponent:
-                    <input type="number" value="2.0" id="exponent" step="0.1">
+                    <input type="number" value="2.0" id="exponent" step="0.025">
                 </div>
                 <div class="input-div">
                     Julia:
@@ -39,7 +39,7 @@
                 </div>
                 <div class="input-div" id="julia_options" style="display: none">
                     Julia C Value:
-                    <canvas width="100px" height="100px" id="julia_selector" class="julia-selector"></canvas>
+                    <canvas width="200px" height="200px" id="julia_selector" class="julia-selector"></canvas>
                 </div>
                 <div class="input-div">
                     Colouring Style:
@@ -55,7 +55,7 @@
                     <input type="number" value="30" id="max_iterations" min="0">
                     <br>
                     Escape Radius:
-                    <input type="number" value="2.0" id="escape_radius" step="0.25" min="0">
+                    <input type="number" value="2.0" id="escape_radius" step="0.1" min="0">
                 </div>
                 <table class="input-div"  id="colour_select">
                     <tr>

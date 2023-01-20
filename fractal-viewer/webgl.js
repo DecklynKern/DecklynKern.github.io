@@ -56,6 +56,8 @@ function main() {
     document.getElementById("far_colour").onchange = updateFarColour;
     document.getElementById("samples").onchange = updateSamples;
 
+    document.getElementById("fractal_canvas").onclick = onFractalClick;
+
     julia_canvas_context = document.getElementById("julia_selector").getContext("2d");
     julia_canvas_context.fillStyle = "black";
     julia_canvas_context.beginPath();
@@ -87,7 +89,7 @@ function fragmentListener() {
 
 function initWebGL() {
     
-    const canvas = document.getElementById("compute-surface");
+    const canvas = document.getElementById("fractal_canvas");
     gl = getWebGLContext(canvas);
 
     initShaders(gl, VERTEX_SHADER, FRAGMENT_SHADER);
@@ -266,12 +268,12 @@ function updateJuliaCoord(event) {
         return;
     }
 
-    julia_c_real.value = event.offsetX / 25 - 2;
-    julia_c_imag.value = event.offsetY / 25 - 2;
+    julia_c_real.value = event.offsetX / 40 - 2.5;
+    julia_c_imag.value = event.offsetY / 40 - 2.5;
 
     redraw();
 
-    julia_canvas_context.clearRect(0, 0, 100, 100);
+    julia_canvas_context.clearRect(0, 0, 200, 200);
 
     julia_canvas_context.beginPath();
     julia_canvas_context.arc(event.offsetX, event.offsetY, 4, 0, 2 * Math.PI);
@@ -326,4 +328,10 @@ function keyhandler(event) {
             break;
 
     }
+}
+
+function onFractalClick(event) {
+    origin_real.value += (event.x - 500) / 500 * magnitude.value;
+    origin_imag.value += (event.y - 500) / 500 * magnitude.value;
+    redraw();
 }
