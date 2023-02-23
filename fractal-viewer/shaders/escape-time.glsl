@@ -1,22 +1,27 @@
-precision mediump float;
+precision highp float;
+
+uniform float magnitude;
+uniform float centre_x;
+uniform float centre_y;
 
 uniform int fractal_type;
 uniform float fractal_param;
 uniform int max_iterations;
 uniform float escape_radius_sq;
-
-uniform float magnitude;
-uniform float origin_real;
-uniform float origin_imag;
+uniform float min_radius_sq;
 
 uniform int is_julia;
 uniform float julia_c_real;
 uniform float julia_c_imag;
 
+uniform int smoothing_type;
 uniform int colouring_type;
 uniform vec3 trapped_colour;
-uniform vec3 far_colour;
+
 uniform vec3 close_colour;
+uniform vec3 far_colour;
+uniform int interior_colouring_type;
+
 uniform int samples;
 
 const int TRUE_ITER_CAP = 10000;
@@ -62,6 +67,10 @@ Complex exponent(Complex z, float d) {
         r * cos(theta),
         r * sin(theta)
     );
+}
+
+vec3 interpolate(vec3 c1, vec3 c2, float amount) {
+    return c1 * amount + c2 * (1.0 - amount);
 }
 
 void iterMandelbrot(inout Iterator iter) {
@@ -169,11 +178,26 @@ void iterChirikov(inout Iterator iter) {
     iter.z.real += iter.c.real * iter.z.imag;
 }
 
-// macro idea shamelessly "borrowed" from https://github.com/HackerPoet/FractalSoundExplorer/blob/main/frag.glsl
+void iterShoe(inout Iterator iter) {
+    iter.z.real = sin(iter.z.imag * iter.z.real);
+    iterMandelbrot(iter);
+}
+
+void iterCustom(inout Iterator iter) {
+
+    float z_real = iter.z.real;
+
+    iter.z.real += sin(iter.z.imag);
+    iter.z.real += sin(z_real);
+    iterMandelbrot(iter);
+
+}
+
+// macro idea "borrowed" from https://github.com/HackerPoet/FractalSoundExplorer/blob/main/frag.glsl
 #define ITERATE(iterFunc, iterator) \
-for (int iteration = 0; iteration < TRUE_ITER_CAP; iteration++) { \
+for (int iteration = 0; iteration < TRUE_ITER_CAP; iteration++) {\
     \
-    if (iteration >= max_iterations) { \
+    if (iteration >= max_iterations) {\
         iterations = TRUE_ITER_CAP;\
         break;\
     }\
@@ -183,7 +207,31 @@ for (int iteration = 0; iteration < TRUE_ITER_CAP; iteration++) { \
     iterator.z_real_sq = iterator.z.real * iterator.z.real;\
     iterator.z_imag_sq = iterator.z.imag * iterator.z.imag;\
     \
-    if (iterator.z_real_sq + iterator.z_imag_sq >= escape_radius_sq) {\
+    float dist = iterator.z_real_sq + iterator.z_imag_sq;\
+    \
+    if (dist >= escape_radius_sq || dist <= min_radius_sq) {\
+        iterations = iteration;\
+        break;\
+    }\
+}
+
+#define ITERATE_ORBIT(iterFunc, iterator)\
+for (int iteration = 0; iteration < TRUE_ITER_CAP; iteration++) {\
+    \
+    if (iteration >= max_iterations) {\
+        iterations = TRUE_ITER_CAP;\
+        break;\
+    }\
+    \
+    iterFunc(iterator);\
+    \
+    iterator.z_real_sq = iterator.z.real * iterator.z.real;\
+    iterator.z_imag_sq = iterator.z.imag * iterator.z.imag;\
+    \
+    float dist = iterator.z_real_sq + iterator.z_imag_sq;\
+    interior_colour_param += iterator.z.real / iterator.z.imag;\
+    \
+    if (dist >= escape_radius_sq || dist <= min_radius_sq) {\
         iterations = iteration;\
         break;\
     }\
@@ -216,61 +264,106 @@ vec3 getColour(float z_real, float z_imag) {
     );
 
     int iterations;
+    float interior_colour_param;
+    Complex derivative;
 
-    if (fractal_type == 0) {
-        ITERATE(iterMandelbrot, iterator);
+    if (interior_colouring_type == 0) {
 
-    } else if (fractal_type == 1) {
-        ITERATE(iterBurningShip, iterator);
+        if (fractal_type == 0) {
+            ITERATE(iterMandelbrot, iterator);
+
+        } else if (fractal_type == 1) {
+            ITERATE(iterBurningShip, iterator);
+        
+        } else if (fractal_type == 2) {
+            ITERATE(iterTricorn, iterator);    
+        
+        } else if (fractal_type == 3) {
+            ITERATE(iterHeart, iterator);
+        
+        } else if (fractal_type == 4) {
+            ITERATE(iterMandelbox, iterator);
+        
+        } else if (fractal_type == 5) {
+            ITERATE(iterMultibrot, iterator);
+        
+        } else if (fractal_type == 6) {
+            ITERATE(iterFeather, iterator);
+        
+        } else if (fractal_type == 7) {
+            ITERATE(iterChirikov, iterator);
+        
+        } else if (fractal_type == 8) {
+            ITERATE(iterShoe, iterator);
+        
+        } else if (fractal_type == 9) {
+            ITERATE(iterCustom, iterator);
+        }
     
-    } else if (fractal_type == 2) {
-        ITERATE(iterTricorn, iterator);    
-    
-    } else if (fractal_type == 3) {
-        ITERATE(iterHeart, iterator);
-    
-    } else if (fractal_type == 4) {
-        ITERATE(iterMandelbox, iterator);
-    
-    } else if (fractal_type == 5) {
-        ITERATE(iterMultibrot, iterator);
-    
-    } else if (fractal_type == 6) {
-        ITERATE(iterFeather, iterator);
-    
-    } else if (fractal_type == 7) {
-        ITERATE(iterChirikov, iterator);
+    } else {
+
+        if (fractal_type == 0) {
+            ITERATE_ORBIT(iterMandelbrot, iterator);
+
+        } else if (fractal_type == 1) {
+            ITERATE_ORBIT(iterBurningShip, iterator);
+        
+        } else if (fractal_type == 2) {
+            ITERATE_ORBIT(iterTricorn, iterator);    
+        
+        } else if (fractal_type == 3) {
+            ITERATE_ORBIT(iterHeart, iterator);
+        
+        } else if (fractal_type == 4) {
+            ITERATE_ORBIT(iterMandelbox, iterator);
+        
+        } else if (fractal_type == 5) {
+            ITERATE_ORBIT(iterMultibrot, iterator);
+        
+        } else if (fractal_type == 6) {
+            ITERATE_ORBIT(iterFeather, iterator);
+        
+        } else if (fractal_type == 7) {
+            ITERATE_ORBIT(iterChirikov, iterator);
+        
+        } else if (fractal_type == 8) {
+            ITERATE_ORBIT(iterShoe, iterator);
+        
+        } else if (fractal_type == 9) {
+            ITERATE_ORBIT(iterCustom, iterator);
+        }
     }
 
-    float f_iterations = float(iterations) + 0.00001;
+    float f_iterations = float(iterations);
 
     if (iterations == TRUE_ITER_CAP) {
-        return trapped_colour;
+
+        if (interior_colouring_type == 0) {
+            return trapped_colour;
+        
+        } else {
+            return trapped_colour * (sin(interior_colour_param) + 1.0) / 2.0;
+        }
 
     } else {
 
-        float normalized_closeness;
+        if (smoothing_type == 1) {
+            f_iterations -= log(log(iterator.z_real_sq + iterator.z_imag_sq) / log(f_iterations + 0.000001) * 0.5) / log(escape_radius_sq) * 2.0;
+
+        } else if (smoothing_type == 2) {
+            f_iterations += (iterator.z_real_sq + iterator.z_imag_sq - escape_radius_sq) / (escape_radius_sq - sqrt(escape_radius_sq));
+        }
 
         if (colouring_type == 0) {
-            normalized_closeness = f_iterations / float(max_iterations);
+            return interpolate(close_colour, far_colour, max(f_iterations, 0.0) / float(max_iterations));
 
-        } else if (colouring_type == 1) {
+        } else if (colouring_type == 1) {;
+            return interpolate(close_colour, far_colour, sin(f_iterations) * 0.5 + 0.5);
 
-            float smoothed = max(f_iterations - log(log(iterator.z_real_sq + iterator.z_imag_sq) / log(f_iterations) * 0.5) / log(escape_radius_sq) * 2.0, 0.0);
-            normalized_closeness = smoothed / float(max_iterations);
-        
         } else if (colouring_type == 2) {
-            
-            float dist = max(f_iterations - log(log(iterator.z_real_sq + iterator.z_imag_sq) / log(f_iterations) * 0.5) / log(escape_radius_sq) * 2.0, 0.0);
 
-            normalized_closeness = sin(dist) * 0.5 + 0.5;
-
-        } else if (colouring_type == 3) {
-
-            float smoothed = (f_iterations - log(log(iterator.z_real_sq + iterator.z_imag_sq) / log(f_iterations) * 0.5) / log(escape_radius_sq) * 2.0) / 2.0;
-
-            float h = 6.0 * fract(smoothed / 6.0);
-            float x = 1.0 - abs(2.0 * fract(smoothed / 2.0) - 1.0);
+            float h = 6.0 * fract(f_iterations / 12.0);
+            float x = 1.0 - abs(2.0 * fract(f_iterations / 4.0) - 1.0);
 
             if (h < 1.0) {
                 return vec3(1.0, x, 0);
@@ -290,10 +383,11 @@ vec3 getColour(float z_real, float z_imag) {
             } else {
                 return vec3(1.0, 0, x);
             }
+        } else if (colouring_type == 3) {
+
+            
+
         }
-
-        return close_colour * normalized_closeness + far_colour * (1.0 - normalized_closeness);
-
     }
 }
 
@@ -301,8 +395,8 @@ void main() {
 
     float pixel_size = 2.0 * magnitude / 1000.0;
 
-    float real = origin_real + frag_position.x * magnitude;
-    float imag = origin_imag + frag_position.y * magnitude;
+    float real = centre_x + frag_position.x * magnitude;
+    float imag = centre_y + frag_position.y * magnitude;
 
     vec3 colour_sum;
 
@@ -312,8 +406,8 @@ void main() {
             break;
         }
 
-        float real_offset = fract(0.1234 * float(sample)) - 0.5;
-        float imag_offset = fract(0.7654 * float(sample)) - 0.5;
+        float real_offset = fract(0.1234 * float(sample));
+        float imag_offset = fract(0.7654 * float(sample));
 
         colour_sum += getColour(real + real_offset * pixel_size, imag + imag_offset * pixel_size);
 

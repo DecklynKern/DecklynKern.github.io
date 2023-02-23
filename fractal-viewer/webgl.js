@@ -1,98 +1,90 @@
-var VERTEX_SHADER = "";
+var VERTEX_SHADER = `
+attribute vec2 position;
+varying vec2 frag_position;
+
+void main() {
+    gl_Position = vec4(position.x, -position.y, 0, 1);
+    frag_position = position;
+}`;
+
 var FRAGMENT_SHADER = "";
 var gl;
 
+var ESCAPE_TIME = new EscapeTime();
+var LYAPUNOV = new Lyapunov();
+var NEWTON = new Newton();
+var program = ESCAPE_TIME;
+
 var mouse_down = false;
-var ready = false;
-
-class Param {
-    constructor(value) {
-        this.value = value;
-        this.attr = null;
-    }
-}
-
-var fractal_type = new Param(0);
-var fractal_param = new Param(2.0);
-var max_iterations = new Param(30);
-var escape_radius = new Param(2.0);
-
-var is_julia = new Param(0);
-var julia_c_real = new Param(0.0);
-var julia_c_imag = new Param(0.0);
 
 var magnitude = new Param(2.0);
-var origin_real = new Param(0.0);
-var origin_imag = new Param(0.0);
-
-var colouring_type = new Param(0);
-var trapped_colour = new Param([0.0, 0.0, 0.0]);
-var close_colour = new Param([0.0, 0.0, 1.0]);
-var far_colour = new Param([0.0, 0.0, 0.0]);
+var centre_x = new Param(0.0);
+var centre_y = new Param(0.0);
 var samples = new Param(1);
 
-var julia_canvas_context;
-
 function main() {
+
+    document.getElementById("program").onchange = updateProgram;
 
     document.onkeydown = keyhandler;
 
     document.onmousedown = function(_ev) {mouse_down = true};
     document.onmouseup = function(_ev) {mouse_down = false};
 
-    document.getElementById("fractal_type").onchange = updateFractalType;
-    document.getElementById("scaling").onchange = updateScaling;
-    document.getElementById("exponent").onchange = updateExponent;
-
-    document.getElementById("is_julia").onchange = updateIsJulia;  
-    document.getElementById("julia_selector").onmousemove = updateJuliaCoord;
-
-    document.getElementById("colouring_type").onchange = updateColouringType;
-    document.getElementById("max_iterations").onchange = updateMaxIterations;
-    document.getElementById("escape_radius").onchange = updateEscapeRadius;
-
-    document.getElementById("trapped_colour").onchange = updateTrappedColour;
-    document.getElementById("close_colour").onchange = updateCloseColour;
-    document.getElementById("far_colour").onchange = updateFarColour;
     document.getElementById("samples").onchange = updateSamples;
 
     document.getElementById("fractal_canvas").onclick = onFractalClick;
 
-    julia_canvas_context = document.getElementById("julia_selector").getContext("2d");
-    julia_canvas_context.fillStyle = "black";
-    julia_canvas_context.beginPath();
-    julia_canvas_context.arc(50, 50, 4, 0, 2 * Math.PI);
-    julia_canvas_context.stroke();
+    ESCAPE_TIME.setupGUI();
+    LYAPUNOV.setupGUI();
+    NEWTON.setupGUI();
 
-    const vertex_request = new XMLHttpRequest();
-    vertex_request.addEventListener("load", vertexListener);
-    vertex_request.open("GET", "vertex.glsl");
-    vertex_request.send();
+    initWebGL();
+    loadProgram(ESCAPE_TIME);
 
 }
 
-function vertexListener() {
+function loadProgram(prgrm) {
 
-    VERTEX_SHADER = this.responseText;
+    document.getElementById(program.options_panel).style.display = "none";
 
+    program = prgrm;
+    
     const fragment_request = new XMLHttpRequest();
-    fragment_request.addEventListener("load", fragmentListener);
-    fragment_request.open("GET", "fragment.glsl");
+    fragment_request.addEventListener("load", setupShader);
+    fragment_request.open("GET", program.shader);
     fragment_request.send();
 
+    document.getElementById(program.options_panel).style.display = "block";
+
 }
 
-function fragmentListener() {
+function setupShader() {
+
     FRAGMENT_SHADER = this.responseText;
-    initWebGL();
+    initShaders(gl, VERTEX_SHADER, FRAGMENT_SHADER);
+
+    const position_attr = gl.getAttribLocation(gl.program, "position");
+
+    gl.vertexAttribPointer(position_attr, 2, gl.FLOAT, false, 0, 0);
+    gl.enableVertexAttribArray(position_attr);
+
+    magnitude.attr = gl.getUniformLocation(gl.program, "magnitude");
+    centre_x.attr = gl.getUniformLocation(gl.program, "centre_x");
+    centre_y.attr = gl.getUniformLocation(gl.program, "centre_y");
+
+    samples.attr = gl.getUniformLocation(gl.program, "samples");
+
+    program.setupAttrs();
+
+    resetView();
+
 }
 
 function initWebGL() {
     
     const canvas = document.getElementById("fractal_canvas");
     gl = getWebGLContext(canvas);
-
-    initShaders(gl, VERTEX_SHADER, FRAGMENT_SHADER);
 
     const vertices = new Float32Array([
         -1.0,  1.0,
@@ -106,183 +98,59 @@ function initWebGL() {
     gl.bindBuffer(gl.ARRAY_BUFFER, vertexBuffer);
     gl.bufferData(gl.ARRAY_BUFFER, vertices, gl.STATIC_DRAW);
 
-    const position_attr = gl.getAttribLocation(gl.program, "position");
-
-    gl.vertexAttribPointer(position_attr, 2, gl.FLOAT, false, 0, 0);
-    gl.enableVertexAttribArray(position_attr);
-
-    fractal_type.attr = gl.getUniformLocation(gl.program, "fractal_type");
-    fractal_param.attr = gl.getUniformLocation(gl.program, "fractal_param");
-    max_iterations.attr = gl.getUniformLocation(gl.program, "max_iterations");
-    escape_radius.attr = gl.getUniformLocation(gl.program, "escape_radius_sq");
-    
-    magnitude.attr = gl.getUniformLocation(gl.program, "magnitude");
-    origin_real.attr = gl.getUniformLocation(gl.program, "origin_real");
-    origin_imag.attr = gl.getUniformLocation(gl.program, "origin_imag");
-    
-    is_julia.attr = gl.getUniformLocation(gl.program, "is_julia");
-    julia_c_real.attr = gl.getUniformLocation(gl.program, "julia_c_real");
-    julia_c_imag.attr = gl.getUniformLocation(gl.program, "julia_c_imag");
-    
-    colouring_type.attr = gl.getUniformLocation(gl.program, "colouring_type");
-    trapped_colour.attr = gl.getUniformLocation(gl.program, "trapped_colour");
-    close_colour.attr = gl.getUniformLocation(gl.program, "close_colour");
-    far_colour.attr = gl.getUniformLocation(gl.program, "far_colour");
-    samples.attr = gl.getUniformLocation(gl.program, "samples");
-
-    ready = true;
-
-    redraw();
-
 }
 
 function redraw() {
 
-    if (!ready) {
-        return;
-    }
+    magnitude.loadFloat();
+    centre_x.loadFloat();
+    centre_y.loadFloat();
 
-    gl.uniform1i(fractal_type.attr, fractal_type.value);
-    gl.uniform1f(fractal_param.attr, fractal_param.value);
-    gl.uniform1i(max_iterations.attr, max_iterations.value);
-    gl.uniform1f(escape_radius.attr, escape_radius.value * escape_radius.value);
-    
-    gl.uniform1f(magnitude.attr, magnitude.value);
-    gl.uniform1f(origin_real.attr, origin_real.value);
-    gl.uniform1f(origin_imag.attr, origin_imag.value);
-    
-    gl.uniform1i(is_julia.attr, is_julia.value);
-    gl.uniform1f(julia_c_real.attr, julia_c_real.value);
-    gl.uniform1f(julia_c_imag.attr, julia_c_imag.value);
-    
-    gl.uniform1i(colouring_type.attr, colouring_type.value);
-    gl.uniform3f(trapped_colour.attr, ...trapped_colour.value);
-    gl.uniform3f(close_colour.attr, ...close_colour.value);
-    gl.uniform3f(far_colour.attr, ...far_colour.value);
-    gl.uniform1i(samples.attr, samples.value);
+    samples.loadInt();
+
+    program.loadAttrs();
 
     gl.clear(gl.COLOR_BUFFER_BIT);
     gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
 
 }
 
-function updateFractalType(_ev) {
+function updateProgram() {
 
-    fractal_type.value = document.getElementById("fractal_type").value;
+    switch (document.getElementById("program").value) {
 
-    const scaling_style = document.getElementById("scaling_div").style;
-    const exponent_style = document.getElementById("exponent_div").style;
+        case "escape-time":
+            loadProgram(ESCAPE_TIME);
+            break;
 
-    scaling_style.display = "none";
-    exponent_style.display = "none";
+        case "lyapunov":
+            loadProgram(LYAPUNOV);
+            break;
 
-    if (fractal_type.value == 4) {
-        scaling_style.display = "block";
+        case "newton":
+            loadProgram(NEWTON);
 
-    } else if (fractal_type.value == 5) {
-        exponent_style.display = "block";
     }
-    
-    redraw();
-
-}
-
-function updateScaling(_ev) {
-    fractal_param.value = document.getElementById("scaling").value;
-    redraw();
-}
-
-function updateExponent(_ev) {
-    fractal_param.value = document.getElementById("exponent").value;
-    redraw();
-}
-
-function updateIsJulia(_ev) {
-
-    is_julia.value = +document.getElementById("is_julia").checked;
-    
-    if (is_julia.value) {
-        document.getElementById("julia_options").style.display = "block";
-    
-    } else {
-        document.getElementById("julia_options").style.display = "none";
-    }
-    
-    redraw();
-
-}
-
-function updateColouringType(_ev) {
-
-    colouring_type.value = document.getElementById("colouring_type").value;
-
-    const colour_select_style = document.getElementById("colour_select").style;
-
-    if (colouring_type.value == 3) {
-        colour_select_style.display = "none";
-
-    } else {
-        colour_select_style.display = "block";
-    }
-
-    redraw();
-
-}
-
-function updateMaxIterations(_ev) {
-    max_iterations.value = document.getElementById("max_iterations").value;
-    redraw();
-}
-
-function updateEscapeRadius(_ev) {
-    escape_radius.value = document.getElementById("escape_radius").value;
-    redraw();
-}
-
-function hexToRGB(hex) {
-    return [
-        parseInt(hex.slice(1, 3), 16) / 256,
-        parseInt(hex.slice(3, 5), 16) / 256,
-        parseInt(hex.slice(5, 7), 16) / 256
-    ];
-}
-
-function updateTrappedColour(_ev) {
-    trapped_colour.value = hexToRGB(document.getElementById("trapped_colour").value);
-    redraw();
-}
-
-function updateCloseColour(_ev) {
-    close_colour.value = hexToRGB(document.getElementById("close_colour").value);
-    redraw();
-}
-
-function updateFarColour(_ev) {
-    far_colour.value = hexToRGB(document.getElementById("far_colour").value);
-    redraw();
-}
-
-function updateJuliaCoord(event) {
-
-    if (!mouse_down) {
-        return;
-    }
-
-    julia_c_real.value = event.offsetX / 40 - 2.5;
-    julia_c_imag.value = event.offsetY / 40 - 2.5;
-
-    redraw();
-
-    julia_canvas_context.clearRect(0, 0, 200, 200);
-
-    julia_canvas_context.beginPath();
-    julia_canvas_context.arc(event.offsetX, event.offsetY, 4, 0, 2 * Math.PI);
-    julia_canvas_context.stroke();
-
 }
 
 function updateSamples(_ev) {
     samples.value = document.getElementById("samples").value;
+    redraw();
+}
+
+function resetView() {
+
+    magnitude.value = 2.0;
+
+    if (program == LYAPUNOV) {
+        centre_x.value = 2.0;
+        centre_y.value = -2.0;
+
+    } else {
+        centre_x.value = 0.0;
+        centre_y.value = 0.0;
+    }
+
     redraw();
 }
 
@@ -291,29 +159,26 @@ function keyhandler(event) {
     switch (event.keyCode) {
 
         case 82: // R
-            origin_imag.value = 0.0;
-            origin_real.value = 0.0;
-            magnitude.value = 2.0;
-            redraw();
+            resetView();
             break;
 
         case 87: // W
-            origin_imag.value -= 0.5 * magnitude.value;
+            centre_y.value -= 0.5 * magnitude.value;
             redraw();
             break;
 
         case 83: // S
-            origin_imag.value += 0.5 * magnitude.value;
+            centre_y.value += 0.5 * magnitude.value;
             redraw();
             break;
 
         case 65: // A
-            origin_real.value -= 0.5 * magnitude.value;
+            centre_x.value -= 0.5 * magnitude.value;
             redraw();
             break;
 
         case 68: // D
-            origin_real.value += 0.5 * magnitude.value;
+            centre_x.value += 0.5 * magnitude.value;
             redraw();
             break;
 
@@ -331,7 +196,7 @@ function keyhandler(event) {
 }
 
 function onFractalClick(event) {
-    origin_real.value += (event.x - 500) / 500 * magnitude.value;
-    origin_imag.value += (event.y - 500) / 500 * magnitude.value;
+    centre_x.value += (event.x - 500) / 500 * magnitude.value;
+    centre_y.value += (event.y - 500) / 500 * magnitude.value;
     redraw();
 }

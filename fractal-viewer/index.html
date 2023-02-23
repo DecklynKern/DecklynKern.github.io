@@ -6,6 +6,10 @@
         <script src="lib/webgl-utils.js"></script>
         <script src="lib/webgl-debug.js"></script>
         <script src="lib/cuon-utils.js"></script>
+        <script src="util.js"></script>
+        <script src="escape-time.js"></script>
+        <script src="lyapunov.js"></script>
+        <script src="newton.js"></script>
         <script src="webgl.js"></script>
     </head>
     <body onload="main()">
@@ -13,82 +17,170 @@
             <canvas id="fractal_canvas" width="1000px" height="1000px"></canvas>
             <div class="sidebar">
                 <div class="input-div">
-                    Fractal:
-                    <select id="fractal_type">
-                        <option value="0">Mandelbrot</option>
-                        <option value="1">Burning Ship</option>
-                        <option value="2">Tricorn</option>
-                        <option value="3">Heart</option>
-                        <option value="4">Mandelbox</option>
-                        <option value="5">Multibrot (slower than Mandelbrot)</option>
-                        <option value="6">CodeParade's Feather</option>
-                        <option value="7">Chirikov Map</option>
+                    Program: 
+                    <select id="program">
+                        <option value="escape-time">Escape Time</option>
+                        <option value="lyapunov">Lyapunov</option>
+                        <option value="newton">Newton</option>
                     </select>
                 </div>
-                <div class="input-div" id="scaling_div" style="display: none">
-                    Scale:
-                    <input type="number" value="2.0" id="scaling" step="0.025">
-                </div>
-                <div class="input-div" id="exponent_div" style="display: none">
-                    Exponent:
-                    <input type="number" value="2.0" id="exponent" step="0.025">
-                </div>
-                <div class="input-div">
-                    Julia:
-                    <input type="checkbox" id="is_julia">
-                </div>
-                <div class="input-div" id="julia_options" style="display: none">
-                    Julia C Value:
-                    <canvas width="200px" height="200px" id="julia_selector" class="julia-selector"></canvas>
-                </div>
-                <div class="input-div">
-                    Colouring Style:
-                    <select id="colouring_type">
-                        <option value="0">Banded</option>
-                        <option value="1">Smooth</option>
-                        <option value="2">Rings</option>
-                        <option value="3">Hue Cycle</option>
-                    </select>
-                </div>
-                <div class="input-div">
-                    Max Iterations:
-                    <input type="number" value="30" id="max_iterations" min="0">
-                    <br>
-                    Escape Radius:
-                    <input type="number" value="2.0" id="escape_radius" step="0.1" min="0">
-                </div>
-                <table class="input-div"  id="colour_select">
-                    <tr>
-                        <td>
+                <div id="escape_time_options">
+                    <div class="input-div">
+                        Fractal:
+                        <select id="fractal_type">
+                            <option value="0">Mandelbrot</option>
+                            <option value="1">Burning Ship</option>
+                            <option value="2">Tricorn</option>
+                            <option value="3">Heart</option>
+                            <option value="4">Mandelbox</option>
+                            <option value="5">Multibrot</option>
+                            <option value="6">CodeParade's Feather</option>
+                            <option value="7">Chirikov Map</option>
+                            <optgroup label="Custom">
+                                <option value="8">Smelly Shoe</option>
+                                <option value="9">Custom</option>
+                            </optgroup>
+                        </select>
+                        <div id="scaling_div" style="display: none">
+                            Scale:
+                            <input type="number" value="2.0" id="scaling" step="0.025">
+                        </div>
+                        <div id="exponent_div" style="display: none">
+                            Exponent:
+                            <input type="number" value="2.0" id="exponent" step="0.025">
+                        </div>
+                    </div>
+                    <div class="input-div">
+                        Julia:
+                        <input type="checkbox" id="is_julia">
+                        <div id="julia_options" style="display: none">
+                            Julia C Value:
+                            <canvas id="julia_selector" class="julia-selector" width="200px" height="200px"></canvas>
+                        </div>
+                    </div>
+                    <div class="input-div">
+                        Smoothing:
+                        <select id="smoothing_type">
+                            <option value="0">None</option>
+                            <option value="1">Log</option>
+                            <option value="2">Reverse</option>
+                        </select>
+                    </div>
+                    <div class="input-div">
+                        Max Iterations:
+                        <input id="et_max_iterations" type="number" value="30" min="0">
+                        <br>
+                        Escape Radius:
+                        <input id="escape_radius" type="number" value="2.0" step="0.1" min="0">
+                        <br>
+                        Min Radius:
+                        <input id="min_radius" type="number" value="0.0" step="0.025" min="0">
+                    </div>
+                    <div class="input-div">
+                        Colouring:
+                        <select id="colouring_type">
+                            <option value="0">Gradient</option>
+                            <option value="1">Rings</option>
+                            <option value="2">Hue Cycle</option>
+                            <option value="3">Normal Mapping</option>
+                        </select>
+                        <br>
+                        Interior Colouring:
+                        <select id="interior_colouring_type">
+                            <option value="0">Solid</option>
+                            <option value="1">On</option>
+                        </select>
+                    </div>
+                    <div id="colour_select" class="input-div" style="display: grid">
+                        <div class="grid-entry">
                             Trapped Colour:
-                        </td>
-                        <td>
-                            <input type="color" id="trapped_colour" value="#000000">
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>
+                            <input id="trapped_colour" type="color" value="#000000">
+                        </div>
+                        <div class="grid-entry">
                             Close Colour:
-                        </td>
-                        <td>
-                            <input type="color" id="close_colour" value="#0000FF">
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>
+                            <input id="close_colour" type="color" value="#0000FF">
+                        </div>
+                        <div class="grid-entry">
                             Far Colour:
-                        </td>
-                        <td>
-                            <input type="color" id="far_colour" value="#000000">
-                        </td>
-                    </tr>
-                </table>
+                            <input id="far_colour" type="color" value="#000000">
+                        </div>
+                    </div>
+                </div>
+                <div id="lyapunov_options" style="display:none">
+                    <div class="input-div">
+                        Sequence (1s, 2s, and 3s only):
+                        <input id="lya_sequence" type="text" value="12" maxlength="8" size="8">
+                        <hr>
+                        Value of "3":
+                        <input id="c_value" type="range" min="0.5" max="4.5" value="2.5" step="0.005" style="width:95%">
+                    </div>
+                    <div class="input-div">
+                        Iterations:
+                        <input id="lya_iterations" type="number" value="500" min="0">
+                    </div>
+                    <div class="input-div" style="display: grid">
+                        <div class="grid-entry">
+                            Stable Colour:
+                            <input id="stable_colour" type="color" value="#FFFF00">
+                        </div>
+                        <div class="grid-entry">
+                            Chaotic Colour:
+                            <input id="chaotic_colour" type="color" value="#0000FF">
+                        </div>
+                        <div class="grid-entry">
+                            Infinity Colour:
+                            <input id="infinity_colour" type="color" value="#000000">
+                        </div>
+                    </div>
+                </div>
+                <div id="newton_options" style="display:none;">
+                    <div class="input-div">
+                        Fractal Type:
+                        <select id="nwt_fractal_type">
+                            <option value="0">Classic</option>
+                            <option value="1">Nova</option>
+                        </select> 
+                    </div>
+                    <div class="input-div">
+                        Max Iterations:
+                        <input id="nwt_iterations" type="number" value="40" min="0">
+                    </div>
+                    <div class="input-div">
+                        Colouring:
+                        <select id="nwt_colouring_type">
+                            <option value="0">Root</option>
+                            <option value="1">Shaded Root</option>
+                            <option value="2">Convergence</option>
+                        </select>
+                    </div>
+                    <div id="root_colour_div" class="input-div">
+                        <div class="grid-entry">
+                            Root 1 Colour:
+                            <input id="root1_colour" type="color" value="#FF0000">
+                        </div>
+                        <div class="grid-entry">
+                            Root 2 Colour:
+                            <input id="root2_colour" type="color" value="#00FF00">
+                        </div>
+                        <div class="grid-entry">
+                            Root 3 Colour:
+                            <input id="root3_colour" type="color" value="#0000FF">
+                        </div>
+                        <div class="grid-entry" id="base_colour_div" style="display: none;">
+                            Base Colour:
+                            <input id="base_colour" type="color" value="#000000">
+                        </div>
+                    </div>
+                </div>
                 <div class="input-div">
                     Samples:
-                    <input type="number" value="1" id="samples" min="1" max="10">
-                    (higher values will significantly slow performance)
+                    <input id="samples" type="number" value="1" min="1" max="10">
+                    <br>
+                    <button onclick="resetView()">Reset View</button>
                 </div>
-                Use WASD to move, +/- to zoom in and out, and R to reset zoom.
+                WASD = Move
+                <br>
+                +/- = Zoom
             </div>
         </div>
     </body>

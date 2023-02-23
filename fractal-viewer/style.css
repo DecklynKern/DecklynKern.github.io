@@ -17,10 +17,17 @@ body {
 .input-div {
     padding-bottom: 5px;
     border-spacing: 0;
+    border: 1px grey dashed;
 }
 
 .julia-selector {
     border: 2px black solid;
+}
+
+.grid-entry {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
 }
 
 input[type="number"] {
