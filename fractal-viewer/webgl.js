@@ -12,7 +12,8 @@ var gl;
 
 var ESCAPE_TIME = new EscapeTime();
 var LYAPUNOV = new Lyapunov();
-var NEWTON = new Newton();
+var ROOT_FINDING = new RootFinding();
+var RECURSIVE = new Recursive();
 var program = ESCAPE_TIME;
 
 var mouse_down = false;
@@ -37,7 +38,8 @@ function main() {
 
     ESCAPE_TIME.setupGUI();
     LYAPUNOV.setupGUI();
-    NEWTON.setupGUI();
+    ROOT_FINDING.setupGUI();
+    RECURSIVE.setupGUI();
 
     initWebGL();
     loadProgram(ESCAPE_TIME);
@@ -69,11 +71,11 @@ function setupShader() {
     gl.vertexAttribPointer(position_attr, 2, gl.FLOAT, false, 0, 0);
     gl.enableVertexAttribArray(position_attr);
 
-    magnitude.attr = gl.getUniformLocation(gl.program, "magnitude");
-    centre_x.attr = gl.getUniformLocation(gl.program, "centre_x");
-    centre_y.attr = gl.getUniformLocation(gl.program, "centre_y");
+    magnitude.getAttr("magnitude");
+    centre_x.getAttr("centre_x");
+    centre_y.getAttr("centre_y");
 
-    samples.attr = gl.getUniformLocation(gl.program, "samples");
+    samples.getAttr("samples");
 
     program.setupAttrs();
 
@@ -127,14 +129,18 @@ function updateProgram() {
             loadProgram(LYAPUNOV);
             break;
 
-        case "newton":
-            loadProgram(NEWTON);
+        case "root-finding":
+            loadProgram(ROOT_FINDING);
+            break;
+
+        case "recursive":
+            loadProgram(RECURSIVE);
 
     }
 }
 
-function updateSamples(_ev) {
-    samples.value = document.getElementById("samples").value;
+function updateSamples(event) {
+    samples.value = event.target.value;
     redraw();
 }
 
@@ -145,6 +151,11 @@ function resetView() {
     if (program == LYAPUNOV) {
         centre_x.value = 2.0;
         centre_y.value = -2.0;
+
+    } else if (program == RECURSIVE) {
+        centre_x.value = 0.5;
+        centre_y.value = -0.5;
+        magnitude.value = 0.5;
 
     } else {
         centre_x.value = 0.0;

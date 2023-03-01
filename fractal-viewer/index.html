@@ -9,7 +9,8 @@
         <script src="util.js"></script>
         <script src="escape-time.js"></script>
         <script src="lyapunov.js"></script>
-        <script src="newton.js"></script>
+        <script src="root-finding.js"></script>
+        <script src="recursive.js"></script>
         <script src="webgl.js"></script>
     </head>
     <body onload="main()">
@@ -21,13 +22,14 @@
                     <select id="program">
                         <option value="escape-time">Escape Time</option>
                         <option value="lyapunov">Lyapunov</option>
-                        <option value="newton">Newton</option>
+                        <option value="root-finding">Root Finding</option>
+                        <option value="recursive">Recursive</option>
                     </select>
                 </div>
                 <div id="escape_time_options">
                     <div class="input-div">
                         Fractal:
-                        <select id="fractal_type">
+                        <select id="esc_fractal_type">
                             <option value="0">Mandelbrot</option>
                             <option value="1">Burning Ship</option>
                             <option value="2">Tricorn</option>
@@ -35,7 +37,16 @@
                             <option value="4">Mandelbox</option>
                             <option value="5">Multibrot</option>
                             <option value="6">CodeParade's Feather</option>
-                            <option value="7">Chirikov Map</option>
+                            <option value="10">Tower of Powers</option>
+                            <option value="14">Sin</option>
+                            <option value="15">Rational Map</option>
+                            <option value="16">Phoenix</option>
+                            <optgroup label="Chaotic Maps (generally not very fractal-ly)">
+                                <option value="7">Chirikov</option>
+                                <option value="11">Modified Duffing</option>
+                                <option value="12">"Gingerbread"</option>
+                                <option value="13">Hénon</option>
+                            </optgroup>
                             <optgroup label="Custom">
                                 <option value="8">Smelly Shoe</option>
                                 <option value="9">Custom</option>
@@ -43,11 +54,28 @@
                         </select>
                         <div id="scaling_div" style="display: none">
                             Scale:
-                            <input type="number" value="2.0" id="scaling" step="0.025">
+                            <input id="scaling" type="number" value="2.0" step="0.025">
                         </div>
                         <div id="exponent_div" style="display: none">
                             Exponent:
-                            <input type="number" value="2.0" id="exponent" step="0.025">
+                            <input id="exponent" type="number" value="2.0" step="0.025">
+                        </div>
+                        <div id="rational_div" style="display: none">
+                            p:
+                            <input id="rational_p" type="number" value="2.0" step="0.025" min="0">
+                            <br>
+                            q:
+                            <input id="rational_q" type="number" value="-2.0" step="0.025" max="0">
+                            <br>
+                            Lambda:
+                            <input id="rational_lambda" type="number" value="0.0625" step="0.0025">
+                        </div>
+                        <div id="phoenix_div" style="display: none;">
+                            Re(p):
+                            <input id="phoenix_p_real" type="number" value="-0.5" step="0.01">
+                            <br>
+                            Im(p):
+                            <input id="phoenix_p_imag" type="number" value="0" step="0.01">
                         </div>
                     </div>
                     <div class="input-div">
@@ -55,7 +83,7 @@
                         <input type="checkbox" id="is_julia">
                         <div id="julia_options" style="display: none">
                             Julia C Value:
-                            <canvas id="julia_selector" class="julia-selector" width="200px" height="200px"></canvas>
+                            <canvas id="julia_selector" class="selector" width="200px" height="200px"></canvas>
                         </div>
                     </div>
                     <div class="input-div">
@@ -68,7 +96,7 @@
                     </div>
                     <div class="input-div">
                         Max Iterations:
-                        <input id="et_max_iterations" type="number" value="30" min="0">
+                        <input id="esc_max_iterations" type="number" value="30" min="0">
                         <br>
                         Escape Radius:
                         <input id="escape_radius" type="number" value="2.0" step="0.1" min="0">
@@ -108,6 +136,14 @@
                 </div>
                 <div id="lyapunov_options" style="display:none">
                     <div class="input-div">
+                        Fractal Type:
+                        <select id="lya_fractal_type">
+                            <option value="0">Logistic</option>
+                            <option value="1">Gaussian</option>
+                            <option value="2">Circle</option>
+                        </select>
+                    </div>
+                    <div class="input-div">
                         Sequence (1s, 2s, and 3s only):
                         <input id="lya_sequence" type="text" value="12" maxlength="8" size="8">
                         <hr>
@@ -116,7 +152,7 @@
                     </div>
                     <div class="input-div">
                         Iterations:
-                        <input id="lya_iterations" type="number" value="500" min="0">
+                        <input id="lya_iterations" type="number" value="250" min="0">
                     </div>
                     <div class="input-div" style="display: grid">
                         <div class="grid-entry">
@@ -133,21 +169,43 @@
                         </div>
                     </div>
                 </div>
-                <div id="newton_options" style="display:none;">
+                <div id="root_finding_options" style="display:none;">
                     <div class="input-div">
+                        Algorithm:
+                        <select id="rtf_algorithm">
+                            <option value="0">Newton</option>
+                            <option value="1">Halley</option>
+                            <option value="2">Schröder</option>
+                            <option value="3">Steffensen</option>
+                            <optgroup label="Secant">
+                                <option value="4">z0 = 0</option>
+                                <option value="5">z0 = swap(z)</option>
+                                <option value="6">z0 = 2z</option>
+                                <option value="7">z0 = conj(z)</option>
+                                <option value="8">z0 = z^2</option>
+                            </optgroup>
+                        </select>
+                        <br>
                         Fractal Type:
-                        <select id="nwt_fractal_type">
+                        <select id="rtf_fractal_type">
                             <option value="0">Classic</option>
                             <option value="1">Nova</option>
                         </select> 
                     </div>
+                    <div>
+                        Roots:
+                        <canvas id="root_selector" class="selector" width="200px" height="200px">q</canvas>
+                    </div>
                     <div class="input-div">
                         Max Iterations:
-                        <input id="nwt_iterations" type="number" value="40" min="0">
+                        <input id="rtf_iterations" type="number" value="40" min="0">
+                        <br>
+                        Bailout Threshold:
+                        <input id="rtf_threshold" type="number" value="0.000001" min="0" step="0.000001" style="width: 70px">
                     </div>
                     <div class="input-div">
                         Colouring:
-                        <select id="nwt_colouring_type">
+                        <select id="rtf_colouring_type">
                             <option value="0">Root</option>
                             <option value="1">Shaded Root</option>
                             <option value="2">Convergence</option>
@@ -166,10 +224,23 @@
                             Root 3 Colour:
                             <input id="root3_colour" type="color" value="#0000FF">
                         </div>
-                        <div class="grid-entry" id="base_colour_div" style="display: none;">
+                        <div class="grid-entry">
                             Base Colour:
                             <input id="base_colour" type="color" value="#000000">
                         </div>
+                    </div>
+                </div>
+                <div id="recursive_options" style="display: none;">
+                    <div class="input-div">
+                        Fractal Type:
+                        <select id="rc_fractal_type">
+                            <option value="0">Sierpiński Carpet</option>
+                            <option value="1">Sierpiński Triangle</option>
+                        </select>
+                    </div>
+                    <div class="input-div">
+                        Iterations:
+                        <input id="rc_iterations" type="number" value="8" min="0" max="20">
                     </div>
                 </div>
                 <div class="input-div">

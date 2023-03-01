@@ -4,7 +4,11 @@ class EscapeTime {
     options_panel = "escape_time_options";
 
     fractal_type = new Param(0);
-    fractal_param = new Param(2.0);
+
+    fractal_param1 = new Param(2.0);
+    fractal_param2 = new Param(-2.0);
+    fractal_param3 = new Param(0.0625);
+    
     max_iterations = new Param(30);
     escape_radius = new Param(2.0);
     min_radius = new Param(0.0);
@@ -26,61 +30,82 @@ class EscapeTime {
 
     setupGUI = function() {
 
-        document.getElementById("fractal_type").onchange = this.updateFractalType;
-        document.getElementById("scaling").onchange = this.updateScaling;
-        document.getElementById("exponent").onchange = this.updateExponent;
+        document.getElementById("esc_fractal_type").onchange = this.updateFractalType;
         
-        document.getElementById("et_max_iterations").onchange = this.updateMaxIterations;
-        document.getElementById("escape_radius").onchange = this.updateEscapeRadius;
-        document.getElementById("min_radius").onchange = this.updateMinRadius;
+        document.getElementById("scaling").onchange = paramSet(this.fractal_param1);
+        document.getElementById("exponent").onchange = paramSet(this.fractal_param1);
+
+        document.getElementById("rational_p").onchange = paramSet(this.fractal_param1);
+        document.getElementById("rational_q").onchange = paramSet(this.fractal_param2);
+        document.getElementById("rational_lambda").onchange = paramSet(this.fractal_param3);
+
+        document.getElementById("phoenix_p_real").onchange = paramSet(this.fractal_param1);
+        document.getElementById("phoenix_p_imag").onchange = paramSet(this.fractal_param2);
+        
+        document.getElementById("esc_max_iterations").onchange = paramSet(this.max_iterations);
+        document.getElementById("escape_radius").onchange = paramSet(this.escape_radius);
+        document.getElementById("min_radius").onchange = paramSet(this.min_radius);
     
-        document.getElementById("is_julia").onchange = this.updateIsJulia;  
+        document.getElementById("is_julia").onchange = this.updateIsJulia;
         document.getElementById("julia_selector").onmousemove = this.updateJuliaCoord;
     
-        document.getElementById("smoothing_type").onchange = this.updateSmoothingType;
+        document.getElementById("smoothing_type").onchange = paramSet(this.smoothing_type);
         document.getElementById("colouring_type").onchange = this.updateColouringType;
-        document.getElementById("interior_colouring_type").onchange = this.updateInteriorColouringType;
+        document.getElementById("interior_colouring_type").onchange = paramSet(this.interior_colouring_type);
     
-        document.getElementById("trapped_colour").onchange = this.updateTrappedColour;
-        document.getElementById("close_colour").onchange = this.updateCloseColour;
-        document.getElementById("far_colour").onchange = this.updateFarColour;
+        document.getElementById("trapped_colour").onchange = paramSetColour(this.trapped_colour);;
+        document.getElementById("close_colour").onchange = paramSetColour(this.close_colour);;
+        document.getElementById("far_colour").onchange = paramSetColour(this.far_colour);;
 
         this.julia_canvas_context = document.getElementById("julia_selector").getContext("2d");
-        this.julia_canvas_context.fillStyle = "black";
+        this.julia_canvas_context.strokeStyle = "black";
         this.julia_canvas_context.beginPath();
-        this.julia_canvas_context.arc(50, 50, 4, 0, 2 * Math.PI);
+        this.julia_canvas_context.moveTo(0, 100);
+        this.julia_canvas_context.lineTo(200, 100);
+        this.julia_canvas_context.moveTo(100, 0);
+        this.julia_canvas_context.lineTo(100, 200);
+        this.julia_canvas_context.stroke();
+        this.julia_canvas_context.beginPath();
+        this.julia_canvas_context.arc(100, 100, 4, 0, 2 * Math.PI);
         this.julia_canvas_context.stroke();
 
     }
 
     setupAttrs = function() {
         
-        this.fractal_type.attr = gl.getUniformLocation(gl.program, "fractal_type");
-        this.fractal_param.attr = gl.getUniformLocation(gl.program, "fractal_param");
-        this.max_iterations.attr = gl.getUniformLocation(gl.program, "max_iterations");
-        this.escape_radius.attr = gl.getUniformLocation(gl.program, "escape_radius_sq");
-        this.min_radius.attr = gl.getUniformLocation(gl.program, "min_radius_sq");
-            
-        this.is_julia.attr = gl.getUniformLocation(gl.program, "is_julia");
-        this.julia_c_real.attr = gl.getUniformLocation(gl.program, "julia_c_real");
-        this.julia_c_imag.attr = gl.getUniformLocation(gl.program, "julia_c_imag");
-        
-        this.smoothing_type.attr = gl.getUniformLocation(gl.program, "smoothing_type");
-        this.colouring_type.attr = gl.getUniformLocation(gl.program, "colouring_type");
-        this.interior_colouring_type.attr = gl.getUniformLocation(gl.program, "interior_colouring_type");
+        this.fractal_type.getAttr("fractal_type");
 
-        this.trapped_colour.attr = gl.getUniformLocation(gl.program, "trapped_colour");
-        this.close_colour.attr = gl.getUniformLocation(gl.program, "close_colour");
-        this.far_colour.attr = gl.getUniformLocation(gl.program, "far_colour");
+        this.fractal_param1.getAttr("fractal_param1");
+        this.fractal_param2.getAttr("fractal_param2");
+        this.fractal_param3.getAttr("fractal_param3");
+        
+        this.max_iterations.getAttr("max_iterations");
+        this.escape_radius.getAttr("escape_radius_sq");
+        this.min_radius.getAttr("min_radius_sq");
+            
+        this.is_julia.getAttr("is_julia");
+        this.julia_c_real.getAttr("julia_c_real");
+        this.julia_c_imag.getAttr("julia_c_imag");
+        
+        this.smoothing_type.getAttr("smoothing_type");
+        this.colouring_type.getAttr("colouring_type");
+        this.interior_colouring_type.getAttr("interior_colouring_type");
+
+        this.trapped_colour.getAttr("trapped_colour");
+        this.close_colour.getAttr("close_colour");
+        this.far_colour.getAttr("far_colour");
     
     }
 
     loadAttrs = function() {
 
         this.fractal_type.loadInt();
-        this.fractal_param.loadFloat();
-        this.max_iterations.loadInt();
 
+        this.fractal_param1.loadFloat();
+        this.fractal_param2.loadFloat();
+        this.fractal_param3.loadFloat();
+
+        this.max_iterations.loadInt();
         this.escape_radius.loadFloatSq();
         this.min_radius.loadFloatSq();
 
@@ -98,42 +123,49 @@ class EscapeTime {
 
     }
 
-    updateFractalType = function(_ev) {
+    updateFractalType = function(event) {
 
-        ESCAPE_TIME.fractal_type.value = document.getElementById("fractal_type").value;
+        ESCAPE_TIME.fractal_type.value = event.target.value;
     
         const scaling_style = document.getElementById("scaling_div").style;
         const exponent_style = document.getElementById("exponent_div").style;
+        const rational_style = document.getElementById("rational_div").style;
+        const phoenix_style = document.getElementById("phoenix_div").style;
     
         scaling_style.display = "none";
         exponent_style.display = "none";
-    
-        if (fractal_type.value == 4) {
+        rational_style.display = "none";
+        phoenix_style.display = "none";
+        
+        if (ESCAPE_TIME.fractal_type.value == 4) {
             scaling_style.display = "block";
+            ESCAPE_TIME.fractal_param1.value = document.getElementById("scaling").value;
     
-        } else if (fractal_type.value == 5) {
+        } else if (ESCAPE_TIME.fractal_type.value == 5) {
             exponent_style.display = "block";
+            ESCAPE_TIME.fractal_param1.value = document.getElementById("exponent").value;
+        
+        } else if (ESCAPE_TIME.fractal_type.value == 15) {
+            rational_style.display = "block";
+            ESCAPE_TIME.fractal_param1.value = document.getElementById("rational_p").value;
+            ESCAPE_TIME.fractal_param2.value = document.getElementById("rational_q").value;
+            ESCAPE_TIME.fractal_param3.value = document.getElementById("rational_lambda").value;
+        
+        } else if (ESCAPE_TIME.fractal_type.value == 16) {
+            phoenix_style.display = "block";
+            ESCAPE_TIME.fractal_param1.value = document.getElementById("phoenix_p_real").value;
+            ESCAPE_TIME.fractal_param2.value = document.getElementById("phoenix_p_imag").value;
         }
         
         redraw();
     
     }
     
-    updateScaling = function(_ev) {
-        ESCAPE_TIME.fractal_param.value = document.getElementById("scaling").value;
-        redraw();
-    }
+    updateIsJulia = function(event) {
     
-    updateExponent = function(_ev) {
-        ESCAPE_TIME.fractal_param.value = document.getElementById("exponent").value;
-        redraw();
-    }
-    
-    updateIsJulia = function(_ev) {
-    
-        ESCAPE_TIME.is_julia.value = +document.getElementById("is_julia").checked;
+        ESCAPE_TIME.is_julia.value = +event.target.checked;
         
-        if (is_julia.value) {
+        if (ESCAPE_TIME.is_julia.value) {
             document.getElementById("julia_options").style.display = "block";
         
         } else {
@@ -144,18 +176,13 @@ class EscapeTime {
     
     }
     
-    updateSmoothingType = function(_ev) {
-        ESCAPE_TIME.smoothing_type.value = document.getElementById("smoothing_type").value;
-        redraw();
-    }
+    updateColouringType = function(event) {
     
-    updateColouringType = function(_ev) {
-    
-        ESCAPE_TIME.colouring_type.value = document.getElementById("colouring_type").value;
+        ESCAPE_TIME.colouring_type.value = event.target.value;
     
         const colour_select_style = document.getElementById("colour_select").style;
     
-        if (colouring_type.value == 2) {
+        if (ESCAPE_TIME.colouring_type.value == 2) {
             colour_select_style.display = "none";
     
         } else {
@@ -164,41 +191,6 @@ class EscapeTime {
     
         redraw();
     
-    }
-
-    updateInteriorColouringType = function(_ev) {
-        ESCAPE_TIME.interior_colouring_type.value = document.getElementById("interior_colouring_type").value;
-        redraw();
-    }
-    
-    updateMaxIterations = function(_ev) {
-        ESCAPE_TIME.max_iterations.value = document.getElementById("et_max_iterations").value;
-        redraw();
-    }
-    
-    updateEscapeRadius = function(_ev) {
-        ESCAPE_TIME.escape_radius.value = document.getElementById("escape_radius").value;
-        redraw();
-    }
-    
-    updateMinRadius = function(_ev) {
-        ESCAPE_TIME.min_radius.value = document.getElementById("min_radius").value;
-        redraw();
-    }
-    
-    updateTrappedColour = function(_ev) {
-        ESCAPE_TIME.trapped_colour.value = hexToRGB(document.getElementById("trapped_colour").value);
-        redraw();
-    }
-    
-    updateCloseColour = function(_ev) {
-        ESCAPE_TIME.close_colour.value = hexToRGB(document.getElementById("close_colour").value);
-        redraw();
-    }
-    
-    updateFarColour = function(_ev) {
-        ESCAPE_TIME.far_colour.value = hexToRGB(document.getElementById("far_colour").value);
-        redraw();
     }
     
     updateJuliaCoord = function(event) {
@@ -214,6 +206,12 @@ class EscapeTime {
     
         ESCAPE_TIME.julia_canvas_context.clearRect(0, 0, 200, 200);
     
+        ESCAPE_TIME.julia_canvas_context.beginPath();
+        ESCAPE_TIME.julia_canvas_context.moveTo(0, 100);
+        ESCAPE_TIME.julia_canvas_context.lineTo(200, 100);
+        ESCAPE_TIME.julia_canvas_context.moveTo(100, 0);
+        ESCAPE_TIME.julia_canvas_context.lineTo(100, 200);
+        ESCAPE_TIME.julia_canvas_context.stroke();
         ESCAPE_TIME.julia_canvas_context.beginPath();
         ESCAPE_TIME.julia_canvas_context.arc(event.offsetX, event.offsetY, 4, 0, 2 * Math.PI);
         ESCAPE_TIME.julia_canvas_context.stroke();

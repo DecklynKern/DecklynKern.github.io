@@ -6,11 +6,29 @@ function hexToRGB(hex) {
     ];
 }
 
+function paramSet(param) {
+    return function(event) {
+        param.value = event.target.value;
+        redraw();
+    }
+}
+
+function paramSetColour(param) {
+    return function(event) {
+        param.value = hexToRGB(event.target.value);
+        redraw();
+    }
+}
+
 class Param {
     
     constructor(value) {
         this.value = value;
         this.attr = null;
+    }
+
+    getAttr = function(name) {
+        this.attr = gl.getUniformLocation(gl.program, name);
     }
 
     loadInt = function() {
