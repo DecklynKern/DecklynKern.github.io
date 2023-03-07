@@ -202,8 +202,6 @@ class EscapeTime {
         ESCAPE_TIME.julia_c_real.value = event.offsetX / 40 - 2.5;
         ESCAPE_TIME.julia_c_imag.value = event.offsetY / 40 - 2.5;
     
-        redraw();
-    
         ESCAPE_TIME.julia_canvas_context.clearRect(0, 0, 200, 200);
     
         ESCAPE_TIME.julia_canvas_context.beginPath();
@@ -215,6 +213,8 @@ class EscapeTime {
         ESCAPE_TIME.julia_canvas_context.beginPath();
         ESCAPE_TIME.julia_canvas_context.arc(event.offsetX, event.offsetY, 4, 0, 2 * Math.PI);
         ESCAPE_TIME.julia_canvas_context.stroke();
+        
+        redraw();
     
     }
 }
