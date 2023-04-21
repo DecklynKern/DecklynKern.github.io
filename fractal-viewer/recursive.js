@@ -1,4 +1,4 @@
-class Recursive {
+class Recursive extends Program {
 
     shader = "shaders/recursive.glsl";
     options_panel = "recursive_options";

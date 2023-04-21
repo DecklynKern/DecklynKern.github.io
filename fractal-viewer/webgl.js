@@ -1,4 +1,4 @@
-var VERTEX_SHADER = `
+const VERTEX_SHADER = `
 attribute vec2 position;
 varying vec2 frag_position;
 
@@ -10,10 +10,10 @@ void main() {
 var FRAGMENT_SHADER = "";
 var gl;
 
-var ESCAPE_TIME = new EscapeTime();
-var LYAPUNOV = new Lyapunov();
-var ROOT_FINDING = new RootFinding();
-var RECURSIVE = new Recursive();
+const ESCAPE_TIME = new EscapeTime();
+const LYAPUNOV = new Lyapunov();
+const ROOT_FINDING = new RootFinding();
+const RECURSIVE = new Recursive();
 var program = ESCAPE_TIME;
 
 var mouse_down = false;
@@ -53,7 +53,7 @@ function loadProgram(prgrm) {
     program = prgrm;
     
     const fragment_request = new XMLHttpRequest();
-    fragment_request.addEventListener("load", setupShader);
+    fragment_request.addEventListener("load", receiveShader);
     fragment_request.open("GET", program.shader);
     fragment_request.send();
 
@@ -61,9 +61,15 @@ function loadProgram(prgrm) {
 
 }
 
+function receiveShader() {
+    program.baseShader = this.responseText;
+    setupShader();
+    resetView();
+}
+
 function setupShader() {
 
-    FRAGMENT_SHADER = this.responseText;
+    FRAGMENT_SHADER = program.getShader();
     initShaders(gl, VERTEX_SHADER, FRAGMENT_SHADER);
 
     const position_attr = gl.getAttribLocation(gl.program, "position");
@@ -78,8 +84,6 @@ function setupShader() {
     samples.getAttr("samples");
 
     program.setupAttrs();
-
-    resetView();
 
 }
 

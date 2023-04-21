@@ -1,11 +1,10 @@
 precision highp float;
 
+//%
+
 uniform float magnitude;
 uniform float centre_x;
 uniform float centre_y;
-
-uniform int algorithm;
-uniform int fractal_type;
 
 uniform int max_iterations;
 uniform float threshold;
@@ -16,6 +15,12 @@ uniform float root2_real;
 uniform float root2_imag;
 uniform float root3_real;
 uniform float root3_imag;
+
+uniform float a_real;
+uniform float a_imag;
+
+uniform float c_real;
+uniform float c_imag;
 
 uniform int colouring_type;
 uniform vec3 root1_colour;
@@ -97,330 +102,265 @@ float root_dist_sq(Complex z, Complex root) {
     return diff.real * diff.real + diff.imag * diff.imag;
 }
 
-struct Iterator {
-    Complex z;
-    Complex c;
-    Complex d;
-    Complex e;
-    Complex f;
-};
-
-struct Val0 {
-    Complex func;
-};
-
-struct Val1 {
-    Complex func;
-    Complex der;
-};
-
-struct Val2 {
-    Complex func;
-    Complex der;
-    Complex der2;
-};
-
-struct ValPrev {
-    Complex func;
-    Complex func_prev;
-    Complex z;
-    Complex z_prev;
-};
-
-struct ValStef {
-    Complex func;
-    Complex func_step;
-};
-
 #define div(x, y) prod(x, reciprocal(y))
-
 #define ADD3(a, b, c) add(add(a, b), c)
-#define ADD4(a, b, c, d) add(ADD3(a, b, c), d)
-#define ADD5(a, b, c, d, e) add(ADD4(a, b, c, d), e)
-
-void cubic0(Iterator iter, inout Val0 val) {
-    val.func = ADD3(
-        prod(
-            add(iter.d, iter.z),
-            square(iter.z)),
-        prod(iter.e, iter.z),
-        iter.f);
-}
-
-void cubic1(Iterator iter, inout Val1 val) {
-
-    Complex z2 = square(iter.z);
-
-    val.func = ADD3(
-        prod(
-            add(iter.d, iter.z),
-            z2),
-        prod(iter.e, iter.z),
-        iter.f);
-
-    val.der = ADD3(
-        scale(z2, 3.0),
-        prod(scale(iter.d, 2.0), iter.z),
-        iter.e);
-
-}
-
-void cubic2(Iterator iter, inout Val2 val) {
-
-    Complex z2 = square(iter.z);
-    Complex dd = scale(iter.d, 2.0);
-
-    val.func = ADD3(
-        prod(
-            add(iter.d, iter.z),
-            z2),
-        prod(iter.e, iter.z),
-        iter.f);
-
-    val.der = ADD3(
-        scale(z2, 3.0),
-        prod(dd, iter.z),
-        iter.e);
-
-    val.der2 = add(
-        scale(iter.z, 6.0),
-        dd);
-
-}
-
-void cubicPrev(Iterator iter, inout ValPrev val) {
-
-    val.func_prev = val.func;
-    val.func = ADD3(
-        prod(
-            add(iter.d, iter.z),
-            square(iter.z)),
-        prod(iter.e, iter.z),
-        iter.f);
-
-    val.z_prev = val.z;
-    val.z = iter.z;
-    
-}
-
-void cubicStef(Iterator iter, inout ValStef val) {
-
-    val.func = ADD3(
-        prod(
-            add(iter.d, iter.z),
-            square(iter.z)),
-        prod(iter.e, iter.z),
-        iter.f);
-
-    Complex func_z = add(val.func, iter.z);
-
-    val.func_step = ADD3(
-        prod(
-            add(func_z, iter.d),
-            square(func_z)),
-        prod(iter.e, func_z),
-        iter.f);
-
-}
-
-void newton(inout Iterator iter, Val1 val) {
-    iter.z = sub(
-        iter.z,
-        div(
-            val.func,
-            val.der));
-}
-
-void halley(inout Iterator iter, Val2 val) {
-    iter.z = sub(
-        iter.z,
-        div(
-            scale(
-                prod(
-                    val.func,
-                    val.der),
-                2.0),
-            sub(
-                scale(
-                    square(val.der),
-                    2.0),
-                prod(val.func, val.der2))));
-}
-
-void schroeder(inout Iterator iter, Val2 val) {
-    iter.z = sub(
-        iter.z,
-        div(
-            prod(val.func, val.der),
-            sub(
-                square(val.der),
-                prod(val.func, val.der2))));
-}
-
-void steffensen(inout Iterator iter, ValStef val) {
-    iter.z = sub(
-        iter.z,
-        div(
-            square(val.func),
-            sub(
-                val.func_step,
-                val.func)));
-}
-
-void secant(inout Iterator iter, ValPrev val) {
-    iter.z = sub(
-        iter.z,
-        prod(
-            val.func,
-            div(
-                sub(
-                    val.z,
-                    val.z_prev),
-                sub(
-                    val.func,
-                    val.func_prev))));
-}
-
-#define SOLVE(algorithm, calc_vals)\
-for (int iteration = 0; iteration < TRUE_ITER_CAP; iteration++) {\
-    \
-    calc_vals(iter, val);\
-    \
-    if (val.func.real * val.func.real + val.func.imag * val.func.imag <= threshold || iteration == max_iterations) {\
-        iters = iteration;\
-        break;\
-    }\
-    \
-    algorithm(iter, val);\
-    iadd(iter.z, iter.c);\
-    \
-}
-
-#define SOLVE_NOVA(algorithm, calc_vals)\
-Complex z_prev = Complex(\
-    iter.z.real + 1.0,\
-    iter.z.imag\
-);\
-Complex dz;\
-for (int iteration = 0; iteration < TRUE_ITER_CAP; iteration++) {\
-    \
-    calc_vals(iter, val);\
-    dz = sub(iter.z, z_prev);\
-    \
-    if (dz.real * dz.real + dz.imag * dz.imag <= threshold || iteration == max_iterations) {\
-        iters = iteration;\
-        break;\
-    }\
-    \
-    z_prev = iter.z;\
-    algorithm(iter, val);\
-    iadd(iter.z, iter.c);\
-    \
-}
-
-#define SOLVE_ALL(algorithm, calc_vals)\
-if (fractal_type == 0) {\
-    SOLVE(algorithm, calc_vals);\
-} else if (fractal_type == 1) {\
-    SOLVE_NOVA(algorithm, calc_vals);\
-}
 
 vec3 getColour(Complex z) {
 
-    Complex c;
+    Complex z_prev;
 
     Complex root1 = Complex(root1_real, root1_imag);
     Complex root2 = Complex(root2_real, root2_imag);
     Complex root3 = Complex(root3_real, root3_imag);
 
-    if (fractal_type == 0) {
-        c = ZERO;
-    
-    } else if (fractal_type == 1) {
-        c = z;
-        z = Complex(1.0, 0.0);
-    }
-
     Complex r1r2 = prod(root1, root2);
-
-    Iterator iter = Iterator(
-        z,
-        c,
-        neg(ADD3(root1, root2, root3)),
-        ADD3(r1r2, prod(root1, root3), prod(root2, root3)),
-        neg(prod(r1r2, root3))
-    );
+    
+    Complex d = neg(ADD3(root1, root2, root3));
+    Complex e = ADD3(r1r2, prod(root1, root3), prod(root2, root3));
+    Complex f = neg(prod(r1r2, root3));
 
     int iters = max_iterations;
 
-    if (algorithm == 0) {
-        Val1 val = Val1(ZERO, ZERO);
-        SOLVE_ALL(newton, cubic1);
+    #if FRACTAL_TYPE == 1
 
-    } else if (algorithm == 1) {
-        Val2 val = Val2(ZERO, ZERO, ZERO);
-        SOLVE_ALL(halley, cubic2);
+        Complex c = z;
+        z = ZERO;
 
-    } else if (algorithm == 2) {
-        Val2 val = Val2(ZERO, ZERO, ZERO);
-        SOLVE_ALL(schroeder, cubic2);
+        z_prev = Complex(10000.0, 0.0);
+        Complex dz;
 
-    } else if (algorithm == 3) {
-        ValStef val = ValStef(ZERO, ZERO);
-        SOLVE_ALL(steffensen, cubicStef);
-    
-    } else if (algorithm >= 4 && algorithm <= 8) {
+    #elif FRACTAL_TYPE == 2
 
-        Complex z_prev;
+        Complex c = Complex(c_real, c_imag);
 
-        if (algorithm == 4) {
+        z_prev = Complex(1000000.0, 0.0);
+        Complex dz;
+
+    #endif
+
+    Complex func;
+    Complex diff;
+
+    Complex a = Complex(a_real, a_imag);
+
+    #if ALGORITHM == 0
+        Complex der = ZERO;
+
+    #elif ALGORITHM == 1 || ALGORITHM == 2
+        Complex der = ZERO;
+        Complex der2 = ZERO;
+
+    #elif ALGORITHM == 3
+        Complex func_step = ZERO;
+
+    #elif ALGORITHM == 4
+
+        Complex func_prev;
+
+        #if START_POINT == 0
             z_prev = ZERO;
-        
-        } else if (algorithm == 5) {
+
+        #elif START_POINT == 1
             z_prev = Complex(
-                iter.z.imag,
-                iter.z.real
+                z.imag,
+                z.real
             );
 
-        } else if (algorithm == 6) {
-            z_prev = scale(iter.z, 2.0);
+        #elif START_POINT == 2
+            z_prev = scale(z, 2.0);
+
+        #elif START_POINT == 3
+            z_prev = conj(z);
+
+        #elif START_POINT == 4
+            z_prev = square(z);
+        #endif
+
+        func_prev = ADD3(
+            prod(
+                add(d, z_prev),
+                square(z_prev)),
+            prod(e, z_prev),
+            f);
+
+    #elif ALGORITHM == 5
+        Complex der = ZERO;
+        Complex der2 = ZERO;
+        Complex der3 = ZERO;
+
+    #endif
+
+    for (int iteration = 0; iteration < TRUE_ITER_CAP; iteration++) {
+
+        Complex z2 = square(z);
+
+        func = ADD3(
+            prod(
+                add(d, z),
+                z2),
+            prod(e, z),
+            f);
+
+        #if ALGORITHM == 0 || ALGORITHM == 1 || ALGORITHM == 2 || ALGORITHM == 5
+
+            Complex dd = scale(d, 2.0);
+
+            der = ADD3(
+                scale(z2, 3.0),
+                prod(dd, z),
+                e);
+
+        #endif
+
+        #if ALGORITHM == 1 || ALGORITHM == 2 || ALGORITHM == 5
+
+            der2 = add(
+                scale(z, 6.0),
+                dd);
+
+        #endif
+
+        #if ALGORITHM == 3 // steffensen
+
+            Complex func_z = add(func, z);
+
+            func_step = ADD3(
+                prod(
+                    add(func_z, d),
+                    square(func_z)),
+                prod(e, func_z),
+                f);
+
+        #elif ALGORITHM == 5
+            der3 = Complex(6.0, 0.0);
+
+        #endif
+
+        #if FRACTAL_TYPE == 0 // normal
         
-        } else if (algorithm == 7) {
-            z_prev = conj(iter.z);
+            if (func.real * func.real + func.imag * func.imag <= threshold || iteration == max_iterations) {
+                iters = iteration;
+                break;
+            }
 
-        } else if (algorithm == 8) {
-            z_prev = square(iter.z);
-        }
+        #elif FRACTAL_TYPE == 1 || FRACTAL_TYPE == 2 // nova
 
-        Val0 temp = Val0(ZERO);
-        Complex z_temp = iter.z;
+            dz = sub(z, z_prev);
+            
+            if (dz.real * dz.real + dz.imag * dz.imag <= threshold || iteration == max_iterations) {
+                iters = iteration;
+                break;
+            }
+            
+            z_prev = z;
 
-        iter.z = z_prev;
-        cubic0(iter, temp);
-        iter.z = z_temp;
+        #endif
 
-        ValPrev val = ValPrev(
-            temp.func,
-            ZERO,
-            z_prev,
-            ZERO
-        );
-        SOLVE(secant, cubicPrev);
+        #if ALGORITHM == 0 // newton
+            diff = div(
+                func,
+                der);
+
+        #elif ALGORITHM == 1 // halley
+            diff = div(
+                scale(
+                    prod(
+                        func,
+                        der),
+                    2.0),
+                sub(
+                    scale(
+                        square(der),
+                        2.0),
+                    prod(func, der2)));
+
+        #elif ALGORITHM == 2 // schroeder
+            diff = div(
+                prod(func, der),
+                sub(
+                    square(der),
+                    prod(func, der2)));
+
+        #elif ALGORITHM == 3 // steffensen
+            diff = div(
+                square(func),
+                sub(
+                    func_step,
+                    func));
+
+        #elif ALGORITHM == 4 // secant
+
+            Complex z_temp = z;
+
+            diff = prod(
+                    func,
+                    div(
+                        sub(
+                            z,
+                            z_prev),
+                        sub(
+                            func,
+                            func_prev)));
+
+            func_prev = func;
+            z_prev = z_temp;
+
+        #elif ALGORITHM == 5
+
+            Complex funcder = prod(func, der);
+            Complex func_sq = square(func);
+
+            diff = div(
+                sub(
+                    scale(
+                        prod(
+                            funcder,
+                            der),
+                        6.0),
+                    scale(
+                        prod(
+                            func_sq,
+                            der2),
+                        3.0)),
+                add(
+                    sub(
+                        scale(
+                            prod(
+                                der,
+                                square(der)),
+                            6.0),
+                        scale(
+                            prod(
+                                funcder,
+                                der2),
+                            6.0)),
+                    prod(
+                        func_sq,
+                        der3)));
+
+        #endif
+
+        z = sub(z, prod(a, diff));
+
+        #if FRACTAL_TYPE == 1 || FRACTAL_TYPE == 2
+            iadd(z, c);
+        #endif
+        
     }
 
-    if (colouring_type == 0 || colouring_type == 1 ) {
+    if (colouring_type == 0 || colouring_type == 1) {
 
-        float root_dist_1 = root_dist_sq(iter.z, root1);
-        float root_dist_2 = root_dist_sq(iter.z, root2);
-        float root_dist_3 = root_dist_sq(iter.z, root3);
+        float root_dist_1 = root_dist_sq(z, root1);
+        float root_dist_2 = root_dist_sq(z, root2);
+        float root_dist_3 = root_dist_sq(z, root3);
 
         float amount;
 
         if (colouring_type == 0) {
-            amount = 1.0;
+            amount = 0.0;
         
         } else {
-            amount = 1.0 - float(iters) / float(max_iterations);
+            amount = float(iters) / float(max_iterations);
         }
 
         if (iters == max_iterations) {
@@ -428,18 +368,18 @@ vec3 getColour(Complex z) {
         }
 
         if (root_dist_1 < root_dist_2 && root_dist_1 < root_dist_3) {
-            return root1_colour * amount + base_colour * (1.0 - amount);
+            return root1_colour * (1.0 - amount) + base_colour * amount;
         
         } else if (root_dist_2 < root_dist_3) {
-            return root2_colour * amount + base_colour * (1.0 - amount);
+            return root2_colour * (1.0 - amount) + base_colour * amount;
         
         } else {
-            return root3_colour * amount + base_colour * (1.0 - amount);
+            return root3_colour * (1.0 - amount) + base_colour * amount;
         }
 
     } else if (colouring_type == 2) {
-        float amount = 1.0 - float(iters) / float(max_iterations);
-        return vec3(amount, amount, amount);
+        float amount = float(iters) / float(max_iterations);
+        return root1_colour * (1.0 - amount) + base_colour * amount;
     }
 }
 

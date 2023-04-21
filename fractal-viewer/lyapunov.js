@@ -1,9 +1,11 @@
-class Lyapunov {
+class Lyapunov extends Program {
 
     shader = "shaders/lyapunov.glsl";
     options_panel = "lyapunov_options";
 
-    fractal_type = new Param(0);
+    fractal_type = 0;
+
+    fractal_param = new Param(0);
 
     sequence0 = new Param(0);
     sequence1 = new Param(1);
@@ -17,18 +19,33 @@ class Lyapunov {
     length = new Param(2);
     c_value = new Param(2);
 
+    initial_value = new Param(0.5);
+
     iterations = new Param(250);
 
     stable_colour = new Param([1.0, 1.0, 0.0]);
     chaotic_colour = new Param([0.0, 0.0, 1.0]);
     infinity_colour = new Param([0.0, 0.0, 0.0]);
 
+    getShader = function() {
+        
+        var shader = (' ' + this.baseShader).slice(1);
+        var def = `#define FRACTAL_TYPE ${this.fractal_type}`;
+
+        return shader.replace("//%", def);
+
+    }
+
     setupGUI = function() {
 
-        document.getElementById("lya_fractal_type").onchange = paramSet(this.fractal_type);
+        document.getElementById("lya_fractal_type").onchange = this.updateFractalType;
+        document.getElementById("lya_gauss_alpha").onchange = paramSet(this.fractal_param);
+        document.getElementById("lya_circle_omega").onchange = paramSet(this.fractal_param);
+        document.getElementById("lya_sine_mu").onchange = paramSet(this.fractal_param);
 
         document.getElementById("lya_sequence").onkeydown = this.processSequenceEvent;
         document.getElementById("lya_sequence").onchange = this.updateSequence;
+        document.getElementById("lya_initial").onchange = paramSet(this.initial_value);
         document.getElementById("c_value").oninput = this.updateCValue;
         
         document.getElementById("lya_iterations").onchange = paramSet(this.iterations);
@@ -41,7 +58,7 @@ class Lyapunov {
 
     setupAttrs = function() {
 
-        this.fractal_type.getAttr("fractal_type");
+        this.fractal_param.getAttr("fractal_param");
 
         this.iterations.getAttr("iterations");
 
@@ -55,6 +72,7 @@ class Lyapunov {
         this.sequence7.getAttr("sequence7");
 
         this.length.getAttr("length");
+        this.initial_value.getAttr("initial_value");
         this.c_value.getAttr("c_value");
 
         this.stable_colour.getAttr("stable_colour");
@@ -65,7 +83,7 @@ class Lyapunov {
 
     loadAttrs = function() {
 
-        this.fractal_type.loadInt();
+        this.fractal_param.loadFloat();
 
         this.iterations.loadInt();
 
@@ -79,14 +97,44 @@ class Lyapunov {
         this.sequence7.loadInt();
 
         this.length.loadInt();
+        this.initial_value.loadFloat();
         this.c_value.loadFloat();
-
+        
         this.stable_colour.loadFloat3();
         this.chaotic_colour.loadFloat3();
         this.infinity_colour.loadFloat3();
 
     }
 
+    updateFractalType = function(event) {
+
+        LYAPUNOV.fractal_type = event.target.value;
+
+        var gauss_style = document.getElementById("lya_gauss_div").style;
+        var circle_style = document.getElementById("lya_circle_div").style;
+        var sine_style = document.getElementById("lya_sine_div").style;
+
+        gauss_style.display = "none";
+        circle_style.display = "none";
+        sine_style.display = "none";
+
+        if (LYAPUNOV.fractal_type == 1) {
+            LYAPUNOV.fractal_param.value = document.getElementById("lya_gauss_alpha").value;
+            gauss_style.display = "block";
+            
+        } else if (LYAPUNOV.fractal_type == 2) {
+            LYAPUNOV.fractal_param.value = document.getElementById("lya_circle_omega").value;
+            circle_style.display = "block";
+        
+        } else if (LYAPUNOV.fractal_type == 5) {
+            LYAPUNOV.fractal_param.value = document.getElementById("lya_sine_mu").value;
+            sine_style.display = "block";
+        }
+
+        setupShader();
+        redraw();
+
+    }
 
     processSequenceEvent = function(event) {
 
