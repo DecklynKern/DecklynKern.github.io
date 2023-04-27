@@ -73,8 +73,8 @@ class ComplexPickerHandler {
 
     constructor(canvas, real_param, imag_param, scale, offset_real, offset_imag, info_div, template) {
 
-        var init_real = real_param.value;
-        var init_imag = imag_param.value;
+        this.real = real_param.value;
+        this.imag = imag_param.value;
 
         var canvas_ref = document.getElementById(canvas);
         
@@ -92,8 +92,8 @@ class ComplexPickerHandler {
         
         var unit_px = 100 / scale;
 
-        var x = (init_real - offset_real + scale) * unit_px;
-        var y = (init_imag - offset_imag + scale) * unit_px;
+        var x = (this.real - offset_real + scale) * unit_px;
+        var y = (this.imag - offset_imag + scale) * unit_px;
 
         canvas_context.arc(x, y, 4, 0, 2 * Math.PI);
         canvas_context.stroke();
@@ -112,6 +112,9 @@ class ComplexPickerHandler {
         
             real_param.value = event.offsetX / unit_px - scale + offset_real;
             imag_param.value = event.offsetY / unit_px - scale + offset_imag;
+
+            this.real = real_param.value;
+            this.imag = imag_param.value;
 
             document.getElementById(info_div).innerHTML = template.replace("$", formatComplex(real_param.value, imag_param.value));
         

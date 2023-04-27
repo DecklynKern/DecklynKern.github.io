@@ -315,7 +315,6 @@ vec3 getColour(float z_real, float z_imag) {
             z.imag = 2.0 * z.real * z.imag + c.imag;
 
         #elif FRACTAL_TYPE == 19 // marek dragon
-
             z = multiply(
                 z, 
                 Complex(

@@ -1,3 +1,28 @@
+ESCAPE_TIME_FUNCTIONS = [
+    "z ← z<sup>2</sup> + c",
+    "z ← (|Re(z)| + |Im(z)|i)<sup>2</sup> + c",
+    "z ← z̄<sup>2</sup> + c",
+    "z ← Re(z)Im(z) + (|Im(z) - Re(z)|)i + c",
+    "",
+    "z ← z<sup>p</sup> + c",
+    "z ← z<sup>3</sup>/(z⊙z + 1) + c",
+    "z ← Im(c)sin(Re(z)) + Re(c)Im(z)i",
+    "z ← (sin(Re(z)Im(z)) + iIm(z))<sup>2</sup> + c",
+    "",
+    "z ← c<sup>z</sup>",
+    "z ← Im(z) + (Re(z)Im(c) + Im(z)Re(c) - Im(z)³)i",
+    "z ← 1 - Im(z) + |Re(z)| + Re(z)i + c",
+    "z ← 1 - Re(z)<sup>2</sup>Re(c) + Im(z) + (Re(z)Im(c))i",
+    "z ← sin(z)c",
+    "z ← z<sup>p</sup> + λz<sup>q</sup> + c",
+    "z ← z² + pz + c",
+    "z ← z<sup>2</sup>|z|<sup>2</sup> + c",
+    "z ← Re(z<sup>2</sup>) + 2(Re(z<sup>2</sup> + c)Im(z))i + c",
+    "z ← z<sup>2</sup> + e<sup>2πr</sup>z",
+    "",
+    "z ← ce<sup>z</sup>"
+];
+
 class EscapeTime extends Program {
 
     shader = "shaders/escape-time.glsl";
@@ -6,9 +31,9 @@ class EscapeTime extends Program {
     fractal_type = 0;
     orbit_trap = 0;
 
-    fractal_param1 = new Param(2.0);
-    fractal_param2 = new Param(-2.0);
-    fractal_param3 = new Param(0.0625);
+    fractal_param1 = new Param(0);
+    fractal_param2 = new Param(0);
+    fractal_param3 = new Param(0);
     
     max_iterations = new Param(30);
     escape_radius = new Param(2.0);
@@ -73,9 +98,6 @@ class EscapeTime extends Program {
         document.getElementById("rational_q").onchange = paramSet(this.fractal_param2);
         document.getElementById("rational_lambda").onchange = paramSet(this.fractal_param3);
 
-        document.getElementById("phoenix_p_real").onchange = paramSet(this.fractal_param1);
-        document.getElementById("phoenix_p_imag").onchange = paramSet(this.fractal_param2);
-
         document.getElementById("dragon_r").onchange = paramSet(this.fractal_param1);
 
         document.getElementById("gangopadhyay1").onchange = this.updateGangopadhyay;
@@ -105,6 +127,7 @@ class EscapeTime extends Program {
         document.getElementById("far_colour").onchange = paramSetColour(this.far_colour);
 
         this.julia_c_handler = new ComplexPickerHandler("julia_selector", this.julia_c_real, this.julia_c_imag, 2.5, 0, 0, "esc_julia_text", "c = $");
+        this.phoenix_p_handler = new ComplexPickerHandler("phoenix_p_selector", this.fractal_param1, this.fractal_param2, 2, 0, 0, "phoenix_p_text", "p = $");
 
     }
 
@@ -171,6 +194,7 @@ class EscapeTime extends Program {
         var phoenix_style = document.getElementById("phoenix_div").style;
         var dragon_style = document.getElementById("dragon_div").style;
         var gangopadhyay_style = document.getElementById("gangopadhyay_div").style;
+        var function_text = document.getElementById("esc_function_text");
     
         julia_style.display = "block";
         scaling_style.display = "none";
@@ -179,7 +203,9 @@ class EscapeTime extends Program {
         phoenix_style.display = "none";
         dragon_style.display = "none";
         gangopadhyay_style.display = "none";
-        
+
+        function_text.innerHTML = ESCAPE_TIME_FUNCTIONS[ESCAPE_TIME.fractal_type];
+
         if (ESCAPE_TIME.fractal_type == 4) {
             scaling_style.display = "block";
             ESCAPE_TIME.fractal_param1.value = document.getElementById("scaling").value;
@@ -196,8 +222,8 @@ class EscapeTime extends Program {
         
         } else if (ESCAPE_TIME.fractal_type == 16) {
             phoenix_style.display = "block";
-            ESCAPE_TIME.fractal_param1.value = document.getElementById("phoenix_p_real").value;
-            ESCAPE_TIME.fractal_param2.value = document.getElementById("phoenix_p_imag").value;
+            ESCAPE_TIME.fractal_param1.value = ESCAPE_TIME.phoenix_p_handler.real;
+            ESCAPE_TIME.fractal_param2.value = ESCAPE_TIME.phoenix_p_handler.imag;
 
         } else if (ESCAPE_TIME.fractal_type == 19) {
             julia_style.display = "none";

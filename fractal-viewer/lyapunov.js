@@ -1,3 +1,12 @@
+LYAPUNOV_FUNCTIONS = [
+    "x ← rx(1 - x)",
+    "x ← e<sup>-αx²</sup> + r",
+    "x ← x + Ω + r/2π*sin(2πx)",
+    "x ← r - x<sup>2</sup>",
+    "x ← rx(1 - x<sup>2</sup>)",
+    "x ← rx(1 - x) + μsin<sup>2</sup>(2πx)"
+]
+
 class Lyapunov extends Program {
 
     shader = "shaders/lyapunov.glsl";
@@ -113,10 +122,13 @@ class Lyapunov extends Program {
         var gauss_style = document.getElementById("lya_gauss_div").style;
         var circle_style = document.getElementById("lya_circle_div").style;
         var sine_style = document.getElementById("lya_sine_div").style;
+        var function_text = document.getElementById("lya_function_text");
 
         gauss_style.display = "none";
         circle_style.display = "none";
         sine_style.display = "none";
+
+        function_text.innerHTML = LYAPUNOV_FUNCTIONS[LYAPUNOV.fractal_type];
 
         if (LYAPUNOV.fractal_type == 1) {
             LYAPUNOV.fractal_param.value = document.getElementById("lya_gauss_alpha").value;
@@ -125,7 +137,7 @@ class Lyapunov extends Program {
         } else if (LYAPUNOV.fractal_type == 2) {
             LYAPUNOV.fractal_param.value = document.getElementById("lya_circle_omega").value;
             circle_style.display = "block";
-        
+                
         } else if (LYAPUNOV.fractal_type == 5) {
             LYAPUNOV.fractal_param.value = document.getElementById("lya_sine_mu").value;
             sine_style.display = "block";
