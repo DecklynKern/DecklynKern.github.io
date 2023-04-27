@@ -120,6 +120,14 @@ vec3 getColour(float a, float b) {
             float angle = TAU * x;
             lambda += log(abs(r * (1.0 - 2.0 * x) + fractal_param * TAU * sin(angle) * cos(angle)));
 
+        #elif FRACTAL_TYPE == 6
+            x = r * sin(x);
+            lambda += log(abs(r * cos(x)));
+
+        #elif FRACTAL_TYPE == 7
+            x = r * cos(x);
+            lambda += log(abs(r * sin(x)));
+
         #endif
         
     }
