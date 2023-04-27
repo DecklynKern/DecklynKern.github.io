@@ -104,7 +104,7 @@ class EscapeTime extends Program {
         document.getElementById("close_colour").onchange = paramSetColour(this.close_colour);
         document.getElementById("far_colour").onchange = paramSetColour(this.far_colour);
 
-        this.julia_c_handler = new ComplexPickerHandler("julia_selector", this.julia_c_real, this.julia_c_imag, 2.5, 0, 0);
+        this.julia_c_handler = new ComplexPickerHandler("julia_selector", this.julia_c_real, this.julia_c_imag, 2.5, 0, 0, "esc_julia_text", "c = $");
 
     }
 

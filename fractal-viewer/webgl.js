@@ -1,6 +1,6 @@
-const VERTEX_SHADER = `
-attribute vec2 position;
-varying vec2 frag_position;
+const VERTEX_SHADER = `#version 300 es
+in vec2 position;
+out vec2 frag_position;
 
 void main() {
     gl_Position = vec4(position.x, -position.y, 0, 1);
@@ -90,7 +90,7 @@ function setupShader() {
 function initWebGL() {
     
     const canvas = document.getElementById("fractal_canvas");
-    gl = getWebGLContext(canvas);
+    gl = canvas.getContext("webgl2");
 
     const vertices = new Float32Array([
         -1.0,  1.0,

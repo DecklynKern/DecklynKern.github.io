@@ -1,3 +1,4 @@
+#version 300 es
 precision highp float;
 
 //%
@@ -33,7 +34,8 @@ uniform int samples;
 const int TRUE_ITER_CAP = 10000;
 const int TRUE_SAMPLE_CAP = 10;
 
-varying vec2 frag_position;
+in vec2 frag_position;
+out vec4 colour;
 
 const float PI = 3.1415926535;
 
@@ -91,14 +93,6 @@ Complex exponent(Complex z) {
         mag * cos(z.imag),
         mag * sin(z.imag)
     );
-}
-
-float sinh(float x) {
-    return (exp(x) - exp(-x)) * 0.5;
-}
-
-float cosh(float x) {
-    return (exp(x) + exp(-x)) * 0.5;
 }
 
 vec3 interpolate(vec3 c1, vec3 c2, float amount) {
@@ -443,15 +437,16 @@ vec3 getColour(float z_real, float z_imag) {
 
         } else if (smoothing_type == 2) {
             f_iterations -= log(log(mag_sq) / log(f_iterations + 0.000001) * 0.5) / log(escape_radius_sq) * 2.0;
+            f_iterations = max(f_iterations, 0.0);
 
         } else if (smoothing_type == 3) {
             f_iterations += (mag_sq - escape_radius_sq) / (escape_radius_sq - sqrt(escape_radius_sq));
         }
 
         if (colouring_type == 0) {
-            return interpolate(close_colour, far_colour, max(f_iterations, 0.0) / float(max_iterations));
+            return interpolate(close_colour, far_colour, f_iterations / float(max_iterations));
 
-        } else if (colouring_type == 1) {;
+        } else if (colouring_type == 1) {
             return interpolate(close_colour, far_colour, sin(f_iterations) * 0.5 + 0.5);
 
         } else if (colouring_type == 2) {
@@ -490,19 +485,19 @@ void main() {
 
     vec3 colour_sum;
 
-    for (int sample = 0; sample < TRUE_SAMPLE_CAP; sample++) {
+    for (int s = 0; s < TRUE_SAMPLE_CAP; s++) {
 
-        if (sample == samples) {
+        if (s == samples) {
             break;
         }
 
-        float real_offset = fract(0.1234 * float(sample));
-        float imag_offset = fract(0.7654 * float(sample));
+        float real_offset = fract(0.1234 * float(s));
+        float imag_offset = fract(0.7654 * float(s));
 
         colour_sum += getColour(real + real_offset * pixel_size, imag + imag_offset * pixel_size);
 
     }
 
-    gl_FragColor = vec4(colour_sum / float(samples), 1.0);
-
+    colour = vec4(colour_sum / float(samples), 1.0);
+    
 }

@@ -1,3 +1,4 @@
+#version 300 es
 precision highp float;
 
 //%
@@ -22,7 +23,8 @@ uniform float a_imag;
 uniform float c_real;
 uniform float c_imag;
 
-uniform int colouring_type;
+uniform float colouring_param;
+
 uniform vec3 root1_colour;
 uniform vec3 root2_colour;
 uniform vec3 root3_colour;
@@ -30,9 +32,12 @@ uniform vec3 base_colour;
 
 const int TRUE_ITER_CAP = 10000;
 const int TRUE_SAMPLE_CAP = 10;
+const float MAX = 9999999999999.9;
 
 uniform int samples;
-varying vec2 frag_position;
+
+in vec2 frag_position;
+out vec4 colour;
 
 struct Complex {
     float real;
@@ -95,6 +100,21 @@ Complex conj(Complex z) {
         z.real,
         -z.imag
     );
+}
+
+float argument(Complex z) {
+    return atan(z.imag / z.real);
+}
+
+Complex exponent(Complex z, Complex d) {
+
+    float z_norm_sq = z.real * z.real + z.imag * z.imag;
+    float arg = argument(z);
+    float r = pow(z_norm_sq, 0.5 * d.real);
+    float angle = d.real * arg + 0.5 * z.imag * log(z_norm_sq);
+
+    return Complex(r * cos(angle), r * sin(angle));
+
 }
 
 float root_dist_sq(Complex z, Complex root) {
@@ -161,10 +181,7 @@ vec3 getColour(Complex z) {
             z_prev = ZERO;
 
         #elif START_POINT == 1
-            z_prev = Complex(
-                z.imag,
-                z.real
-            );
+            z_prev = Complex(z.imag, z.real);
 
         #elif START_POINT == 2
             z_prev = scale(z, 2.0);
@@ -190,49 +207,98 @@ vec3 getColour(Complex z) {
 
     #endif
 
+    #if COLOURING_TYPE == 3
+        float max_norm_sq = 0.0;
+
+    #elif COLOURING_TYPE == 4
+        float min_root1_dist_sq = MAX;
+        float min_root2_dist_sq = MAX;
+        float min_root3_dist_sq = MAX;
+
+    #endif
+
     for (int iteration = 0; iteration < TRUE_ITER_CAP; iteration++) {
 
-        Complex z2 = square(z);
+        #if FUNCTION == 0
 
-        func = ADD3(
-            prod(
-                add(d, z),
-                z2),
-            prod(e, z),
-            f);
+            Complex z2 = square(z);
 
-        #if ALGORITHM == 0 || ALGORITHM == 1 || ALGORITHM == 2 || ALGORITHM == 5
-
-            Complex dd = scale(d, 2.0);
-
-            der = ADD3(
-                scale(z2, 3.0),
-                prod(dd, z),
-                e);
-
-        #endif
-
-        #if ALGORITHM == 1 || ALGORITHM == 2 || ALGORITHM == 5
-
-            der2 = add(
-                scale(z, 6.0),
-                dd);
-
-        #endif
-
-        #if ALGORITHM == 3 // steffensen
-
-            Complex func_z = add(func, z);
-
-            func_step = ADD3(
+            func = ADD3(
                 prod(
-                    add(func_z, d),
-                    square(func_z)),
-                prod(e, func_z),
+                    add(d, z),
+                    z2),
+                prod(e, z),
                 f);
 
-        #elif ALGORITHM == 5
-            der3 = Complex(6.0, 0.0);
+            #if ALGORITHM == 0 || ALGORITHM == 1 || ALGORITHM == 2 || ALGORITHM == 5
+
+                Complex dd = scale(d, 2.0);
+
+                der = ADD3(
+                    scale(z2, 3.0),
+                    prod(dd, z),
+                    e);
+
+            #endif
+
+            #if ALGORITHM == 1 || ALGORITHM == 2 || ALGORITHM == 5
+
+                der2 = add(
+                    scale(z, 6.0),
+                    dd);
+
+            #endif
+
+            #if ALGORITHM == 3 // steffensen
+
+                Complex func_z = add(func, z);
+
+                func_step = ADD3(
+                    prod(
+                        add(func_z, d),
+                        square(func_z)),
+                    prod(e, func_z),
+                    f);
+
+            #elif ALGORITHM == 5
+                der3 = Complex(6.0, 0.0);
+
+            #endif
+
+        #elif FUNCTION == 1
+
+        #endif
+
+        #if COLOURING_TYPE == 3
+
+            float norm_sq = z.real * z.real + z.imag * z.imag;
+
+            if (norm_sq > max_norm_sq) {
+                max_norm_sq = norm_sq;
+            }
+
+        #elif COLOURING_TYPE == 4
+
+            Complex root1_offset = sub(z, root1);
+            float root1_dist_sq = root1_offset.real * root1_offset.real + root1_offset.imag* root1_offset.imag;
+
+            if (root1_dist_sq < min_root1_dist_sq) {
+                min_root1_dist_sq = root1_dist_sq;
+            }
+
+            Complex root2_offset = sub(z, root2);
+            float root2_dist_sq = root2_offset.real * root2_offset.real + root2_offset.imag* root2_offset.imag;
+
+            if (root2_dist_sq < min_root2_dist_sq) {
+                min_root2_dist_sq = root2_dist_sq;
+            }
+
+            Complex root3_offset = sub(z, root3);
+            float root3_dist_sq = root3_offset.real * root3_offset.real + root3_offset.imag* root3_offset.imag;
+
+            if (root3_dist_sq < min_root3_dist_sq) {
+                min_root3_dist_sq = root3_dist_sq;
+            }
 
         #endif
 
@@ -251,7 +317,10 @@ vec3 getColour(Complex z) {
                 iters = iteration;
                 break;
             }
-            
+
+        #endif
+
+        #if ALGORITHM != 4
             z_prev = z;
 
         #endif
@@ -348,7 +417,17 @@ vec3 getColour(Complex z) {
         
     }
 
-    if (colouring_type == 0 || colouring_type == 1) {
+    #if COLOURING_TYPE == 2
+        float amount = float(iters) / float(max_iterations);
+        return root1_colour * (1.0 - amount) + base_colour * amount;
+
+    #elif COLOURING_TYPE == 4
+
+        return root1_colour * (1.0 - min(1.0, log(min_root1_dist_sq / colouring_param + 1.0))) +
+            root2_colour * (1.0 - min(1.0, log(min_root2_dist_sq / colouring_param + 1.0))) +
+            root3_colour * (1.0 - min(1.0, log(min_root3_dist_sq / colouring_param + 1.0)));
+
+    #else
 
         float root_dist_1 = root_dist_sq(z, root1);
         float root_dist_2 = root_dist_sq(z, root2);
@@ -356,12 +435,15 @@ vec3 getColour(Complex z) {
 
         float amount;
 
-        if (colouring_type == 0) {
+        #if COLOURING_TYPE == 0
             amount = 0.0;
-        
-        } else {
+
+        #elif COLOURING_TYPE == 1
             amount = float(iters) / float(max_iterations);
-        }
+
+        #else
+            amount = fract(max_norm_sq / colouring_param);
+        #endif
 
         if (iters == max_iterations) {
             return base_colour;
@@ -377,10 +459,7 @@ vec3 getColour(Complex z) {
             return root3_colour * (1.0 - amount) + base_colour * amount;
         }
 
-    } else if (colouring_type == 2) {
-        float amount = float(iters) / float(max_iterations);
-        return root1_colour * (1.0 - amount) + base_colour * amount;
-    }
+    #endif
 }
 
 void main() {
@@ -392,19 +471,19 @@ void main() {
 
     vec3 colour_sum;
 
-    for (int sample = 0; sample < TRUE_SAMPLE_CAP; sample++) {
+    for (int s = 0; s < TRUE_SAMPLE_CAP; s++) {
 
-        if (sample == samples) {
+        if (s == samples) {
             break;
         }
 
-        float real_offset = fract(0.1234 * float(sample));
-        float imag_offset = fract(0.7654 * float(sample));
+        float real_offset = fract(0.1234 * float(s));
+        float imag_offset = fract(0.7654 * float(s));
 
         colour_sum += getColour(Complex(real + real_offset * pixel_size, imag + imag_offset * pixel_size));
 
     }
 
-    gl_FragColor = vec4(colour_sum / float(samples), 1.0);
-
+    colour = vec4(colour_sum / float(samples), 1.0);
+    
 }

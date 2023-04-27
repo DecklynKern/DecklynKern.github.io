@@ -1,3 +1,4 @@
+#version 300 es
 precision highp float;
 
 //%
@@ -28,7 +29,8 @@ uniform vec3 stable_colour;
 uniform vec3 chaotic_colour;
 uniform vec3 infinity_colour;
 
-varying vec2 frag_position;
+in vec2 frag_position;
+out vec4 colour;
 
 const int TRUE_SAMPLE_CAP = 10;
 const int TRUE_ITER_CAP = 10000;
@@ -156,6 +158,6 @@ void main() {
 
     }
 
-    gl_FragColor = vec4(colour_sum / float(samples), 1.0);
+    colour = vec4(colour_sum / float(samples), 1.0);
 
 }

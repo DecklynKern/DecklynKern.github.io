@@ -107,7 +107,9 @@
                         Julia:
                         <input type="checkbox" id="is_julia">
                         <div id="julia_options" style="display: none">
-                            C value:
+                            <div id="esc_julia_text" class="complex-text">
+                                c = 0 + 0i
+                            </div>
                             <canvas id="julia_selector" class="selector" width="200px" height="200px"></canvas>
                         </div>
                     </div>
@@ -153,7 +155,7 @@
                             <option value="0">None</option>
                             <option value="1">Log 1</option>
                             <option value="2">Log 2</option>
-                            <option value="3">Reverse Log</option>
+                            <option value="3">Reverse</option>
                         </select>
                         <br>
                         Colouring:
@@ -239,24 +241,29 @@
                 </div>
                 <div id="root_finding_options" style="display: none;">
                     <div class="input-div">
+                        Function:
+                        <select id="rtf_function">
+                            <option value="0">Cubic</option>
+                        </select>
+                        <br>
                         Algorithm:
                         <select id="rtf_algorithm">
                             <option value="0">Newton</option>
                             <option value="1">Halley</option>
                             <option value="2">Schröder</option>
-                            <option value="3">Steffensen</option>
-                            <option value="4">Secant</option>
                             <option value="5">Householder-3</option>
+                            <option value="4">Secant</option>
+                            <option value="3">Steffensen</option>
                         </select>
-                        <br>
                         <div id="secant_div" style="display: none">
+                            <br>
                             Starting point:
                             <select id="secant_start">
                                 <option value="0">z0 = 0</option>
                                 <option value="1">z0 = swap(z)</option>
                                 <option value="2">z0 = 2z</option>
                                 <option value="3">z0 = conj(z)</option>
-                                <option value="4">z0 = z^2</option>
+                                <option value="4">z0 = z²</option>
                             </select>
                         </div>
                         <br>
@@ -274,13 +281,16 @@
                             <canvas id="root_selector" class="selector" width="200px" height="200px"></canvas>
                         </div>
                         <div>
-                            a:
-                            <br>
+                            <div id="a_text" class="complex-text">
+                                a = 0 + 1i
+                            </div>
                             <canvas id="a_selector" class="selector" width="200px" height="200px"></canvas>
                         </div>
-                        <div id="root_julia_div" style="display: none">
-                            C value:
-                            <canvas id="root_julia_c_selector" class="selector" width="200px" height="200px"></canvas>
+                        <div id="rtf_julia_div" style="display: none">
+                            <div id="rtf_julia_text" class="complex-text">
+                                c = 0 + 0i
+                            </div>
+                            <canvas id="rtf_julia_c_selector" class="selector" width="200px" height="200px"></canvas>
                         </div>
                     </div>
                     <div class="input-div">
@@ -296,7 +306,17 @@
                             <option value="0">Root</option>
                             <option value="1">Shaded Root</option>
                             <option value="2">Convergence</option>
+                            <option value="3">Max Orbit Distance</option>
+                            <option value="4">Closest Root Distance</option>
                         </select>
+                        <div id="rtf_dist_options" style="display: none">
+                            Modulo:
+                            <input id="rtf_dist_mod" type="number" value="2" min="0.1" max="10" step="0.1">
+                        </div>
+                        <div id="rtf_root_dist_options" style="display: none">
+                            Brightness:
+                            <input id="rtf_root_dist_brightness" type="number" value="2" min="0.1" max="10" step="0.1">
+                        </div>
                     </div>
                     <div class="input-div">
                         <div id="root1_colour_div" class="grid-entry">

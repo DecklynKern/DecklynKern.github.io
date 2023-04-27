@@ -1,3 +1,4 @@
+#version 300 es
 precision highp float;
 
 uniform float magnitude;
@@ -9,7 +10,8 @@ uniform int samples;
 uniform int fractal_type;
 uniform int iterations;
 
-varying vec2 frag_position;
+in vec2 frag_position;
+out vec4 colour;
 
 const int TRUE_ITER_CAP = 20;
 const int TRUE_SAMPLE_CAP = 10;
@@ -214,6 +216,6 @@ void main() {
 
     }
 
-    gl_FragColor = vec4(colour_sum / float(samples), 1.0);
+    colour = vec4(colour_sum / float(samples), 1.0);
 
 }

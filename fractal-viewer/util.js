@@ -6,6 +6,18 @@ function hexToRGB(hex) {
     ];
 }
 
+function formatComplex(real, imag) {
+
+    real = real.toPrecision(4);
+    imag = imag.toPrecision(4);
+
+    if (imag < 0) {
+        return `${real} - ${-imag}i`;
+    } else {
+        return `${real} + ${imag}i`;
+    }
+}
+
 function paramSet(param) {
     return function(event) {
         param.value = event.target.value;
@@ -59,7 +71,7 @@ class Program {
 
 class ComplexPickerHandler {
 
-    constructor(canvas, real_param, imag_param, scale, offset_real, offset_imag) {
+    constructor(canvas, real_param, imag_param, scale, offset_real, offset_imag, info_div, template) {
 
         var init_real = real_param.value;
         var init_imag = imag_param.value;
@@ -67,7 +79,7 @@ class ComplexPickerHandler {
         var canvas_ref = document.getElementById(canvas);
         
         var canvas_context = canvas_ref.getContext("2d");
-        canvas_ref.onmousemove = this.updateComplex(real_param, imag_param, canvas_context, scale, offset_real, offset_imag);
+        canvas_ref.onmousemove = this.updateComplex(real_param, imag_param, canvas_context, scale, offset_real, offset_imag, info_div, template);
         
         canvas_context.strokeStyle = "black";
         canvas_context.beginPath();
@@ -88,7 +100,7 @@ class ComplexPickerHandler {
 
     }
 
-    updateComplex = function(real_param, imag_param, canvas_context, scale, offset_real, offset_imag) {
+    updateComplex = function(real_param, imag_param, canvas_context, scale, offset_real, offset_imag, info_div, template) {
 
         var unit_px = 100 / scale;
 
@@ -100,6 +112,8 @@ class ComplexPickerHandler {
         
             real_param.value = event.offsetX / unit_px - scale + offset_real;
             imag_param.value = event.offsetY / unit_px - scale + offset_imag;
+
+            document.getElementById(info_div).innerHTML = template.replace("$", formatComplex(real_param.value, imag_param.value));
         
             canvas_context.clearRect(0, 0, 200, 200);
         

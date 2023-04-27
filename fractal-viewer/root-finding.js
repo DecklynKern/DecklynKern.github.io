@@ -5,9 +5,12 @@ class RootFinding extends Program {
 
     root_clicked = 0;
 
+    function = 0;
     algorithm = 0;
     secant_start = 0;
     fractal_type = 0;
+
+    colouring_type = 0;
 
     max_iterations = new Param(40);
     threshold = new Param(0.000001);
@@ -25,17 +28,20 @@ class RootFinding extends Program {
     c_real = new Param(0.0);
     c_imag = new Param(0.0);
     
-    colouring_type = new Param(0);
     root1_colour = new Param([1.0, 0.0, 0.0]);
     root2_colour = new Param([0.0, 1.0, 0.0]);
     root3_colour = new Param([0.0, 0.0, 1.0]);
     base_colour = new Param([0.0, 0.0, 0.0]);
 
+    colouring_param = new Param(2);
+
     getShader = function() {
         
         var shader = (' ' + this.baseShader).slice(1);
-        var def = `#define FRACTAL_TYPE ${this.fractal_type}
-        \n#define ALGORITHM ${this.algorithm}`;
+        var def = `#define FUNCTION ${this.function}
+        \n#define FRACTAL_TYPE ${this.fractal_type}
+        \n#define ALGORITHM ${this.algorithm}
+        \n#define COLOURING_TYPE ${this.colouring_type}`;
 
         if (this.algorithm == 4) {
             def += `\n#define START_POINT ${this.secant_start}`;
@@ -47,6 +53,7 @@ class RootFinding extends Program {
 
     setupGUI = function() {
         
+        document.getElementById("rtf_function").onchange = this.updateFunction;
         document.getElementById("rtf_algorithm").onchange = this.updateAlgorithm;
         document.getElementById("secant_start").onchange = this.updateSecantStart;
         document.getElementById("rtf_fractal_type").onchange = this.updateFractalType;
@@ -57,7 +64,9 @@ class RootFinding extends Program {
         document.getElementById("root_selector").onmousedown = this.clickRoot;
         document.getElementById("root_selector").onmousemove = this.updateRoots;
         
-        document.getElementById("rtf_colouring_type").onchange = this.updateColouringType; 
+        document.getElementById("rtf_colouring_type").onchange = this.updateColouringType;
+        document.getElementById("rtf_dist_mod").onchange = paramSet(this.colouring_param);
+        document.getElementById("rtf_root_dist_brightness").onchange = paramSet(this.colouring_param);
         
         document.getElementById("root1_colour").onchange = paramSetColour(this.root1_colour);
         document.getElementById("root2_colour").onchange = paramSetColour(this.root2_colour);
@@ -69,8 +78,8 @@ class RootFinding extends Program {
         this.root_canvas_context = document.getElementById("root_selector").getContext("2d");
         this.drawRoots();
 
-        this.a_handler = new ComplexPickerHandler("a_selector", this.a_real, this.a_imag, 1, 1, 0);
-        this.julia_c_handler = new ComplexPickerHandler("root_julia_c_selector", this.c_real, this.c_imag, 1, 0, 0);
+        this.a_handler = new ComplexPickerHandler("a_selector", this.a_real, this.a_imag, 1, 1, 0, "a_text", "a = $");
+        this.julia_c_handler = new ComplexPickerHandler("rtf_julia_c_selector", this.c_real, this.c_imag, 1, 0, 0, "rtf_julia_text", "c = $");
 
     }
 
@@ -91,8 +100,8 @@ class RootFinding extends Program {
 
         this.c_real.getAttr("c_real");
         this.c_imag.getAttr("c_imag");
-        
-        this.colouring_type.getAttr("colouring_type");
+
+        this.colouring_param.getAttr("colouring_param");
 
         this.root1_colour.getAttr("root1_colour");
         this.root2_colour.getAttr("root2_colour");
@@ -118,13 +127,65 @@ class RootFinding extends Program {
 
         this.c_real.loadFloat();
         this.c_imag.loadFloat();
-        
-        this.colouring_type.loadInt();
+
+        this.colouring_param.loadFloat();
         
         this.root1_colour.loadFloat3();
         this.root2_colour.loadFloat3();
         this.root3_colour.loadFloat3();
         this.base_colour.loadFloat3();
+
+    }
+
+    updateFunction = function(event) {
+
+        ROOT_FINDING.function = event.target.value;
+
+        setupShader();
+        redraw();
+
+    }
+
+    updateAlgorithm = function(event) {
+
+        ROOT_FINDING.algorithm = event.target.value;
+
+        var secant_style = document.getElementById("secant_div").style;
+
+        secant_style.display = "none";
+
+        if (ROOT_FINDING.algorithm == 4) {
+            secant_style.display = "block";
+        }
+
+        setupShader();
+        redraw();
+        
+    }
+
+    updateSecantStart = function(event) {
+
+        ROOT_FINDING.secant_start = event.target.value;
+
+        setupShader();
+        redraw();
+
+    }
+
+    updateFractalType = function(event) {
+
+        ROOT_FINDING.fractal_type = event.target.value;
+
+        var julia_style = document.getElementById("rtf_julia_div").style;
+
+        julia_style.display = "none";
+
+        if (ROOT_FINDING.fractal_type == 2) {
+            julia_style.display = "block";
+        }
+
+        setupShader();
+        redraw();
 
     }
 
@@ -227,77 +288,47 @@ class RootFinding extends Program {
     updateColouringType = function(event) {
 
         const colouring_type = event.target.value;
-        ROOT_FINDING.colouring_type.value = colouring_type;
+        ROOT_FINDING.colouring_type = colouring_type;
    
         const root1_style = document.getElementById("root1_colour_div").style;
         const root2_style = document.getElementById("root2_colour_div").style;
         const root3_style = document.getElementById("root3_colour_div").style;
         const convergent_style = document.getElementById("convergent_colour_div").style;
+        const dist_style = document.getElementById("rtf_dist_options").style;
+        const root_dist_style = document.getElementById("rtf_root_dist_options").style;
+
+        root1_style.display = "none";
+        root2_style.display = "none";
+        root3_style.display = "none";
+        convergent_style.display = "none";
+        dist_style.display = "none";
+        root_dist_style.display = "none";
         
         if (colouring_type == 2) {
 
-            root1_style.display = "none";
-            root2_style.display = "none";
-            root3_style.display = "none";
             convergent_style.display = "block";
 
             ROOT_FINDING.root1_colour.value = hexToRGB(document.getElementById("convergent_colour").value);
             
         } else {
+
+            if (colouring_type == 3) {
+                dist_style.display = "block";
+
+            } else if (colouring_type == 4) {
+                root_dist_style.display = "block";
+            }
             
             root1_style.display = "block";
             root2_style.display = "block";
             root3_style.display = "block";
-            convergent_style.display = "none";
 
             ROOT_FINDING.root1_colour.value = hexToRGB(document.getElementById("root1_colour").value);
 
         }
     
+        setupShader();
         redraw();
     
-    }
-
-    updateAlgorithm = function(event) {
-
-        ROOT_FINDING.algorithm = event.target.value;
-
-        var secant_style = document.getElementById("secant_div").style;
-
-        secant_style.display = "none";
-
-        if (ROOT_FINDING.algorithm == 4) {
-            secant_style.display = "block";
-        }
-
-        setupShader();
-        redraw();
-        
-    }
-
-    updateSecantStart = function(event) {
-
-        ROOT_FINDING.secant_start = event.target.value;
-
-        setupShader();
-        redraw();
-
-    }
-
-    updateFractalType = function(event) {
-
-        ROOT_FINDING.fractal_type = event.target.value;
-
-        var julia_style = document.getElementById("root_julia_div").style;
-
-        julia_style.display = "none";
-
-        if (ROOT_FINDING.fractal_type == 2) {
-            julia_style.display = "block";
-        }
-
-        setupShader();
-        redraw();
-
     }
 }
