@@ -133,6 +133,12 @@ vec3 getColour(float z_real, float z_imag) {
             sin(r)
         );
 
+    #elif FRACTAL_TYPE == 22
+        Complex c_mul = Complex(
+            c.real * c.real,
+            c.imag * c.imag
+        );
+
     #endif
 
     #if ORBIT_TRAP == 1
@@ -361,6 +367,15 @@ vec3 getColour(float z_real, float z_imag) {
 
         #elif FRACTAL_TYPE == 21 // exponent
             z = multiply(c, exponent(z));
+
+        #elif FRACTAL_TYPE == 22
+
+            float dot = z_real_sq + z_imag_sq;
+            Complex zc = multiply(z, c_mul);
+
+            z = Complex(
+                z.real * dot - zc.real,
+                z.imag * dot - zc.imag);
             
         #endif
         

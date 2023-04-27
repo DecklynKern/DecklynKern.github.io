@@ -10,7 +10,7 @@ ESCAPE_TIME_FUNCTIONS = [
     "z ← (sin(Re(z)Im(z)) + iIm(z))<sup>2</sup> + c",
     "",
     "z ← c<sup>z</sup>",
-    "z ← Im(z) + (Re(z)Im(c) + Im(z)Re(c) - Im(z)³)i",
+    "z ← Im(z) + (z·c - Im(z)³)i",
     "z ← 1 - Im(z) + |Re(z)| + Re(z)i + c",
     "z ← 1 - Re(z)<sup>2</sup>Re(c) + Im(z) + (Re(z)Im(c))i",
     "z ← sin(z)c",
@@ -20,7 +20,8 @@ ESCAPE_TIME_FUNCTIONS = [
     "z ← Re(z<sup>2</sup>) + 2(Re(z<sup>2</sup> + c)Im(z))i + c",
     "z ← z<sup>2</sup> + e<sup>2πr</sup>z",
     "",
-    "z ← ce<sup>z</sup>"
+    "z ← ce<sup>z</sup>",
+    "z ← z(z·z - c⊙c)"
 ];
 
 class EscapeTime extends Program {
