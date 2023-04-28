@@ -131,7 +131,18 @@ vec3 getColour(Complex z) {
 
     Complex root1 = Complex(root1_real, root1_imag);
     Complex root2 = Complex(root2_real, root2_imag);
-    Complex root3 = Complex(root3_real, root3_imag);
+
+    #if FRACTAL_TYPE != 3
+        Complex root3 = Complex(root3_real, root3_imag);
+    
+    #else
+        Complex root3 = z;
+        z = scale(
+            ADD3(root1, root2, root3),
+            0.3333333333);
+
+    #endif
+
 
     Complex r1r2 = prod(root1, root2);
     
@@ -302,7 +313,7 @@ vec3 getColour(Complex z) {
 
         #endif
 
-        #if FRACTAL_TYPE == 0 // normal
+        #if FRACTAL_TYPE == 0 || FRACTAL_TYPE == 3 // normal
         
             if (func.real * func.real + func.imag * func.imag <= threshold || iteration == max_iterations) {
                 iters = iteration;

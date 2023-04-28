@@ -184,6 +184,8 @@ class RootFinding extends Program {
             julia_style.display = "block";
         }
 
+        ROOT_FINDING.drawRoots();
+
         setupShader();
         redraw();
 
@@ -210,11 +212,13 @@ class RootFinding extends Program {
         this.root_canvas_context.beginPath();
         this.root_canvas_context.arc(100 + 50 * ROOT_FINDING.root2_real.value, 100 + 50 * ROOT_FINDING.root2_imag.value, 4, 0, 2 * Math.PI);
         this.root_canvas_context.stroke();
-        
-        this.root_canvas_context.strokeStyle = document.getElementById("root3_colour").value;
-        this.root_canvas_context.beginPath();
-        this.root_canvas_context.arc(100 + 50 * ROOT_FINDING.root3_real.value, 100 + 50 * ROOT_FINDING.root3_imag.value, 4, 0, 2 * Math.PI);
-        this.root_canvas_context.stroke();
+
+        if (this.fractal_type != 3) {   
+            this.root_canvas_context.strokeStyle = document.getElementById("root3_colour").value;
+            this.root_canvas_context.beginPath();
+            this.root_canvas_context.arc(100 + 50 * ROOT_FINDING.root3_real.value, 100 + 50 * ROOT_FINDING.root3_imag.value, 4, 0, 2 * Math.PI);
+            this.root_canvas_context.stroke();
+        }
 
     }
 
@@ -227,10 +231,17 @@ class RootFinding extends Program {
         const dx2 = 100 + 50 * ROOT_FINDING.root2_real.value - event.offsetX;
         const dy2 = 100 + 50 * ROOT_FINDING.root2_imag.value - event.offsetY;
         const root2_dist = dx2 * dx2 + dy2 * dy2;
+
+        var root3_dist;
+
+        if (ROOT_FINDING.fractal_type != 3) {   
+            const dx3 = 100 + 50 * ROOT_FINDING.root3_real.value - event.offsetX;
+            const dy3 = 100 + 50 * ROOT_FINDING.root3_imag.value - event.offsetY;
+            root3_dist = dx3 * dx3 + dy3 * dy3;
         
-        const dx3 = 100 + 50 * ROOT_FINDING.root3_real.value - event.offsetX;
-        const dy3 = 100 + 50 * ROOT_FINDING.root3_imag.value - event.offsetY;
-        const root3_dist = dx3 * dx3 + dy3 * dy3;
+        } else {
+            root3_dist = 999999999;
+        }
 
         const min_dist = Math.min(root1_dist, root2_dist, root3_dist);
 
