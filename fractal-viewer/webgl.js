@@ -148,6 +148,21 @@ function updateSamples(event) {
     redraw();
 }
 
+function updateDisplayText() {
+    
+    var text;
+    
+    if (program == ESCAPE_TIME || program == ROOT_FINDING) {
+        text = `z = ${formatComplex(centre_x.value, centre_y.value)}`;
+
+    } else if (program == LYAPUNOV || program == RECURSIVE) {
+        text = `centre = (${centre_x.value.toPrecision(6)}, ${centre_y.value.toPrecision(6)})`;
+    }
+
+    document.getElementById("display_text").innerHTML = text + `<br>Zoom = ${(1 / magnitude.value).toPrecision(5)}`;
+
+}
+
 function resetView() {
 
     magnitude.value = 2.0;
@@ -166,48 +181,52 @@ function resetView() {
         centre_y.value = 0.0;
     }
 
+    updateDisplayText();
     redraw();
 }
 
 function keyhandler(event) {
     
     switch (event.keyCode) {
-
+        
         case 82: // R
-            resetView();
-            break;
-
+        resetView();
+        break;
+        
         case 87: // W
-            centre_y.value -= 0.5 * magnitude.value;
-            redraw();
-            break;
-
+        centre_y.value -= 0.5 * magnitude.value;
+        redraw();
+        break;
+        
         case 83: // S
-            centre_y.value += 0.5 * magnitude.value;
-            redraw();
-            break;
+        centre_y.value += 0.5 * magnitude.value;
+        redraw();
+        break;
 
         case 65: // A
-            centre_x.value -= 0.5 * magnitude.value;
-            redraw();
-            break;
+        centre_x.value -= 0.5 * magnitude.value;
+        redraw();
+        break;
 
         case 68: // D
-            centre_x.value += 0.5 * magnitude.value;
-            redraw();
-            break;
-
+        centre_x.value += 0.5 * magnitude.value;
+        redraw();
+        break;
+        
         case 187: // +
-            magnitude.value /= 1.5;
-            redraw();
-            break;
+        magnitude.value /= 1.5;
+        redraw();
+        break;
 
         case 189: // -
             magnitude.value *= 1.5;
             redraw();
             break;
-
+            
     }
+    
+    updateDisplayText();
+
 }
 
 function onFractalClick(event) {
