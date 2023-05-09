@@ -9,19 +9,20 @@ ESCAPE_TIME_FUNCTIONS = [
     "z ← Im(c)sin(Re(z)) + Re(c)Im(z)i",
     "z ← (sin(Re(z)Im(z)) + iIm(z))<sup>2</sup> + c",
     "",
-    "z ← c<sup>z</sup>",
-    "z ← Im(z) + (z·c - Im(z)³)i",
+    "",
+    "z ← Im(z) + (z·c - Im(z)<sup>3</sup>)i",
     "z ← 1 - Im(z) + |Re(z)| + Re(z)i + c",
     "z ← 1 - Re(z)<sup>2</sup>Re(c) + Im(z) + (Re(z)Im(c))i",
     "z ← sin(z)c",
     "z ← z<sup>p</sup> + λz<sup>q</sup> + c",
-    "z ← z² + pz + c",
+    "z ← z<sup>2</sup> + pz + c",
     "z ← z<sup>2</sup>|z|<sup>2</sup> + c",
     "z ← Re(z<sup>2</sup>) + 2(Re(z<sup>2</sup> + c)Im(z))i + c",
     "z ← z<sup>2</sup> + e<sup>2πr</sup>z",
     "",
     "z ← ce<sup>z</sup>",
-    "z ← z(z·z - c⊙c)"
+    "z ← z(z·z - c⊙c)",
+    "z ← z<sup>p</sup> + c"
 ];
 
 class EscapeTime extends Program {
@@ -35,6 +36,8 @@ class EscapeTime extends Program {
     fractal_param1 = new Param(0);
     fractal_param2 = new Param(0);
     fractal_param3 = new Param(0);
+
+    is_inverted = new Param(0);
     
     max_iterations = new Param(30);
     escape_radius = new Param(2.0);
@@ -106,6 +109,8 @@ class EscapeTime extends Program {
         document.getElementById("gangopadhyay3").onchange = this.updateGangopadhyay;
         document.getElementById("gangopadhyay4").onchange = this.updateGangopadhyay;
         document.getElementById("gangopadhyay5").onchange = this.updateGangopadhyay;
+
+        document.getElementById("is_inverted").onchange = this.updateInverted;
         
         document.getElementById("esc_max_iterations").onchange = paramSet(this.max_iterations);
         document.getElementById("escape_radius").onchange = paramSet(this.escape_radius);
@@ -130,6 +135,12 @@ class EscapeTime extends Program {
         this.julia_c_handler = new ComplexPickerHandler("julia_selector", this.julia_c_real, this.julia_c_imag, 2.5, 0, 0, "esc_julia_text", "c = $");
         this.phoenix_p_handler = new ComplexPickerHandler("phoenix_p_selector", this.fractal_param1, this.fractal_param2, 2, 0, 0, "phoenix_p_text", "p = $");
 
+        this.fractal_param1.value = 2;
+        
+        this.cmultibrot_p_handler = new ComplexPickerHandler("cmultibrot_p_selector", this.fractal_param1, this.fractal_param2, 6, 0, 0, "cmultibrot_p_text", "p = $");
+        
+        this.fractal_param1.value = 0;
+        
     }
 
     setupAttrs = function() {
@@ -137,6 +148,8 @@ class EscapeTime extends Program {
         this.fractal_param1.getAttr("fractal_param1");
         this.fractal_param2.getAttr("fractal_param2");
         this.fractal_param3.getAttr("fractal_param3");
+
+        this.is_inverted.getAttr("is_inverted");
         
         this.max_iterations.getAttr("max_iterations");
         this.escape_radius.getAttr("escape_radius_sq");
@@ -163,6 +176,8 @@ class EscapeTime extends Program {
         this.fractal_param1.loadFloat();
         this.fractal_param2.loadFloat();
         this.fractal_param3.loadFloat();
+
+        this.is_inverted.loadInt();
 
         this.max_iterations.loadInt();
         this.escape_radius.loadFloatSq();
@@ -191,6 +206,7 @@ class EscapeTime extends Program {
         var julia_style = document.getElementById("julia_div").style;
         var scaling_style = document.getElementById("scaling_div").style;
         var exponent_style = document.getElementById("exponent_div").style;
+        var cmultibrot_style = document.getElementById("cmultibrot_div").style;
         var rational_style = document.getElementById("rational_div").style;
         var phoenix_style = document.getElementById("phoenix_div").style;
         var dragon_style = document.getElementById("dragon_div").style;
@@ -200,6 +216,7 @@ class EscapeTime extends Program {
         julia_style.display = "block";
         scaling_style.display = "none";
         exponent_style.display = "none";
+        cmultibrot_style.display = "none";
         rational_style.display = "none";
         phoenix_style.display = "none";
         dragon_style.display = "none";
@@ -232,11 +249,19 @@ class EscapeTime extends Program {
         
         } else if (ESCAPE_TIME.fractal_type == 20) {
             gangopadhyay_style.display = "block";
+        
+        } else if (ESCAPE_TIME.fractal_type == 23) {
+            cmultibrot_style.display = "block";
         }
         
         setupShader();
         redraw();
     
+    }
+
+    updateInverted = function(event) {
+        ESCAPE_TIME.is_inverted.value = +event.target.checked;
+        redraw();
     }
     
     updateIsJulia = function(event) {
@@ -259,12 +284,16 @@ class EscapeTime extends Program {
         ESCAPE_TIME.colouring_type.value = event.target.value;
     
         const colour_select_style = document.getElementById("colour_select").style;
-    
+        const smoothing_style = document.getElementById("smoothing_div").style;
+        
+        colour_select_style.display = "block";
+        smoothing_style.display = "block";
+        
         if (ESCAPE_TIME.colouring_type.value == 2) {
             colour_select_style.display = "none";
-    
-        } else {
-            colour_select_style.display = "block";
+            
+        } else if (ESCAPE_TIME.colouring_type.value == 3) {
+            smoothing_style.display = "none";
         }
     
         redraw();

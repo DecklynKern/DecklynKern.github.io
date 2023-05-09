@@ -2,9 +2,12 @@ LYAPUNOV_FUNCTIONS = [
     "x ← rx(1 - x)",
     "x ← e<sup>-αx²</sup> + r",
     "x ← x + Ω + r/2π*sin(2πx)",
-    "x ← r - x<sup>2</sup>",
+    "x ← r - ax<sup>2</sup>",
     "x ← rx(1 - x<sup>2</sup>)",
-    "x ← rx(1 - x) + μsin<sup>2</sup>(2πx)"
+    "x ← rx(1 - x) + μsin<sup>2</sup>(2πx)",
+    "x ← r*sin(x)",
+    "x ← r*cos(x)",
+    "x ← r*(a - cosh(x))"
 ]
 
 class Lyapunov extends Program {
@@ -50,7 +53,10 @@ class Lyapunov extends Program {
         document.getElementById("lya_fractal_type").onchange = this.updateFractalType;
         document.getElementById("lya_gauss_alpha").onchange = paramSet(this.fractal_param);
         document.getElementById("lya_circle_omega").onchange = paramSet(this.fractal_param);
-        document.getElementById("lya_sine_mu").onchange = paramSet(this.fractal_param);
+        document.getElementById("lya_quadratic_a").onchange = paramSet(this.fractal_param);
+        document.getElementById("lya_squared_sine_mu").onchange = paramSet(this.fractal_param);
+        document.getElementById("lya_trig_theta").onchange = paramSet(this.fractal_param);
+        document.getElementById("lya_cosh_a").onchange = paramSet(this.fractal_param);
 
         document.getElementById("lya_sequence").onkeydown = this.processSequenceEvent;
         document.getElementById("lya_sequence").onchange = this.updateSequence;
@@ -121,12 +127,18 @@ class Lyapunov extends Program {
 
         var gauss_style = document.getElementById("lya_gauss_div").style;
         var circle_style = document.getElementById("lya_circle_div").style;
-        var sine_style = document.getElementById("lya_sine_div").style;
+        var quadratic_style = document.getElementById("lya_quadratic_div").style;
+        var squared_sine_style = document.getElementById("lya_squared_sine_div").style;
+        var trig_style = document.getElementById("lya_trig_div").style;
+        var cosh_style = document.getElementById("lya_cosh_div").style;
         var function_text = document.getElementById("lya_function_text");
 
         gauss_style.display = "none";
         circle_style.display = "none";
-        sine_style.display = "none";
+        quadratic_style.display = "none";
+        squared_sine_style.display = "none";
+        trig_style.display = "none";
+        cosh_style.display = "none";
 
         function_text.innerHTML = LYAPUNOV_FUNCTIONS[LYAPUNOV.fractal_type];
 
@@ -137,10 +149,22 @@ class Lyapunov extends Program {
         } else if (LYAPUNOV.fractal_type == 2) {
             LYAPUNOV.fractal_param.value = document.getElementById("lya_circle_omega").value;
             circle_style.display = "block";
-                
+            
+        } else if (LYAPUNOV.fractal_type == 3) {
+            LYAPUNOV.fractal_param.value = document.getElementById("lya_quadratic_a").value;
+            quadratic_style.display = "block";
+
         } else if (LYAPUNOV.fractal_type == 5) {
-            LYAPUNOV.fractal_param.value = document.getElementById("lya_sine_mu").value;
-            sine_style.display = "block";
+            LYAPUNOV.fractal_param.value = document.getElementById("lya_squared_sine_mu").value;
+            squared_sine_style.display = "block";
+        
+        } else if (LYAPUNOV.fractal_type == 6 || LYAPUNOV.fractal_type == 7) {
+            LYAPUNOV.fractal_param.value = document.getElementById("lya_trig_theta").value;
+            trig_style.display = "block";
+        
+        } else if (LYAPUNOV.fractal_type == 8) {
+            LYAPUNOV.fractal_param.value = document.getElementById("lya_cosh_a").value;
+            cosh_style.display = "block";
         }
 
         setupShader();

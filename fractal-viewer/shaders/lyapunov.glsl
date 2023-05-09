@@ -107,8 +107,8 @@ vec3 getColour(float a, float b) {
             lambda += log(abs(1.0 - r * cos(TAU * x)));
 
         #elif FRACTAL_TYPE == 3 // quadratic
-            x = r - x * x;
-            lambda += log(abs(2.0 * x));
+            x = r - fractal_param * x * x;
+            lambda += log(abs(2.0 * fractal_param * x));
 
         #elif FRACTAL_TYPE == 4 // square logistic
             x = r * x * (1.0 - x * x);
@@ -121,12 +121,16 @@ vec3 getColour(float a, float b) {
             lambda += log(abs(r * (1.0 - 2.0 * x) + fractal_param * TAU * sin(angle) * cos(angle)));
 
         #elif FRACTAL_TYPE == 6
-            x = r * sin(x);
+            x = r * sin(x + fractal_param);
             lambda += log(abs(r * cos(x)));
 
         #elif FRACTAL_TYPE == 7
-            x = r * cos(x);
+            x = r * cos(x + fractal_param);
             lambda += log(abs(r * sin(x)));
+
+        #elif FRACTAL_TYPE == 8
+            x = r * (fractal_param - cosh(x));
+            lambda += log(abs(r * sinh(x)));
 
         #endif
         

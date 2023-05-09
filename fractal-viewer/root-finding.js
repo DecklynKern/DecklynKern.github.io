@@ -78,6 +78,12 @@ class RootFinding extends Program {
         this.root_canvas_context = document.getElementById("root_selector").getContext("2d");
         this.drawRoots();
 
+        this.root1_real.value = 3;
+
+        this.exponent_handler = new ComplexPickerHandler("rtf_exponent_selector", this.root1_real, this.root1_imag, 6, 0, 0, "rtf_exponent_text", "p = $");
+
+        this.root1_real.value = 1;
+
         this.a_handler = new ComplexPickerHandler("a_selector", this.a_real, this.a_imag, 1, 1, 0, "a_text", "a = $");
         this.julia_c_handler = new ComplexPickerHandler("rtf_julia_c_selector", this.c_real, this.c_imag, 1, 0, 0, "rtf_julia_text", "c = $");
 
@@ -140,6 +146,49 @@ class RootFinding extends Program {
     updateFunction = function(event) {
 
         ROOT_FINDING.function = event.target.value;
+
+        var root_colour = document.getElementById("rtf_root_colouring");
+        var shaded_root_colour = document.getElementById("rtf_shaded_root_colouring");
+        var max_orbit_dist_colour = document.getElementById("rtf_max_orbit_dist_colouring");
+        var closest_root_dist_colour = document.getElementById("rtf_closest_root_dist_colouring");
+
+        var root_selector_style = document.getElementById("root_selector_div").style;
+        var exponent_selector_style = document.getElementById("rtf_exponent_div").style;
+
+        root_colour.disabled = true;
+        shaded_root_colour.disabled = true;
+        max_orbit_dist_colour.disabled = true;
+        closest_root_dist_colour.disabled = true;
+
+        root_selector_style.display = "none";
+        exponent_selector_style.display = "none";
+
+        if (ROOT_FINDING.function == 0) {
+            
+            root_colour.disabled = false;
+            shaded_root_colour.disabled = false;
+            max_orbit_dist_colour.disabled = false;
+            closest_root_dist_colour.disabled = false;
+            
+            root_selector_style.display = "block";
+
+        } else {
+
+            if (ROOT_FINDING.function == 2) {
+
+                ROOT_FINDING.root1_real.value = ROOT_FINDING.exponent_handler.real;
+                ROOT_FINDING.root1_real.imag = ROOT_FINDING.exponent_handler.imag;
+
+                exponent_selector_style.display = "block";
+
+            }
+
+            document.getElementById("rtf_colouring_type").value = 2;
+
+            ROOT_FINDING.updateColouringType({target: {value: 2}});
+            return;
+
+        }
 
         setupShader();
         redraw();

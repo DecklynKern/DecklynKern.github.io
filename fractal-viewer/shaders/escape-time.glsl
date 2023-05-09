@@ -11,6 +11,8 @@ uniform float fractal_param1;
 uniform float fractal_param2;
 uniform float fractal_param3;
 
+uniform int is_inverted;
+
 uniform int max_iterations;
 uniform float escape_radius_sq;
 
@@ -44,7 +46,32 @@ struct Complex {
     float imag;
 };
 
-Complex multiply(Complex x, Complex y) {
+Complex add(Complex x, Complex y) {
+    return Complex(
+        x.real + y.real,
+        x.imag + y.imag
+    );
+}
+
+Complex sub(Complex x, Complex y) {
+    return Complex(
+        x.real - y.real,
+        x.imag - y.imag
+    );
+}
+
+Complex scale(Complex z, float d) {
+    return Complex(
+        z.real * d,
+        z.imag * d
+    );
+}
+
+Complex square(Complex z) {
+    return Complex(z.real * z.real - z.imag * z.imag, (z.real + z.real) * z.imag);
+}
+
+Complex prod(Complex x, Complex y) {
     return Complex(
         x.real * y.real - x.imag * y.imag,
         x.real * y.imag + y.real * x.imag
@@ -62,7 +89,7 @@ Complex reciprocal(Complex z) {
 }
 
 float argument(Complex z) {
-    return atan(z.imag / z.real);
+    return atan(z.imag, z.real);
 }
 
 Complex exponent(Complex z, float d) {
@@ -80,11 +107,13 @@ Complex exponent(Complex z, Complex d) {
 
     float z_norm_sq = z.real * z.real + z.imag * z.imag;
     float arg = argument(z);
-    float r = pow(z_norm_sq, 0.5 * d.real);
-    float angle = d.real * arg + 0.5 * z.imag * log(z_norm_sq);
+    float r = pow(z_norm_sq, 0.5 * d.real) * exp(-d.imag * arg);
+    float angle = d.real * arg + 0.5 * d.imag * log(z_norm_sq);
 
-    return Complex(r * cos(angle), r * sin(angle));
-
+    return Complex(
+        r * cos(angle),
+        r * sin(angle)
+    );
 }
 
 Complex exponent(Complex z) {
@@ -95,11 +124,23 @@ Complex exponent(Complex z) {
     );
 }
 
+#define div(x, y) prod(x, reciprocal(y))
+#define ADD3(a, b, c) add(add(a, b), c)
+
 vec3 interpolate(vec3 c1, vec3 c2, float amount) {
     return c1 * amount + c2 * (1.0 - amount);
 }
 
 vec3 getColour(float z_real, float z_imag) {
+
+    if (bool(is_inverted)) {
+
+        Complex inv = reciprocal(Complex(z_real, z_imag));
+
+        z_real = inv.real;
+        z_imag = inv.imag;
+
+    }
 
     float c_real, c_imag;
 
@@ -220,28 +261,20 @@ vec3 getColour(float z_real, float z_imag) {
             }
 
         #elif FRACTAL_TYPE == 5 // multibrot
-
-            Complex z_exp = exponent(z, fractal_param1);
-
-            z.real = z_exp.real + c.real;
-            z.imag = z_exp.imag + c.imag;
+            z = add(
+                exponent(z, fractal_param1),
+                c);
 
         #elif FRACTAL_TYPE == 6 // feather
-
-            Complex numerator = Complex(
-                z.real * (z_real_sq - 3.0 * z_imag_sq),
-                z.imag * (3.0 * z_real_sq - z_imag_sq)
-            );
-
-            Complex div = multiply(numerator, reciprocal(
-                Complex(
-                    1.0 + z_real_sq,
-                    1.0 + z_imag_sq
-                )
-            ));
-
-            z.real = div.real + c.real;
-            z.imag = div.imag + c.imag;
+            z = add(
+                div(
+                    Complex(
+                    z.real * (z_real_sq - 3.0 * z_imag_sq),
+                    z.imag * (3.0 * z_real_sq - z_imag_sq)),
+                    Complex(
+                        1.0 + z_real_sq,
+                        1.0 + z_imag_sq)),
+                c);
 
         #elif FRACTAL_TYPE == 7 // chrikov
             z.imag += c.imag * sin(z.real);
@@ -269,23 +302,14 @@ vec3 getColour(float z_real, float z_imag) {
             z = exponent(c, z);
 
         #elif FRACTAL_TYPE == 11 // duffing
-    
-            float z_real = z.real;
-
             z.real = z.imag;
             z.imag = c.imag * z_real + c.real * z.imag - z.imag * z_imag_sq;
 
         #elif FRACTAL_TYPE == 12 // gingerbread
-
-            float z_real = z.real;
-
             z.real = 1.0 - z.imag + abs(z_real) + c.real;
             z.imag = z_real + c.imag;
 
         #elif FRACTAL_TYPE == 13 // henon
-
-            float z_real = z.real;
-
             z.real = 1.0 - c.real * z_real_sq + z.imag;
             z.imag = c.imag * z_real;
 
@@ -298,17 +322,15 @@ vec3 getColour(float z_real, float z_imag) {
             z.imag = c.real * sin_imag + sin_real * c.imag;
 
         #elif FRACTAL_TYPE == 15 // rational map
-
-            Complex exp1 = exponent(z, fractal_param1);
-            Complex exp2 = exponent(z, fractal_param2);
-
-            z.real = exp1.real - fractal_param3 * exp2.real + c.real;
-            z.imag = exp1.imag - fractal_param3 * exp2.imag + c.imag;
+            z = add(
+                sub(
+                    exponent(z, fractal_param1),
+                    scale(
+                        exponent(z, fractal_param2),
+                        fractal_param3)),
+                c);
 
         #elif FRACTAL_TYPE == 16 // phoenix
-
-            float z_real = z.real;
-
             z.real = z_real_sq - z_imag_sq + fractal_param1 * z_prev.real - fractal_param2 * z_prev.imag + c.real;
             z.imag = 2.0 * z_real * z.imag + fractal_param1 * z_prev.imag + fractal_param2 * z_prev.real + c.imag;
 
@@ -321,7 +343,7 @@ vec3 getColour(float z_real, float z_imag) {
             z.imag = 2.0 * z.real * z.imag + c.imag;
 
         #elif FRACTAL_TYPE == 19 // marek dragon
-            z = multiply(
+            z = prod(
                 z, 
                 Complex(
                     zc.real + z.real,
@@ -366,16 +388,90 @@ vec3 getColour(float z_real, float z_imag) {
             z.real = z_real_sq - z_imag_sq + c.real;
 
         #elif FRACTAL_TYPE == 21 // exponent
-            z = multiply(c, exponent(z));
+            z = prod(c, exponent(z));
 
         #elif FRACTAL_TYPE == 22
 
-            float dot = z_real_sq + z_imag_sq;
-            Complex zc = multiply(z, c_mul);
+            Complex zc = prod(z, c_mul);
 
             z = Complex(
-                z.real * dot - zc.real,
-                z.imag * dot - zc.imag);
+                z.real * mag_sq - zc.real,
+                z.imag * mag_sq - zc.imag);
+
+        #elif FRACTAL_TYPE == 23
+            z = add(
+                exponent(
+                    z,
+                    Complex(fractal_param1, fractal_param2)),
+                c);
+
+        #elif FRACTAL_TYPE == 24
+            z.real = z.real / cos(z.imag) + c.real;
+            z.imag = z.imag / sin(z_real) + c.imag;
+
+        #elif FRACTAL_TYPE == 25
+
+            Complex meta_z = Complex(
+                z_real_sq - z_imag_sq + c.real,
+                2.0 * z.real * z.imag + c.imag
+            );
+
+            Complex meta_c = add(
+                square(c),
+                z);
+
+            z = add(
+                square(meta_z),
+                meta_c);
+
+        #elif FRACTAL_TYPE == 26
+            z = Complex(
+                z_real_sq - z_imag_sq - abs(z.real) + c.real,
+                2.0 * abs(z.real * z.imag) - abs(z.imag) + c.imag
+            );
+
+        #elif FRACTAL_TYPE == 27
+
+            float dzr = 2.0 * z.real;
+
+            z = square(
+                div(
+                    Complex(
+                        z_real_sq - z_imag_sq + c.real - 1.0,
+                        dzr * z.imag + c.imag),
+                    Complex(
+                        dzr + c.real - 2.0,
+                        2.0 * z.imag + c.imag)));
+
+        #elif FRACTAL_TYPE == 28
+
+            Complex z3 = prod(
+                z,
+                Complex(
+                    z_real_sq - z_imag_sq,
+                    2.0 * z.real * z.imag));
+
+            z = add(
+                div(
+                    z3,
+                    Complex(
+                        z3.real + 1.0,
+                        z3.imag)),
+                c);
+
+        #elif FRACTAL_TYPE == 29
+
+            Complex dz2c = Complex(
+                2.0 * (z_real_sq - z_imag_sq + c.real),
+                4.0 * z.real * z.imag + c.imag
+            );
+
+            float denom = cos(dz2c.real) + cosh(dz2c.imag);
+
+            z = Complex(
+                sin(dz2c.real) / denom,
+                sinh(dz2c.imag) / denom
+            );
             
         #endif
         
@@ -446,15 +542,25 @@ vec3 getColour(float z_real, float z_imag) {
 
     } else {
 
+        if (colouring_type == 3) {
+
+            if (argument(z) > 0.0) {
+                return close_colour;
+
+            } else {
+                return far_colour;
+            }
+        }
+
         if (smoothing_type == 1) {
-            f_iterations += 1.0 + log(log(escape_radius_sq) / log(mag_sq)) / log(2.0);
+            f_iterations += log(log(escape_radius_sq) / log(mag_sq)) / log(2.0);
 
         } else if (smoothing_type == 2) {
-            f_iterations -= log(log(mag_sq) / log(f_iterations + 0.000001) * 0.5) / log(escape_radius_sq) * 2.0;
-            f_iterations = max(f_iterations, 0.0);
+            f_iterations += 1.0 - log(log(mag_sq) / 2.0) / log(2.0);
 
         } else if (smoothing_type == 3) {
             f_iterations += (mag_sq - escape_radius_sq) / (escape_radius_sq - sqrt(escape_radius_sq));
+
         }
 
         if (colouring_type == 0) {

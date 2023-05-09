@@ -13,6 +13,7 @@ var gl;
 const ESCAPE_TIME = new EscapeTime();
 const LYAPUNOV = new Lyapunov();
 const ROOT_FINDING = new RootFinding();
+const PENDULUM = new Pendulum();
 const RECURSIVE = new Recursive();
 var program = ESCAPE_TIME;
 
@@ -39,6 +40,7 @@ function main() {
     ESCAPE_TIME.setupGUI();
     LYAPUNOV.setupGUI();
     ROOT_FINDING.setupGUI();
+    PENDULUM.setupGUI();
     RECURSIVE.setupGUI();
 
     initWebGL();
@@ -137,6 +139,10 @@ function updateProgram() {
             loadProgram(ROOT_FINDING);
             break;
 
+        case "pendulum":
+            loadProgram(PENDULUM);
+            break;
+
         case "recursive":
             loadProgram(RECURSIVE);
 
@@ -155,7 +161,7 @@ function updateDisplayText() {
     if (program == ESCAPE_TIME || program == ROOT_FINDING) {
         text = `z = ${formatComplex(centre_x.value, centre_y.value)}`;
 
-    } else if (program == LYAPUNOV || program == RECURSIVE) {
+    } else {
         text = `centre = (${centre_x.value.toPrecision(6)}, ${centre_y.value.toPrecision(6)})`;
     }
 

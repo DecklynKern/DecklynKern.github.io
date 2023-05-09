@@ -10,6 +10,7 @@
         <script src="escape-time.js"></script>
         <script src="lyapunov.js"></script>
         <script src="root-finding.js"></script>
+        <script src="pendulum.js"></script>
         <script src="recursive.js"></script>
         <script src="webgl.js"></script>
     </head>
@@ -23,6 +24,7 @@
                         <option value="escape-time">Escape Time</option>
                         <option value="lyapunov">Lyapunov</option>
                         <option value="root-finding">Root Finding</option>
+                        <option value="pendulum">Pendulum</option>
                         <option value="recursive">Recursive</option>
                     </select>
                 </div>
@@ -35,21 +37,27 @@
                                 <option value="1">Burning Ship</option>
                                 <option value="2">Tricorn</option>
                                 <option value="17">Simonbrot</option>
+                                <option value="26">Buffalo</option>
                                 <option value="5">Multibrot</option>
+                                <option value="23">Complex Multibrot</option>
                                 <option value="15">Rational Map</option>
                                 <option value="16">Phoenix</option>
                                 <option value="18">Tippetts</option>
-                                <option value="20">Gangopadhyay</option>
+                                <option value="25">Meta-Mandelbrot</option>
                             </optgroup>
                             <optgroup label="Other Fractals">
                                 <option value="3">Heart</option>
                                 <option value="4">Mandelbox</option>
                                 <option value="6">CodeParade's Feather</option>
                                 <option value="22">CodeParade's SFX</option>
-                                <option value="10">Tower of Powers</option>
-                                <option value="14">Sin</option>
+                                <option value="14">Sine</option>
                                 <option value="19">Marek Dragon</option>
+                                <option value="20">Gangopadhyay</option>
                                 <option value="21">Exponent</option>
+                                <option value="24">Thorn</option>
+                                <option value="27">Magnet</option>
+                                <option value="28">Triple Dragon</option>
+                                <option value="29">Spiral</option>
                             </optgroup>
                             <optgroup label="Chaotic Maps (generally not very fractal-ly)">
                                 <option value="7">Chirikov</option>
@@ -105,6 +113,14 @@
                             ax5:
                             <input id="gangopadhyay5" type="checkbox">
                         </div>
+                        <div id="cmultibrot_div" style="display: none">
+                            <div id="cmultibrot_p_text" class="complex-text">
+                                p = 2 + 0i
+                            </div>
+                            <canvas id="cmultibrot_p_selector" class="selector" width="200px" height="200px"></canvas>
+                        </div>
+                        Invert: 
+                        <input type="checkbox" id="is_inverted">
                     </div>
                     <div class="input-div" id="julia_div">
                         Julia:
@@ -153,19 +169,21 @@
                         </div>
                     </div>
                     <div class="input-div">
-                        Smoothing:
-                        <select id="smoothing_type">
-                            <option value="0">None</option>
-                            <option value="1">Log 1</option>
-                            <option value="2">Log 2</option>
-                            <option value="3">Reverse</option>
-                        </select>
-                        <br>
+                        <div id="smoothing_div">
+                            Smoothing:
+                            <select id="smoothing_type">
+                                <option value="0">None</option>
+                                <option value="1">Log 1</option>
+                                <option value="2">Log 2</option>
+                                <option value="3">Reverse</option>
+                            </select>
+                        </div>
                         Colouring:
                         <select id="colouring_type">
                             <option value="0">Gradient</option>
                             <option value="1">Rings</option>
                             <option value="2">Hue Cycle</option>
+                            <option value="3">Binary Decomposition</option>
                         </select>
                         <br>
                         Interior Colouring:
@@ -201,6 +219,7 @@
                             <option value="5">Squared Sine Logistic</option>
                             <option value="6">Sine</option>
                             <option value="7">Cosine</option>
+                            <option value="8">Hyperbolic Cosine</option>
                         </select>
                         <div id="lya_function_text">
                             x ← rx(1 - x)
@@ -213,9 +232,21 @@
                             Ω:
                             <input id="lya_circle_omega" type="number" value="0.33" min="0" max="1" step="0.01">
                         </div>
-                        <div id="lya_sine_div" style="display: none">
+                        <div id="lya_quadratic_div" style="display: none">
+                            a: 
+                            <input id="lya_quadratic_a" type="number" value="1" min="-4" max="4" step="0.1">
+                        </div>
+                        <div id="lya_squared_sine_div" style="display: none">
                             μ:
-                            <input id="lya_sine_mu" type="number" value="0.2" min="0" max="1" step="0.01">
+                            <input id="lya_squared_sine_mu" type="number" value="0.2" min="0" max="1" step="0.01">
+                        </div>
+                        <div id="lya_trig_div" style="display: none">
+                            θ:
+                            <input id="lya_trig_theta" type="number" value="0.0" min="0" max="3.14" step="0.01">
+                        </div>
+                        <div id="lya_cosh_div" style="display: none">
+                            a:
+                            <input id="lya_cosh_a" type="number" value="2" min="1" max="5" step="0.01">
                         </div>
                     </div>
                     <div class="input-div">
@@ -252,6 +283,8 @@
                         Function:
                         <select id="rtf_function">
                             <option value="0">Cubic</option>
+                            <option value="1">Sine</option>
+                            <option value="2">General Exponent</option>
                         </select>
                         <br>
                         Algorithm:
@@ -284,10 +317,16 @@
                         </select>
                     </div>
                     <div class="input-div">
-                        <div>
+                        <div id="root_selector_div">
                             Roots:
                             <br>
                             <canvas id="root_selector" class="selector" width="200px" height="200px"></canvas>
+                        </div>
+                        <div id="rtf_exponent_div" style="display:none">
+                            <div id="rtf_exponent_text" class="complex-text">
+                                p: 3 + 0i
+                            </div>
+                            <canvas id="rtf_exponent_selector" class="selector" width="200px" height="200px"></canvas>
                         </div>
                         <div>
                             <div id="a_text" class="complex-text">
@@ -312,11 +351,11 @@
                     <div class="input-div">
                         Colouring:
                         <select id="rtf_colouring_type">
-                            <option value="0">Root</option>
-                            <option value="1">Shaded Root</option>
-                            <option value="2">Convergence</option>
-                            <option value="3">Max Orbit Distance</option>
-                            <option value="4">Closest Root Distance</option>
+                            <option id="rtf_root_colouring" value="0">Root</option>
+                            <option id="rtf_shaded_root_colouring" value="1">Shaded Root</option>
+                            <option id="rtf_convergence_colouring" value="2">Convergence</option>
+                            <option id="rtf_max_orbit_dist_colouring" value="3">Max Orbit Distance</option>
+                            <option id="rtf_closest_root_dist_colouring" value="4">Closest Root Distance</option>
                         </select>
                         <div id="rtf_dist_options" style="display: none">
                             Modulo:
@@ -350,6 +389,45 @@
                         </div>
                     </div>
                 </div>
+                <div id="pendulum_options" style="display: none">
+                    <div class="input-div">
+                        Iterations:
+                        <input id="pend_iterations" type="number" value="40" min="0">
+                        <br>
+                        Friction:
+                        <input id="pend_friction" type="number" value="1.0" min="0" step="0.01">
+                        <br>
+                        Tension:
+                        <input id="pend_tension" type="number" value="1.0" min="0" step="0.01">
+                        <br>
+                        dt:
+                        <input id="pend_dt" type="number" value="0.25" min="0" max="4" step="0.01">
+                    </div>
+                    <div class="input-div">
+                        Magnet 1 Strength:
+                        <input id="magnet1_strength" type="number" value="1.0" min="0" step="0.01">
+                        <br>
+                        Magnet 2 Strength:
+                        <input id="magnet2_strength" type="number" value="1.0" min="0" step="0.01">
+                        <br>
+                        Magnet 3 Strength:
+                        <input id="magnet3_strength" type="number" value="1.0" min="0" step="0.01">
+                    </div>
+                    <div class="input-div" style="display: grid">
+                        <div class="grid-entry">
+                            Magnet 1 Colour:
+                            <input id="magnet1_colour" type="color" value="#FF0000">
+                        </div>
+                        <div class="grid-entry">
+                            Magnet 2 Colour:
+                            <input id="magnet2_colour" type="color" value="#00FF00">
+                        </div>
+                        <div class="grid-entry">
+                            Magnet 3 Colour:
+                            <input id="magnet3_colour" type="color" value="#0000FF">
+                        </div>
+                    </div>
+                </div>
                 <div id="recursive_options" style="display: none;">
                     <div class="input-div">
                         Fractal Type:
@@ -377,9 +455,10 @@
                     </div>
                     <button onclick="resetView()">Reset View</button>
                 </div>
-                WASD = Move
-                <br>
-                +/- = Zoom
+                WASD = Move <br>
+                +/- = Zoom <br>
+                Don't expect every feature to <br>
+                work well with every other feature!
                 <a href="sources.html">Sources</a>
             </div>
         </div>

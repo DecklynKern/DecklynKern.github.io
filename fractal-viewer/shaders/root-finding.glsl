@@ -46,22 +46,6 @@ struct Complex {
 
 const Complex ZERO = Complex(0.0, 0.0);
 
-Complex reciprocal(Complex z) {
-    float denom = z.real * z.real + z.imag * z.imag;
-    return Complex(z.real / denom, -z.imag / denom);
-}
-
-Complex square(Complex z) {
-    return Complex(z.real * z.real - z.imag * z.imag, (z.real + z.real) * z.imag);
-}
-
-Complex scale(Complex z, float d) {
-    return Complex(
-        z.real * d,
-        z.imag * d
-    );
-}
-
 Complex add(Complex x, Complex y) {
     return Complex(
         x.real + y.real,
@@ -78,6 +62,22 @@ Complex sub(Complex x, Complex y) {
     return Complex(
         x.real - y.real,
         x.imag - y.imag
+    );
+}
+
+Complex reciprocal(Complex z) {
+    float denom = z.real * z.real + z.imag * z.imag;
+    return Complex(z.real / denom, -z.imag / denom);
+}
+
+Complex square(Complex z) {
+    return Complex(z.real * z.real - z.imag * z.imag, (z.real + z.real) * z.imag);
+}
+
+Complex scale(Complex z, float d) {
+    return Complex(
+        z.real * d,
+        z.imag * d
     );
 }
 
@@ -103,18 +103,20 @@ Complex conj(Complex z) {
 }
 
 float argument(Complex z) {
-    return atan(z.imag / z.real);
+    return atan(z.imag, z.real);
 }
 
 Complex exponent(Complex z, Complex d) {
 
     float z_norm_sq = z.real * z.real + z.imag * z.imag;
     float arg = argument(z);
-    float r = pow(z_norm_sq, 0.5 * d.real);
-    float angle = d.real * arg + 0.5 * z.imag * log(z_norm_sq);
+    float r = pow(z_norm_sq, 0.5 * d.real) * exp(-d.imag * arg);
+    float angle = d.real * arg + 0.5 * d.imag * log(z_norm_sq);
 
-    return Complex(r * cos(angle), r * sin(angle));
-
+    return Complex(
+        r * cos(angle),
+        r * sin(angle)
+    );
 }
 
 float root_dist_sq(Complex z, Complex root) {
@@ -129,26 +131,63 @@ vec3 getColour(Complex z) {
 
     Complex z_prev;
 
-    Complex root1 = Complex(root1_real, root1_imag);
-    Complex root2 = Complex(root2_real, root2_imag);
+    #if FUNCTION == 0
 
-    #if FRACTAL_TYPE != 3
-        Complex root3 = Complex(root3_real, root3_imag);
-    
-    #else
-        Complex root3 = z;
-        z = scale(
-            ADD3(root1, root2, root3),
-            0.3333333333);
+        Complex root1 = Complex(root1_real, root1_imag);
+        Complex root2 = Complex(root2_real, root2_imag);
+
+        #if FRACTAL_TYPE != 3
+            Complex root3 = Complex(root3_real, root3_imag);
+        
+        #else
+            Complex root3 = z;
+            z = scale(
+                ADD3(root1, root2, root3),
+                0.3333333333);
+
+        #endif
+
+
+        Complex r1r2 = prod(root1, root2);
+        
+        Complex d = neg(ADD3(root1, root2, root3));
+        Complex e = ADD3(r1r2, prod(root1, root3), prod(root2, root3));
+        Complex f = neg(prod(r1r2, root3));
+
+    #elif FUNCTION == 2
+
+        Complex p = Complex(root1_real, root1_imag);
+
+        #if ALGORITHM == 0 || ALGORITHM == 1 || ALGORITHM == 2 || ALGORITHM == 5
+
+            Complex p2 = Complex(
+                root1_real - 1.0,
+                root1_imag
+            );
+
+        #endif
+
+        #if ALGORITHM == 1 || ALGORITHM == 2 || ALGORITHM == 5
+
+            Complex pp2 = prod(p, p2);
+            Complex p3 = Complex(
+                root1_real - 2.0,
+                root1_imag
+            );
+
+        #endif
+
+        #if ALGORITHM == 5
+
+            Complex pp2p3 = prod(pp2, p3);
+            Complex p4 = Complex(
+                root1_real - 3.0,
+                root1_imag
+            );
+
+        #endif
 
     #endif
-
-
-    Complex r1r2 = prod(root1, root2);
-    
-    Complex d = neg(ADD3(root1, root2, root3));
-    Complex e = ADD3(r1r2, prod(root1, root3), prod(root2, root3));
-    Complex f = neg(prod(r1r2, root3));
 
     int iters = max_iterations;
 
@@ -204,12 +243,23 @@ vec3 getColour(Complex z) {
             z_prev = square(z);
         #endif
 
-        func_prev = ADD3(
-            prod(
-                add(d, z_prev),
-                square(z_prev)),
-            prod(e, z_prev),
-            f);
+        #if FUNCTION == 0
+
+            func_prev = ADD3(
+                prod(
+                    add(d, z_prev),
+                    square(z_prev)),
+                prod(e, z_prev),
+                f);
+
+        #elif FUNCTION == 1
+
+            z_prev = Complex(
+                sin(z_prev.real) * cosh(z_prev.imag),
+                cos(z_prev.real) * sinh(z_prev.imag)
+            );
+
+        #endif
 
     #elif ALGORITHM == 5
         Complex der = ZERO;
@@ -260,7 +310,7 @@ vec3 getColour(Complex z) {
 
             #endif
 
-            #if ALGORITHM == 3 // steffensen
+            #if ALGORITHM == 3
 
                 Complex func_z = add(func, z);
 
@@ -277,6 +327,89 @@ vec3 getColour(Complex z) {
             #endif
 
         #elif FUNCTION == 1
+
+            float cos_a = cos(z.real);
+            float sin_a = sin(z.real);
+            float cosh_b = cosh(z.imag);
+            float sinh_b = sinh(z.imag);
+
+            func = Complex(
+                sin_a * cosh_b,
+                cos_a * sinh_b
+            );
+
+            #if ALGORITHM == 0 || ALGORITHM == 1 || ALGORITHM == 2 || ALGORITHM == 5
+
+                der = Complex(
+                    cos_a * cosh_b,
+                    sin_a * sinh_b
+                );
+
+            #endif
+
+            #if ALGORITHM == 1 || ALGORITHM == 2 || ALGORITHM == 5
+                der2 = neg(func);
+
+            #endif
+
+            #if ALGORITHM == 3
+
+                Complex func_z = add(func, z);
+
+                func_step = Complex(
+                    sin(func_z.real) * cosh(func_z.imag),
+                    cos(func_z.real) * sinh(func_z.imag)
+                );
+
+            #elif ALGORITHM == 5
+                der3 = neg(der);
+
+            #endif
+
+        #elif FUNCTION == 2
+
+            Complex exp = exponent(z, p);
+            func = Complex(
+                exp.real - 1.0,
+                exp.imag
+            );
+
+            #if ALGORITHM == 0 || ALGORITHM == 1 || ALGORITHM == 2 || ALGORITHM == 5
+                der = prod(
+                    p,
+                    exponent(
+                        z,
+                        p2));
+
+            #endif
+
+            #if ALGORITHM == 1 || ALGORITHM == 2 || ALGORITHM == 5
+                der2 = prod(
+                    pp2,
+                    exponent(
+                        z,
+                        p3));
+
+            #endif
+
+            #if ALGORITHM == 3
+
+                Complex func_z = add(func, z);
+                Complex exp2 = exponent(func_z, p);
+
+                func_step = Complex(
+                    exp2.real - 1.0,
+                    exp2.imag
+                );
+
+            #elif ALGORITHM == 5
+                der3 = prod(
+                    pp2p3,
+                    exponent(
+                        z,
+                        p4));
+
+            #endif
 
         #endif
 
