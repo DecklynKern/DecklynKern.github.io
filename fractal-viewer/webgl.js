@@ -192,39 +192,41 @@ function resetView() {
 }
 
 function keyhandler(event) {
+
+    console.log(event);
     
-    switch (event.keyCode) {
+    switch (event.key.toLocaleLowerCase()) {
         
-        case 82: // R
-        resetView();
-        break;
+        case "r":
+            resetView();
+            break;
         
-        case 87: // W
-        centre_y.value -= 0.5 * magnitude.value;
-        redraw();
-        break;
+        case "w":
+            centre_y.value -= 0.5 * magnitude.value;
+            redraw();
+            break;
         
-        case 83: // S
-        centre_y.value += 0.5 * magnitude.value;
-        redraw();
-        break;
+        case "s":
+            centre_y.value += 0.5 * magnitude.value;
+            redraw();
+            break;
 
-        case 65: // A
-        centre_x.value -= 0.5 * magnitude.value;
-        redraw();
-        break;
+        case "a":
+            centre_x.value -= 0.5 * magnitude.value;
+            redraw();
+            break;
 
-        case 68: // D
-        centre_x.value += 0.5 * magnitude.value;
-        redraw();
-        break;
+        case "d":
+            centre_x.value += 0.5 * magnitude.value;
+            redraw();
+            break;
         
-        case 187: // +
-        magnitude.value /= 1.5;
-        redraw();
-        break;
+        case "=":
+            magnitude.value /= 1.5;
+            redraw();
+            break;
 
-        case 189: // -
+        case "-":
             magnitude.value *= 1.5;
             redraw();
             break;
