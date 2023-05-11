@@ -136,18 +136,18 @@
                         Max Iterations:
                         <input id="esc_max_iterations" type="number" value="30" min="0">
                         <br>
-                        Escape Radius:
-                        <input id="escape_radius" type="number" value="2.0" step="0.1" min="0">
-                    </div>
-                    <div class="input-div">
                         Orbit Trap:
                         <select id="orbit_trap">
-                            <option value="0">None</option>
+                            <option value="0">Normal</option>
                             <option value="1">Circle</option>
                             <option value="2">Square</option>
-                            <option value="3">Cross</option>
                             <option value="4">Ring</option>
+                            <option value="3">Cross</option>
                         </select>
+                        <div id="orbit_normal_div">
+                            Escape Radius:
+                            <input id="escape_radius" type="number" value="2.0" step="0.1" min="0">
+                        </div>
                         <div id="orbit_circle_div" style="display: none">
                             Radius:
                             <input id="orbit_circle" type="number" value="0.1" step="0.01" min="0" max="1">
@@ -173,9 +173,8 @@
                             Smoothing:
                             <select id="smoothing_type">
                                 <option value="0">None</option>
-                                <option value="1">Log 1</option>
-                                <option value="2">Log 2</option>
-                                <option value="3">Reverse</option>
+                                <option value="1">Log</option>
+                                <option value="2">Reverse</option>
                             </select>
                         </div>
                         Colouring:
@@ -458,7 +457,7 @@
                 WASD = Move <br>
                 +/- = Zoom <br>
                 Don't expect every feature to <br>
-                work well with every other feature!
+                play well with every other feature!
                 <a href="sources.html">Sources</a>
             </div>
         </div>

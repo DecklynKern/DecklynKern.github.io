@@ -192,8 +192,6 @@ function resetView() {
 }
 
 function keyhandler(event) {
-
-    console.log(event);
     
     switch (event.key.toLocaleLowerCase()) {
         

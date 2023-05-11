@@ -14,7 +14,6 @@ uniform float fractal_param3;
 uniform int is_inverted;
 
 uniform int max_iterations;
-uniform float escape_radius_sq;
 
 uniform float orbit_trap_param1;
 uniform float orbit_trap_param2;
@@ -182,7 +181,10 @@ vec3 getColour(float z_real, float z_imag) {
 
     #endif
 
-    #if ORBIT_TRAP == 1
+    #if ORBIT_TRAP == 0
+        float escape_radius_sq = orbit_trap_param1 * orbit_trap_param1;
+
+    #elif ORBIT_TRAP == 1
         float min_radius_sq = orbit_trap_param1 * orbit_trap_param1;
 
     #elif ORBIT_TRAP == 2
@@ -331,8 +333,11 @@ vec3 getColour(float z_real, float z_imag) {
                 c);
 
         #elif FRACTAL_TYPE == 16 // phoenix
-            z.real = z_real_sq - z_imag_sq + fractal_param1 * z_prev.real - fractal_param2 * z_prev.imag + c.real;
-            z.imag = 2.0 * z_real * z.imag + fractal_param1 * z_prev.imag + fractal_param2 * z_prev.real + c.imag;
+
+            float z_real = z.real;
+
+            z.real = z_real_sq - z_imag_sq + fractal_param1 * z.real - fractal_param2 * z.imag + c.real;
+            z.imag = 2.0 * z_real * z.imag + fractal_param1 * z.imag + fractal_param2 * z_real + c.imag;
 
         #elif FRACTAL_TYPE == 17 // simonbrot
             z.imag = 2.0 * (z.real * z.imag) * mag_sq + c.imag;
@@ -490,18 +495,17 @@ vec3 getColour(float z_real, float z_imag) {
 
         #elif ORBIT_TRAP == 1
         
-            if (mag_sq >= escape_radius_sq || mag_sq <= min_radius_sq) {
+            if (mag_sq <= min_radius_sq) {
                 iterations = iteration;
                 break;
             }
 
         #elif ORBIT_TRAP == 2
         
-            if (mag_sq >= escape_radius_sq || 
-                (z.real < orbit_trap_param1 &&
+            if (z.real < orbit_trap_param1 &&
                 -z.real < orbit_trap_param1 &&
                 z.imag < orbit_trap_param1 &&
-                -z.imag < orbit_trap_param1)
+                -z.imag < orbit_trap_param1
             ) {
                 iterations = iteration;
                 break;
@@ -509,8 +513,7 @@ vec3 getColour(float z_real, float z_imag) {
 
         #elif ORBIT_TRAP == 3
 
-            if (mag_sq >= escape_radius_sq || 
-                (-z.real < cross_width && z.real < cross_width) ||
+            if ((-z.real < cross_width && z.real < cross_width) ||
                 (-z.imag < cross_width && z.imag < cross_width)
             ) {
                 iterations = iteration;
@@ -519,8 +522,7 @@ vec3 getColour(float z_real, float z_imag) {
 
         #elif ORBIT_TRAP == 4
         
-            if (mag_sq >= escape_radius_sq || 
-                (mag_sq >= ring_min_sq && mag_sq <= ring_max_sq)
+            if ((mag_sq >= ring_min_sq && mag_sq <= ring_max_sq)
             ) {
                 iterations = iteration;
                 break;
@@ -553,13 +555,10 @@ vec3 getColour(float z_real, float z_imag) {
         }
 
         if (smoothing_type == 1) {
-            f_iterations += log(log(escape_radius_sq) / log(mag_sq)) / log(2.0);
-
-        } else if (smoothing_type == 2) {
             f_iterations += 1.0 - log(log(mag_sq) / 2.0) / log(2.0);
 
-        } else if (smoothing_type == 3) {
-            f_iterations += (mag_sq - escape_radius_sq) / (escape_radius_sq - sqrt(escape_radius_sq));
+        } else if (smoothing_type == 2) {
+            f_iterations += -1.0 + log(log(mag_sq) / 2.0) / log(2.0);
 
         }
 

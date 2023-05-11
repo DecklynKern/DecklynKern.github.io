@@ -40,9 +40,8 @@ class EscapeTime extends Program {
     is_inverted = new Param(0);
     
     max_iterations = new Param(30);
-    escape_radius = new Param(2.0);
 
-    orbit_trap_param1 = new Param(0.0);
+    orbit_trap_param1 = new Param(2.0);
     orbit_trap_param2 = new Param(0.0);
     
     is_julia = new Param(0);
@@ -113,9 +112,9 @@ class EscapeTime extends Program {
         document.getElementById("is_inverted").onchange = this.updateInverted;
         
         document.getElementById("esc_max_iterations").onchange = paramSet(this.max_iterations);
-        document.getElementById("escape_radius").onchange = paramSet(this.escape_radius);
-
+        
         document.getElementById("orbit_trap").onchange = this.updateOrbitTrap;
+        document.getElementById("escape_radius").onchange = paramSet(this.orbit_trap_param1);
         document.getElementById("orbit_circle").onchange = paramSet(this.orbit_trap_param1);
         document.getElementById("orbit_square").onchange = paramSet(this.orbit_trap_param1);
         document.getElementById("orbit_cross").onchange = paramSet(this.orbit_trap_param1);
@@ -152,7 +151,6 @@ class EscapeTime extends Program {
         this.is_inverted.getAttr("is_inverted");
         
         this.max_iterations.getAttr("max_iterations");
-        this.escape_radius.getAttr("escape_radius_sq");
 
         this.orbit_trap_param1.getAttr("orbit_trap_param1");
         this.orbit_trap_param2.getAttr("orbit_trap_param2");
@@ -180,7 +178,6 @@ class EscapeTime extends Program {
         this.is_inverted.loadInt();
 
         this.max_iterations.loadInt();
-        this.escape_radius.loadFloatSq();
 
         this.orbit_trap_param1.loadFloat();
         this.orbit_trap_param2.loadFloat();
@@ -304,17 +301,23 @@ class EscapeTime extends Program {
 
         ESCAPE_TIME.orbit_trap = event.target.value;
 
+        var normal_style = document.getElementById("orbit_normal_div").style;
         var circle_style = document.getElementById("orbit_circle_div").style;
         var square_style = document.getElementById("orbit_square_div").style;
         var cross_style = document.getElementById("orbit_cross_div").style;
         var ring_style = document.getElementById("orbit_ring_div").style;
 
+        normal_style.display = "none";
         circle_style.display = "none";
         square_style.display = "none";
         cross_style.display = "none";
         ring_style.display = "none";
 
-        if (ESCAPE_TIME.orbit_trap == 1) {
+        if (ESCAPE_TIME.orbit_trap == 0) {
+            ESCAPE_TIME.orbit_trap_param1.value = document.getElementById("escape_radius").value;
+            normal_style.display = "block";
+
+        } else if (ESCAPE_TIME.orbit_trap == 1) {
             ESCAPE_TIME.orbit_trap_param1.value = document.getElementById("orbit_circle").value;
             circle_style.display = "block";
         

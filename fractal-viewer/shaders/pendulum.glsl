@@ -42,18 +42,18 @@ vec3 getColour(vec2 pos) {
         }
 
         vec2 magnet1_offset = magnet1_pos - pos; 
-        float magnet1_dist = dot(magnet1_offset, magnet1_offset);
+        float magnet1_dist_sq = dot(magnet1_offset, magnet1_offset) + 0.1;
 
         vec2 magnet2_offset = magnet2_pos - pos; 
-        float magnet2_dist = dot(magnet2_offset, magnet2_offset);
+        float magnet2_dist_sq = dot(magnet2_offset, magnet2_offset) + 0.1;
 
         vec2 magnet3_offset = magnet3_pos - pos; 
-        float magnet3_dist = dot(magnet3_offset, magnet3_offset);
+        float magnet3_dist_sq = dot(magnet3_offset, magnet3_offset) + 0.1;
 
         vec2 accel = 
-            magnet1_strength * magnet1_offset / (pow(magnet1_dist, 3.0)) +
-            magnet2_strength * magnet2_offset / (pow(magnet2_dist, 3.0)) +
-            magnet3_strength * magnet3_offset / (pow(magnet3_dist, 3.0))
+            magnet1_strength * magnet1_offset / (pow(magnet1_dist_sq, 1.5)) +
+            magnet2_strength * magnet2_offset / (pow(magnet2_dist_sq, 1.5)) +
+            magnet3_strength * magnet3_offset / (pow(magnet3_dist_sq, 1.5))
             - tension * pos
             - friction * velocity;
 
