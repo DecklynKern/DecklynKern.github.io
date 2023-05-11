@@ -31,16 +31,6 @@ class EscapeTime extends Program {
     options_panel = "escape_time_options";
 
     fractal = 0;
-    orbit_trap = 0;
-
-    rendering_mode = 0;
-
-    fixed_smoothing = 0;
-    cyclic_cycle_value = 0;
-    cyclic_waveform = 0;
-    radial_decomposition = 0;
-
-    colouring = 0;
 
     fractal_param1 = new Param(0);
     fractal_param2 = new Param(0);
@@ -50,6 +40,8 @@ class EscapeTime extends Program {
     
     max_iterations = new Param(30);
 
+    orbit_trap = 0;
+
     orbit_trap_param1 = new Param(2.0);
     orbit_trap_param2 = new Param(0.0);
     
@@ -57,11 +49,22 @@ class EscapeTime extends Program {
     julia_c_real = new Param(0.0);
     julia_c_imag = new Param(0.0);
 
-    interior_colouring_type = new Param(0);
-    interior_colour = new Param([0.0, 0.0, 0.0]);
+    rendering_mode = 0;
+
+    fixed_smoothing = 0;
+    cyclic_cycle_value = 0;
+    cyclic_waveform = 0;
+    radial_decomposition = 0;
+
+    exterior_colouring = 0;
 
     exterior_colour1 = new Param([0.0, 0.0, 1.0]);
     exterior_colour2 = new Param([0.0, 0.0, 0.0]);
+
+    interior_colouring = 0;
+
+    interior_colour1 = new Param([0.0, 0.0, 0.0]);
+    interior_colour2 = new Param([0.0, 0.0, 0.0]);
 
     getShader = function() {
 
@@ -69,7 +72,8 @@ class EscapeTime extends Program {
         var def = `#define FRACTAL ${this.fractal}
                    #define ORBIT_TRAP ${this.orbit_trap}
                    #define RENDERING_MODE ${this.rendering_mode}
-                   #define COLOURING ${this.colouring}`;
+                   #define EXTERIOR_COLOURING ${this.exterior_colouring}
+                   #define INTERIOR_COLOURING ${this.interior_colouring}`;
 
         var total = 0;
 
@@ -109,7 +113,7 @@ class EscapeTime extends Program {
 
     setupGUI = function() {
 
-        document.getElementById("esc_fractal_type").onchange = this.updateFractalType;
+        document.getElementById("esc_fractal").onchange = this.updateFractal;
         
         document.getElementById("scaling").onchange = paramSet(this.fractal_param1);
         document.getElementById("exponent").onchange = paramSet(this.fractal_param1);
@@ -146,13 +150,18 @@ class EscapeTime extends Program {
         document.getElementById("cyclic_waveform").onchange = this.updateCyclicWaveform;
         document.getElementById("radial_decomposition").onchange = this.updateRadialDecomposition;
 
-        document.getElementById("esc_colouring").onchange = this.updateColouring;
+        document.getElementById("esc_exterior_colouring").onchange = this.updateExteriorColouring;
 
-        document.getElementById("interior_colouring_type").onchange = paramSet(this.interior_colouring_type);
-        document.getElementById("interior_colour").onchange = paramSetColour(this.interior_colour);
+        document.getElementById("close_colour").onchange = paramSetColour(this.exterior_colour1);
+        document.getElementById("far_colour").onchange = paramSetColour(this.exterior_colour2);
+        document.getElementById("exterior_colour1").onchange = paramSetColour(this.exterior_colour1);
+        document.getElementById("exterior_colour2").onchange = paramSetColour(this.exterior_colour2);
 
-        document.getElementById("close_colour").onchange = paramSetColour(this.colour2);
-        document.getElementById("far_colour").onchange = paramSetColour(this.colour1);
+        document.getElementById("interior_colouring").onchange = this.updateInteriorColouring;
+
+        document.getElementById("interior_solid_colour").onchange = paramSetColour(this.interior_colour1);
+        document.getElementById("interior_close_colour").onchange = paramSetColour(this.interior_colour1);
+        document.getElementById("interior_far_colour").onchange = paramSetColour(this.interior_colour2);
 
         this.julia_c_handler = new ComplexPickerHandler("julia_selector", this.julia_c_real, this.julia_c_imag, 2.5, 0, 0, "esc_julia_text", "c = $");
         this.phoenix_p_handler = new ComplexPickerHandler("phoenix_p_selector", this.fractal_param1, this.fractal_param2, 2, 0, 0, "phoenix_p_text", "p = $");
@@ -181,12 +190,12 @@ class EscapeTime extends Program {
         this.is_julia.getAttr("is_julia");
         this.julia_c_real.getAttr("julia_c_real");
         this.julia_c_imag.getAttr("julia_c_imag");
-        
-        this.interior_colouring_type.getAttr("interior_colouring_type");
-        this.interior_colour.getAttr("interior_colour");
 
         this.exterior_colour1.getAttr("exterior_colour1");
         this.exterior_colour2.getAttr("exterior_colour2");
+        
+        this.interior_colour1.getAttr("interior_colour1");
+        this.interior_colour2.getAttr("interior_colour2");
     
     }
 
@@ -207,17 +216,17 @@ class EscapeTime extends Program {
         this.julia_c_real.loadFloat();
         this.julia_c_imag.loadFloat();
 
-        this.interior_colouring_type.loadInt();
-        this.interior_colour.loadFloat3();
-
         this.exterior_colour1.loadFloat3();
         this.exterior_colour2.loadFloat3();
 
+        this.interior_colour1.loadFloat3();
+        this.interior_colour2.loadFloat3();
+
     }
 
-    updateFractalType = function(event) {
+    updateFractal = function(event) {
 
-        ESCAPE_TIME.fractal_type = event.target.value;
+        ESCAPE_TIME.fractal = event.target.value;
     
         var julia_style = document.getElementById("julia_div").style;
         var scaling_style = document.getElementById("scaling_div").style;
@@ -238,35 +247,35 @@ class EscapeTime extends Program {
         dragon_style.display = "none";
         gangopadhyay_style.display = "none";
 
-        function_text.innerHTML = ESCAPE_TIME_FUNCTIONS[ESCAPE_TIME.fractal_type];
+        function_text.innerHTML = ESCAPE_TIME_FUNCTIONS[ESCAPE_TIME.fractal];
 
-        if (ESCAPE_TIME.fractal_type == 4) {
+        if (ESCAPE_TIME.fractal == 4) {
             scaling_style.display = "block";
             ESCAPE_TIME.fractal_param1.value = document.getElementById("scaling").value;
     
-        } else if (ESCAPE_TIME.fractal_type == 5) {
+        } else if (ESCAPE_TIME.fractal == 5) {
             exponent_style.display = "block";
             ESCAPE_TIME.fractal_param1.value = document.getElementById("exponent").value;
         
-        } else if (ESCAPE_TIME.fractal_type == 15) {
+        } else if (ESCAPE_TIME.fractal == 15) {
             rational_style.display = "block";
             ESCAPE_TIME.fractal_param1.value = document.getElementById("rational_p").value;
             ESCAPE_TIME.fractal_param2.value = document.getElementById("rational_q").value;
             ESCAPE_TIME.fractal_param3.value = document.getElementById("rational_lambda").value;
         
-        } else if (ESCAPE_TIME.fractal_type == 16) {
+        } else if (ESCAPE_TIME.fractal == 16) {
             phoenix_style.display = "block";
             ESCAPE_TIME.fractal_param1.value = ESCAPE_TIME.phoenix_p_handler.real;
             ESCAPE_TIME.fractal_param2.value = ESCAPE_TIME.phoenix_p_handler.imag;
 
-        } else if (ESCAPE_TIME.fractal_type == 19) {
+        } else if (ESCAPE_TIME.fractal == 19) {
             julia_style.display = "none";
             dragon_style.display = "block";
         
-        } else if (ESCAPE_TIME.fractal_type == 20) {
+        } else if (ESCAPE_TIME.fractal == 20) {
             gangopadhyay_style.display = "block";
         
-        } else if (ESCAPE_TIME.fractal_type == 23) {
+        } else if (ESCAPE_TIME.fractal == 23) {
             cmultibrot_style.display = "block";
         }
         
@@ -338,9 +347,31 @@ class EscapeTime extends Program {
 
     }
 
-    updateGangopadhyay = function(event) {
+    updateGangopadhyay = function(_event) {
         setupShader();
         redraw();
+    }
+
+    synchExteriorColourSettings = function() {
+    
+        const fixed_colour_style = document.getElementById("fixed_colour_select").style;
+        const other_colour_style = document.getElementById("other_colour_select").style;
+        
+        fixed_colour_style.display = "none";
+        other_colour_style.display = "none";
+        
+        if (ESCAPE_TIME.exterior_colouring == 0) {
+            if (ESCAPE_TIME.rendering_mode == 0) {
+                fixed_colour_style.display = "block";
+                ESCAPE_TIME.exterior_colour1.value = hexToRGB(document.getElementById("close_colour").value);
+                ESCAPE_TIME.exterior_colour2.value = hexToRGB(document.getElementById("far_colour").value);
+                
+            } else {
+                other_colour_style.display = "block";
+                ESCAPE_TIME.exterior_colour1.value = hexToRGB(document.getElementById("exterior_colour1").value);
+                ESCAPE_TIME.exterior_colour2.value = hexToRGB(document.getElementById("exterior_colour2").value);
+            }
+        }
     }
 
     updateRenderingMode = function(event) {
@@ -356,6 +387,7 @@ class EscapeTime extends Program {
         styles.forEach((style) => style.display = "none");
         styles[ESCAPE_TIME.rendering_mode].display = "grid";
 
+        ESCAPE_TIME.synchExteriorColourSettings();
         setupShader();
         redraw();
 
@@ -397,26 +429,38 @@ class EscapeTime extends Program {
 
     }
 
-    updateColouring = function(event) {
+    updateExteriorColouring = function(event) {
     
-        ESCAPE_TIME.colouring = event.target.value;
-    
-        const fixed_colour_style = document.getElementById("fixed_colour_select").style;
-        const other_colour_style = document.getElementById("other_colour_select").style;
-        
-        fixed_colour_style.display = "none";
-        other_colour_style.display = "none";
-        
-        if (ESCAPE_TIME.colouring.value == 0) {
-            if (ESCAPE_TIME.rendering_mode == 0) {
-                fixed_colour_style.display = "block";
-                
-            } else {
-                other_colour_style.display = "block";
-            }
-        }
+        ESCAPE_TIME.exterior_colouring = event.target.value;
 
+        ESCAPE_TIME.synchExteriorColourSettings();
+        setupShader();
         redraw();
     
+    }
+
+    updateInteriorColouring = function(event) {
+
+        ESCAPE_TIME.interior_colouring = event.target.value;
+
+        var solid_style = document.getElementById("interior_solid_div").style;
+        var dist_style = document.getElementById("interior_dist_div").style;
+
+        solid_style.display = "none";
+        dist_style.display = "none";
+
+        if (ESCAPE_TIME.interior_colouring == 0) {
+            solid_style.display = "block";
+            ESCAPE_TIME.interior_colour1.value = hexToRGB(document.getElementById("interior_solid_colour").value);
+        
+        } else if (ESCAPE_TIME.interior_colouring == 1 || ESCAPE_TIME.interior_colouring == 2) {
+            dist_style.display = "block";
+            ESCAPE_TIME.interior_colour1.value = hexToRGB(document.getElementById("interior_close_colour").value);
+            ESCAPE_TIME.interior_colour2.value = hexToRGB(document.getElementById("interior_far_colour").value);
+        }
+
+        setupShader();
+        redraw();
+
     }
 }

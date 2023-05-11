@@ -31,7 +31,7 @@
                 <div id="escape_time_options">
                     <div class="input-div">
                         Fractal:
-                        <select id="esc_fractal_type">
+                        <select id="esc_fractal">
                             <optgroup label="Mandelbrot variants">
                                 <option value="0">Mandelbrot</option>
                                 <option value="1">Burning Ship</option>
@@ -206,41 +206,58 @@
                                 <option value="1">Binary</option>
                             </select>
                         </div>
-                        Colouring:
-                        <select id="esc_colouring">
+                        Exterior Colouring:
+                        <select id="esc_exterior_colouring">
                             <option value="0">Interpolate</option>
                             <option value="1">Hue</option>
                         </select>
                         <br>
-                        Interior Colouring:
-                        <select id="interior_colouring_type">
-                            <option value="0">Solid</option>
-                            <option value="1">On</option>
-                        </select>
+                        <div style="display: grid">
+                            <div id="fixed_colour_select">
+                                <div class="grid-entry">
+                                    Close Colour:
+                                    <input id="close_colour" type="color" value="#0000FF">
+                                </div>
+                                <div class="grid-entry">
+                                    Far Colour:
+                                    <input id="far_colour" type="color" value="#000000">
+                                </div>
+                            </div>
+                            <div id="other_colour_select" style="display: none">
+                                <div class="grid-entry">
+                                    Colour 1:
+                                    <input id="exterior_colour1" type="color" value="#FF0000">
+                                </div>
+                                <div class="grid-entry">
+                                    Colour 2:
+                                    <input id="exterior_colour2" type="color" value="#00FF00">
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                    <div class="input-div" style="display: grid">
-                        <div class="grid-entry">
-                            Interior Colour:
-                            <input id="interior_colour" type="color" value="#000000">
-                        </div>
-                        <div id="fixed_colour_select">
-                            <div class="grid-entry">
-                                Close Colour:
-                                <input id="close_colour" type="color" value="#0000FF">
+                    <div class="input-div">
+                        Interior Colouring:
+                        <select id="interior_colouring">
+                            <option value="0">Solid</option>
+                            <option value="1">Average Magnitude</option>
+                            <option value="2">Min Dist</option>
+                        </select>
+                        <div style="display: grid">
+                            <div id="interior_solid_div">
+                                <div class="grid-entry">
+                                    Interior Colour:
+                                    <input id="interior_solid_colour" type="color" value="#000000">
+                                </div>
                             </div>
-                            <div class="grid-entry">
-                                Far Colour:
-                                <input id="far_colour" type="color" value="#000000">
-                            </div>
-                        </div>
-                        <div id="other_colour_select" style="display: none">
-                            <div class="grid-entry">
-                                Colour 1:
-                                <input id="esc_colour1" type="color" value="#FF0000">
-                            </div>
-                            <div class="grid-entry">
-                                Colour 2:
-                                <input id="esc_colour2" type="color" value="#FFFFFF">
+                            <div id="interior_dist_div" style="display: none">
+                                <div class="grid-entry">
+                                    Close Colour:
+                                    <input id="interior_close_colour" type="color" value="#000000">
+                                </div>
+                                <div class="grid-entry">
+                                    Far Colour:
+                                    <input id="interior_far_colour" type="color" value="#FF00FF">
+                                </div>
                             </div>
                         </div>
                     </div>

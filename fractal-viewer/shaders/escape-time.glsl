@@ -22,13 +22,11 @@ uniform int is_julia;
 uniform float julia_c_real;
 uniform float julia_c_imag;
 
-uniform int smoothing_type;
-uniform int colouring_type;
-uniform vec3 trapped_colour;
-
 uniform vec3 exterior_colour1;
 uniform vec3 exterior_colour2;
-uniform int interior_colouring_type;
+
+uniform vec3 interior_colour1;
+uniform vec3 interior_colour2;
 
 uniform int samples;
 
@@ -160,7 +158,6 @@ vec3 getColour(float z_real, float z_imag) {
     float mag_sq = z_real_sq + z_imag_sq;
 
     int iterations;
-    float interior_colour_param;
     Complex derivative;
 
     float colour_val = 0.0;
@@ -200,12 +197,20 @@ vec3 getColour(float z_real, float z_imag) {
         float cross_width = orbit_trap_param1 * 0.5;
     #endif
 
-
     #if RENDERING_MODE == 1
-        #if CYCLE_VALUE == 2
+        #if CYCLE_VALUE == 1
             Complex diff;
             float exponential = 0.0;
         #endif
+    #endif
+
+    #if INTERIOR_COLOURING == 1
+        float mag_sum = 0.0;
+
+    #elif INTERIOR_COLOURING == 2
+        float bail_dist_sq;
+        float min_dist_sq = 1.0;
+
     #endif
 
     for (int iteration = 0; iteration < TRUE_ITER_CAP; iteration++) {
@@ -496,10 +501,57 @@ vec3 getColour(float z_real, float z_imag) {
         mag_sq = z_real_sq + z_imag_sq;
 
         #if RENDERING_MODE == 1
-            #if CYCLE_VALUE == 2
+            #if CYCLE_VALUE == 1
                 diff = sub(z, z_prev);
                 exponential += exp(-(sqrt(mag_sq) + 0.5 / sqrt(diff.real * diff.real + diff.imag * diff.imag)));
             #endif
+        #endif
+
+        #if INTERIOR_COLOURING == 1
+            mag_sum += mag_sq;
+
+        #elif INTERIOR_COLOURING == 2
+            
+            #if ORBIT_TRAP == 0
+                bail_dist_sq = 1.0 - mag_sq / escape_radius_sq;
+
+            #elif ORBIT_TRAP == 1
+                bail_dist_sq = 1.0 - min_radius_sq / mag_sq;
+
+            #elif ORBIT_TRAP == 2
+
+                float square_dist;
+
+                if (abs(z.real) <= orbit_trap_param1) {
+                    square_dist = z_imag_sq;
+                
+                } else if (abs(z.imag) <= orbit_trap_param1) {
+                    square_dist = z_real_sq;
+                
+                } else {
+                    square_dist = mag_sq;
+                }
+
+                bail_dist_sq = 1.0 - orbit_trap_param1 / square_dist;
+
+            #elif ORBIT_TRAP == 3
+
+                if (ring_min_sq > mag_sq) {
+                    bail_dist_sq = 1.0 - mag_sq / ring_min_sq;
+                
+                } else {
+                    bail_dist_sq = 1.0 - ring_max_sq / mag_sq;
+                }
+
+            #elif ORBIT_TRAP == 4
+                float cross_dist = min(z_real_sq, z_imag_sq);
+                bail_dist_sq = 1.0 - cross_width / cross_dist;
+            #endif
+
+            if (bail_dist_sq < min_dist_sq) {
+                min_dist_sq = bail_dist_sq;
+            }
+
         #endif
 
         #if ORBIT_TRAP == 0
@@ -518,11 +570,7 @@ vec3 getColour(float z_real, float z_imag) {
 
         #elif ORBIT_TRAP == 2
         
-            if (z.real < orbit_trap_param1 &&
-                -z.real < orbit_trap_param1 &&
-                z.imag < orbit_trap_param1 &&
-                -z.imag < orbit_trap_param1
-            ) {
+            if (abs(z.real) < orbit_trap_param1 && abs(z.imag) < orbit_trap_param1) {
                 iterations = iteration;
                 break;
             }
@@ -537,9 +585,7 @@ vec3 getColour(float z_real, float z_imag) {
 
         #elif ORBIT_TRAP == 4
 
-            if ((-z.real < cross_width && z.real < cross_width) ||
-                (-z.imag < cross_width && z.imag < cross_width)
-            ) {
+            if (abs(z.real) < cross_width || abs(z.imag) < cross_width) {
                 iterations = iteration;
                 break;
             }
@@ -549,12 +595,15 @@ vec3 getColour(float z_real, float z_imag) {
 
     if (iterations == TRUE_ITER_CAP) {
 
-        if (interior_colouring_type == 0) {
-            return trapped_colour;
-        
-        } else {
-            return trapped_colour * (sin(interior_colour_param) + 1.0) * 0.5;
-        }
+        #if INTERIOR_COLOURING == 0
+            return interior_colour1;
+
+        #elif INTERIOR_COLOURING == 1
+            return interpolate(interior_colour2, interior_colour1, mag_sum / sqrt(float(iterations)));
+
+        #elif INTERIOR_COLOURING == 2
+            return interpolate(interior_colour1, interior_colour2, min_dist_sq);
+        #endif
 
     } else {
 
@@ -577,10 +626,7 @@ vec3 getColour(float z_real, float z_imag) {
                 val = float(iterations) + 1.0 - log(log(mag_sq) / log(escape_radius_sq)) / log(2.0);
 
             #elif CYCLE_VALUE == 1
-                val = float(iterations) - 4.0 + 4.0 * log(log(mag_sq) / log(escape_radius_sq)) / log(2.0);
-
-            #elif CYCLE_VALUE == 2
-                val = exponential;
+                val = log(exponential);
 
             #endif
 
@@ -614,10 +660,15 @@ vec3 getColour(float z_real, float z_imag) {
             float angle = argument(z);
 
             #if DECOMPOSITION == 0
-                colour_val = angle / 2.0 / PI;
+                if (angle > 0.0) {
+                    colour_val = angle / PI;
+
+                } else {
+                    colour_val = -angle / PI;
+                }
 
             #elif DECOMPOSITION == 1
-                if (angle > 0) {
+                if (angle > 0.0) {
                     colour_val = 0.0;
                 
                 } else {
@@ -625,13 +676,12 @@ vec3 getColour(float z_real, float z_imag) {
                 }
 
             #endif
-
         #endif
 
-        #if COLOURING == 0
+        #if EXTERIOR_COLOURING == 0
             return interpolate(exterior_colour1, exterior_colour2, colour_val);
 
-        #elif COLOURING == 1
+        #elif EXTERIOR_COLOURING == 1
 
             float h = 6.0 * colour_val;
             float x = 1.0 - abs(2.0 * fract(h / 2.0) - 1.0);
@@ -654,6 +704,7 @@ vec3 getColour(float z_real, float z_imag) {
             } else {
                 return vec3(1.0, 0, x);
             }
+
         #endif
 
     }
