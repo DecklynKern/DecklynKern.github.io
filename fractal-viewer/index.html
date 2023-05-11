@@ -141,8 +141,8 @@
                             <option value="0">Normal</option>
                             <option value="1">Circle</option>
                             <option value="2">Square</option>
-                            <option value="4">Ring</option>
-                            <option value="3">Cross</option>
+                            <option value="3">Ring</option>
+                            <option value="4">Cross</option>
                         </select>
                         <div id="orbit_normal_div">
                             Escape Radius:
@@ -169,20 +169,47 @@
                         </div>
                     </div>
                     <div class="input-div">
-                        <div id="smoothing_div">
+                        <div>
+                            Rendering Mode:
+                            <select id="rendering_mode">
+                                <option value="0">Fixed (Escape Time)</option>
+                                <option value="1">Cyclic</option>
+                                <option value="2">Radial</option>
+                            </select>
+                        </div>
+                        <div id="fixed_rendering_div">
                             Smoothing:
-                            <select id="smoothing_type">
+                            <select id="fixed_smoothing">
                                 <option value="0">None</option>
                                 <option value="1">Log</option>
-                                <option value="2">Reverse</option>
+                            </select>
+                        </div>
+                        <div id="cyclic_rendering_div" style="display: none">
+                            Cycle Value:
+                            <select id="cyclic_cycle_value">
+                                <option value="0">Escape Time</option>
+                                <option value="1">Orbit Exponential</option>
+                            </select>
+                            Waveform:
+                            <select id="cyclic_waveform">
+                                <option value="0">Sine</option>
+                                <option value="1">Square</option>
+                                <option value="2">Triangle</option>
+                                <option value="3">Sawtooth</option>
+                                <option value="4">Backwards Sawtooth</option>
+                            </select>
+                        </div>
+                        <div id="radial_rendering_div" style="display: none">
+                            Decomposition:
+                            <select id="radial_decomposition">
+                                <option value="0">Smooth</option>
+                                <option value="1">Binary</option>
                             </select>
                         </div>
                         Colouring:
-                        <select id="colouring_type">
-                            <option value="0">Gradient</option>
-                            <option value="1">Rings</option>
-                            <option value="2">Hue Cycle</option>
-                            <option value="3">Binary Decomposition</option>
+                        <select id="esc_colouring">
+                            <option value="0">Interpolate</option>
+                            <option value="1">Hue</option>
                         </select>
                         <br>
                         Interior Colouring:
@@ -191,18 +218,30 @@
                             <option value="1">On</option>
                         </select>
                     </div>
-                    <div id="colour_select" class="input-div" style="display: grid">
+                    <div class="input-div" style="display: grid">
                         <div class="grid-entry">
-                            Trapped Colour:
-                            <input id="trapped_colour" type="color" value="#000000">
+                            Interior Colour:
+                            <input id="interior_colour" type="color" value="#000000">
                         </div>
-                        <div class="grid-entry">
-                            Close Colour:
-                            <input id="close_colour" type="color" value="#0000FF">
+                        <div id="fixed_colour_select">
+                            <div class="grid-entry">
+                                Close Colour:
+                                <input id="close_colour" type="color" value="#0000FF">
+                            </div>
+                            <div class="grid-entry">
+                                Far Colour:
+                                <input id="far_colour" type="color" value="#000000">
+                            </div>
                         </div>
-                        <div class="grid-entry">
-                            Far Colour:
-                            <input id="far_colour" type="color" value="#000000">
+                        <div id="other_colour_select" style="display: none">
+                            <div class="grid-entry">
+                                Colour 1:
+                                <input id="esc_colour1" type="color" value="#FF0000">
+                            </div>
+                            <div class="grid-entry">
+                                Colour 2:
+                                <input id="esc_colour2" type="color" value="#FFFFFF">
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -277,7 +316,7 @@
                         </div>
                     </div>
                 </div>
-                <div id="root_finding_options" style="display: none;">
+                <div id="root_finding_options" style="display: none">
                     <div class="input-div">
                         Function:
                         <select id="rtf_function">
@@ -427,7 +466,7 @@
                         </div>
                     </div>
                 </div>
-                <div id="recursive_options" style="display: none;">
+                <div id="recursive_options" style="display: none">
                     <div class="input-div">
                         Fractal Type:
                         <select id="rc_fractal_type">

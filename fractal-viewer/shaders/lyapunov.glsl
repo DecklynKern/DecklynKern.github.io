@@ -102,12 +102,8 @@ vec3 getColour(float a, float b) {
             float xa = x * fractal_param;
             lambda += log(abs(2.0 * xa * exp(-x * xa)));
 
-        #elif FRACTAL_TYPE == 2 // circle map
-            x += fractal_param + 0.000001 - r / TAU * sin(TAU * x);
-            lambda += log(abs(1.0 - r * cos(TAU * x)));
-
-        #elif FRACTAL_TYPE == 3 // quadratic
-            x = r - fractal_param * x * x;
+  
+                            <option value="9">Collatz</option>          x = r - fractal_param * x * x;
             lambda += log(abs(2.0 * fractal_param * x));
 
         #elif FRACTAL_TYPE == 4 // square logistic

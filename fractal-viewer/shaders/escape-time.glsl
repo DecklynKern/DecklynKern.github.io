@@ -26,8 +26,8 @@ uniform int smoothing_type;
 uniform int colouring_type;
 uniform vec3 trapped_colour;
 
-uniform vec3 close_colour;
-uniform vec3 far_colour;
+uniform vec3 exterior_colour1;
+uniform vec3 exterior_colour2;
 uniform int interior_colouring_type;
 
 uniform int samples;
@@ -163,17 +163,19 @@ vec3 getColour(float z_real, float z_imag) {
     float interior_colour_param;
     Complex derivative;
 
-    #if FRACTAL_TYPE == 10
+    float colour_val = 0.0;
+
+    #if FRACTAL == 10
         z = Complex(1.0, 0.0);
 
-    #elif FRACTAL_TYPE == 19
+    #elif FRACTAL == 19
         float r = PI * 2.0 * fractal_param1;
         Complex zc = Complex(
             cos(r),
             sin(r)
         );
 
-    #elif FRACTAL_TYPE == 22
+    #elif FRACTAL == 22
         Complex c_mul = Complex(
             c.real * c.real,
             c.imag * c.imag
@@ -188,14 +190,22 @@ vec3 getColour(float z_real, float z_imag) {
         float min_radius_sq = orbit_trap_param1 * orbit_trap_param1;
 
     #elif ORBIT_TRAP == 2
-        float half_side = orbit_trap_param1 / 2.0;
+        float half_side = orbit_trap_param1 * 0.5;
 
     #elif ORBIT_TRAP == 3
-        float cross_width = orbit_trap_param1 / 2.0;
-
-    #elif ORBIT_TRAP == 4
         float ring_min_sq = orbit_trap_param1 * orbit_trap_param1;
         float ring_max_sq = orbit_trap_param2 * orbit_trap_param2;
+
+    #elif ORBIT_TRAP == 4
+        float cross_width = orbit_trap_param1 * 0.5;
+    #endif
+
+
+    #if RENDERING_MODE == 1
+        #if CYCLE_VALUE == 2
+            Complex diff;
+            float exponential = 0.0;
+        #endif
     #endif
 
     for (int iteration = 0; iteration < TRUE_ITER_CAP; iteration++) {
@@ -207,11 +217,11 @@ vec3 getColour(float z_real, float z_imag) {
         
         z_prev = z;
 
-        #if FRACTAL_TYPE == 0 // mandelbrot
+        #if FRACTAL == 0 // mandelbrot
             z.imag = 2.0 * z.real * z.imag + c.imag;
             z.real = z_real_sq - z_imag_sq + c.real;
 
-        #elif FRACTAL_TYPE == 1 // burning ship
+        #elif FRACTAL == 1 // burning ship
 
             z.imag = abs(z.imag);
             z.real = abs(z.real);
@@ -219,14 +229,14 @@ vec3 getColour(float z_real, float z_imag) {
             z.imag = 2.0 * z.real * z.imag + c.imag;
             z.real = z_real_sq - z_imag_sq + c.real;
 
-        #elif FRACTAL_TYPE == 2 // tricorn
+        #elif FRACTAL == 2 // tricorn
 
             z.imag = -z.real * z.imag;
             z.imag = 2.0 * z.imag + c.imag;
 
             z.real = z_real_sq - z_imag_sq + c.real;
 
-        #elif FRACTAL_TYPE == 3 // heart
+        #elif FRACTAL == 3 // heart
 
             float temp;
 
@@ -234,7 +244,7 @@ vec3 getColour(float z_real, float z_imag) {
             z.imag = abs(z.imag) - abs(z.real) + c.imag;
             z.real = temp;
 
-        #elif FRACTAL_TYPE == 4 // mandelbox
+        #elif FRACTAL == 4 // mandelbox
 
             if (mag_sq < 0.25) {
                 z.real *= 4.0;
@@ -262,12 +272,12 @@ vec3 getColour(float z_real, float z_imag) {
                 z.imag = -2.0 - z.imag;
             }
 
-        #elif FRACTAL_TYPE == 5 // multibrot
+        #elif FRACTAL == 5 // multibrot
             z = add(
                 exponent(z, fractal_param1),
                 c);
 
-        #elif FRACTAL_TYPE == 6 // feather
+        #elif FRACTAL == 6 // feather
             z = add(
                 div(
                     Complex(
@@ -278,18 +288,18 @@ vec3 getColour(float z_real, float z_imag) {
                         1.0 + z_imag_sq)),
                 c);
 
-        #elif FRACTAL_TYPE == 7 // chrikov
+        #elif FRACTAL == 7 // chrikov
             z.imag += c.imag * sin(z.real);
             z.real += c.real * z.imag;
 
-        #elif FRACTAL_TYPE == 8 // shoe
+        #elif FRACTAL == 8 // shoe
 
             z.real = sin(z.imag * z.real);
     
             z.imag = 2.0 * z.real * z.imag + c.imag;
             z.real = z_real_sq - z_imag_sq + c.real;
 
-        #elif FRACTAL_TYPE == 9 // custom
+        #elif FRACTAL == 9 // custom
 
             float z_real = z.real;
 
@@ -300,22 +310,22 @@ vec3 getColour(float z_real, float z_imag) {
 
             z.real = z_real_sq - z_imag_sq + c.real;
 
-        #elif FRACTAL_TYPE == 10 // power tower
+        #elif FRACTAL == 10 // power tower
             z = exponent(c, z);
 
-        #elif FRACTAL_TYPE == 11 // duffing
+        #elif FRACTAL == 11 // duffing
             z.real = z.imag;
             z.imag = c.imag * z_real + c.real * z.imag - z.imag * z_imag_sq;
 
-        #elif FRACTAL_TYPE == 12 // gingerbread
+        #elif FRACTAL == 12 // gingerbread/ 2.0
             z.real = 1.0 - z.imag + abs(z_real) + c.real;
             z.imag = z_real + c.imag;
 
-        #elif FRACTAL_TYPE == 13 // henon
+        #elif FRACTAL == 13 // henon
             z.real = 1.0 - c.real * z_real_sq + z.imag;
             z.imag = c.imag * z_real;
 
-        #elif FRACTAL_TYPE == 14 // sin
+        #elif FRACTAL == 14 // sin
 
             float sin_real = sin(z.real) * cosh(z.imag);
             float sin_imag = cos(z.real) * sinh(z.imag);
@@ -323,7 +333,7 @@ vec3 getColour(float z_real, float z_imag) {
             z.real = sin_real * c.real - sin_imag * c.imag;
             z.imag = c.real * sin_imag + sin_real * c.imag;
 
-        #elif FRACTAL_TYPE == 15 // rational map
+        #elif FRACTAL == 15 // rational map
             z = add(
                 sub(
                     exponent(z, fractal_param1),
@@ -332,29 +342,29 @@ vec3 getColour(float z_real, float z_imag) {
                         fractal_param3)),
                 c);
 
-        #elif FRACTAL_TYPE == 16 // phoenix
+        #elif FRACTAL == 16 // phoenix
 
             float z_real = z.real;
 
             z.real = z_real_sq - z_imag_sq + fractal_param1 * z.real - fractal_param2 * z.imag + c.real;
             z.imag = 2.0 * z_real * z.imag + fractal_param1 * z.imag + fractal_param2 * z_real + c.imag;
 
-        #elif FRACTAL_TYPE == 17 // simonbrot
+        #elif FRACTAL == 17 // simonbrot
             z.imag = 2.0 * (z.real * z.imag) * mag_sq + c.imag;
             z.real = (z_real_sq - z_imag_sq) * mag_sq + c.real;
 
-        #elif FRACTAL_TYPE == 18 //tippetts
+        #elif FRACTAL == 18 //tippetts
             z.real = z_real_sq - z_imag_sq + c.real;
             z.imag = 2.0 * z.real * z.imag + c.imag;
 
-        #elif FRACTAL_TYPE == 19 // marek dragon
+        #elif FRACTAL == 19 // marek dragon
             z = prod(
                 z, 
                 Complex(
                     zc.real + z.real,
                     zc.imag + z.imag));
 
-        #elif FRACTAL_TYPE == 20 // gangopadhyay
+        #elif FRACTAL == 20 // gangopadhyay
 
             Complex z_run = Complex(0.0, 0.0);
 
@@ -392,10 +402,10 @@ vec3 getColour(float z_real, float z_imag) {
             z.imag = 2.0 * z.real * z.imag + c.imag;
             z.real = z_real_sq - z_imag_sq + c.real;
 
-        #elif FRACTAL_TYPE == 21 // exponent
+        #elif FRACTAL == 21 // exponent
             z = prod(c, exponent(z));
 
-        #elif FRACTAL_TYPE == 22
+        #elif FRACTAL == 22 // sfx
 
             Complex zc = prod(z, c_mul);
 
@@ -403,18 +413,18 @@ vec3 getColour(float z_real, float z_imag) {
                 z.real * mag_sq - zc.real,
                 z.imag * mag_sq - zc.imag);
 
-        #elif FRACTAL_TYPE == 23
+        #elif FRACTAL == 23 // complex multibrot
             z = add(
                 exponent(
                     z,
                     Complex(fractal_param1, fractal_param2)),
                 c);
 
-        #elif FRACTAL_TYPE == 24
+        #elif FRACTAL == 24 // thorn
             z.real = z.real / cos(z.imag) + c.real;
             z.imag = z.imag / sin(z_real) + c.imag;
 
-        #elif FRACTAL_TYPE == 25
+        #elif FRACTAL == 25 // meta
 
             Complex meta_z = Complex(
                 z_real_sq - z_imag_sq + c.real,
@@ -429,13 +439,13 @@ vec3 getColour(float z_real, float z_imag) {
                 square(meta_z),
                 meta_c);
 
-        #elif FRACTAL_TYPE == 26
+        #elif FRACTAL == 26 // buffalo
             z = Complex(
                 z_real_sq - z_imag_sq - abs(z.real) + c.real,
                 2.0 * abs(z.real * z.imag) - abs(z.imag) + c.imag
             );
 
-        #elif FRACTAL_TYPE == 27
+        #elif FRACTAL == 27 // magnet
 
             float dzr = 2.0 * z.real;
 
@@ -448,7 +458,7 @@ vec3 getColour(float z_real, float z_imag) {
                         dzr + c.real - 2.0,
                         2.0 * z.imag + c.imag)));
 
-        #elif FRACTAL_TYPE == 28
+        #elif FRACTAL == 28 // triple dragon
 
             Complex z3 = prod(
                 z,
@@ -464,7 +474,7 @@ vec3 getColour(float z_real, float z_imag) {
                         z3.imag)),
                 c);
 
-        #elif FRACTAL_TYPE == 29
+        #elif FRACTAL == 29 // spiral
 
             Complex dz2c = Complex(
                 2.0 * (z_real_sq - z_imag_sq + c.real),
@@ -482,9 +492,15 @@ vec3 getColour(float z_real, float z_imag) {
         
         z_real_sq = z.real * z.real;
         z_imag_sq = z.imag * z.imag;
-        z_prev = z_prev;
         
         mag_sq = z_real_sq + z_imag_sq;
+
+        #if RENDERING_MODE == 1
+            #if CYCLE_VALUE == 2
+                diff = sub(z, z_prev);
+                exponential += exp(-(sqrt(mag_sq) + 0.5 / sqrt(diff.real * diff.real + diff.imag * diff.imag)));
+            #endif
+        #endif
 
         #if ORBIT_TRAP == 0
 
@@ -512,6 +528,14 @@ vec3 getColour(float z_real, float z_imag) {
             }
 
         #elif ORBIT_TRAP == 3
+        
+            if ((mag_sq >= ring_min_sq && mag_sq <= ring_max_sq)
+            ) {
+                iterations = iteration;
+                break;
+            }
+
+        #elif ORBIT_TRAP == 4
 
             if ((-z.real < cross_width && z.real < cross_width) ||
                 (-z.imag < cross_width && z.imag < cross_width)
@@ -520,18 +544,8 @@ vec3 getColour(float z_real, float z_imag) {
                 break;
             }
 
-        #elif ORBIT_TRAP == 4
-        
-            if ((mag_sq >= ring_min_sq && mag_sq <= ring_max_sq)
-            ) {
-                iterations = iteration;
-                break;
-            }
-
         #endif
     }
-
-    float f_iterations = float(iterations);
 
     if (iterations == TRUE_ITER_CAP) {
 
@@ -539,39 +553,88 @@ vec3 getColour(float z_real, float z_imag) {
             return trapped_colour;
         
         } else {
-            return trapped_colour * (sin(interior_colour_param) + 1.0) / 2.0;
+            return trapped_colour * (sin(interior_colour_param) + 1.0) * 0.5;
         }
 
     } else {
 
-        if (colouring_type == 3) {
+        #if RENDERING_MODE == 0
 
-            if (argument(z) > 0.0) {
-                return close_colour;
+            float f_iterations = float(iterations);
 
-            } else {
-                return far_colour;
-            }
-        }
+            #if SMOOTHING == 1
+                f_iterations += 1.0 - log(log(mag_sq) / log(escape_radius_sq)) / log(2.0);
+            #endif
 
-        if (smoothing_type == 1) {
-            f_iterations += 1.0 - log(log(mag_sq) / 2.0) / log(2.0);
+            colour_val = f_iterations / float(max_iterations);
 
-        } else if (smoothing_type == 2) {
-            f_iterations += -1.0 + log(log(mag_sq) / 2.0) / log(2.0);
 
-        }
+        #elif RENDERING_MODE == 1
 
-        if (colouring_type == 0) {
-            return interpolate(close_colour, far_colour, f_iterations / float(max_iterations));
+            float val;
 
-        } else if (colouring_type == 1) {
-            return interpolate(close_colour, far_colour, sin(f_iterations) * 0.5 + 0.5);
+            #if CYCLE_VALUE == 0
+                val = float(iterations) + 1.0 - log(log(mag_sq) / log(escape_radius_sq)) / log(2.0);
 
-        } else if (colouring_type == 2) {
+            #elif CYCLE_VALUE == 1
+                val = float(iterations) - 4.0 + 4.0 * log(log(mag_sq) / log(escape_radius_sq)) / log(2.0);
 
-            float h = 6.0 * fract(f_iterations / 12.0);
-            float x = 1.0 - abs(2.0 * fract(f_iterations / 4.0) - 1.0);
+            #elif CYCLE_VALUE == 2
+                val = exponential;
+
+            #endif
+
+            #if WAVEFORM == 0
+                colour_val = 0.5 * sin(val * 2.0 * PI) + 0.5;
+
+            #elif WAVEFORM == 1
+                colour_val = round(fract(val));
+
+            #elif WAVEFORM == 2
+
+                val = fract(val);
+
+                if (val > 0.5) {
+                    colour_val = 1.0 - 2.0 * (val - 0.5);
+                
+                } else {
+                    colour_val = 2.0 * val;
+                }
+
+            #elif WAVEFORM == 3
+                colour_val = 1.0 - fract(val);
+
+            #elif WAVEFORM == 4
+                colour_val = fract(val);
+
+            #endif
+
+        #elif RENDERING_MODE == 2
+            
+            float angle = argument(z);
+
+            #if DECOMPOSITION == 0
+                colour_val = angle / 2.0 / PI;
+
+            #elif DECOMPOSITION == 1
+                if (angle > 0) {
+                    colour_val = 0.0;
+                
+                } else {
+                    colour_val = 1.0;
+                }
+
+            #endif
+
+        #endif
+
+        #if COLOURING == 0
+            return interpolate(exterior_colour1, exterior_colour2, colour_val);
+
+        #elif COLOURING == 1
+
+            float h = 6.0 * colour_val;
+            float x = 1.0 - abs(2.0 * fract(h / 2.0) - 1.0);
 
             if (h < 1.0) {
                 return vec3(1.0, x, 0);
@@ -591,7 +654,8 @@ vec3 getColour(float z_real, float z_imag) {
             } else {
                 return vec3(1.0, 0, x);
             }
-        }   
+        #endif
+
     }
 }
 

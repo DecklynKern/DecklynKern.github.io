@@ -21,7 +21,7 @@ ESCAPE_TIME_FUNCTIONS = [
     "z ← z<sup>2</sup> + e<sup>2πr</sup>z",
     "",
     "z ← ce<sup>z</sup>",
-    "z ← z(z·z - c⊙c)",
+    "z ← z(z·z - c / ⊙c)",
     "z ← z<sup>p</sup> + c"
 ];
 
@@ -30,8 +30,17 @@ class EscapeTime extends Program {
     shader = "shaders/escape-time.glsl";
     options_panel = "escape_time_options";
 
-    fractal_type = 0;
+    fractal = 0;
     orbit_trap = 0;
+
+    rendering_mode = 0;
+
+    fixed_smoothing = 0;
+    cyclic_cycle_value = 0;
+    cyclic_waveform = 0;
+    radial_decomposition = 0;
+
+    colouring = 0;
 
     fractal_param1 = new Param(0);
     fractal_param2 = new Param(0);
@@ -47,27 +56,24 @@ class EscapeTime extends Program {
     is_julia = new Param(0);
     julia_c_real = new Param(0.0);
     julia_c_imag = new Param(0.0);
-    
-    magnitude = new Param(2.0);
-    origin_real = new Param(0.0);
-    origin_imag = new Param(0.0);
-    
-    smoothing_type = new Param(0);
-    colouring_type = new Param(0);
+
     interior_colouring_type = new Param(0);
-    trapped_colour = new Param([0.0, 0.0, 0.0]);
-    close_colour = new Param([0.0, 0.0, 1.0]);
-    far_colour = new Param([0.0, 0.0, 0.0]);
+    interior_colour = new Param([0.0, 0.0, 0.0]);
+
+    exterior_colour1 = new Param([0.0, 0.0, 1.0]);
+    exterior_colour2 = new Param([0.0, 0.0, 0.0]);
 
     getShader = function() {
 
         var shader = (' ' + this.baseShader).slice(1);
-        var def = `#define FRACTAL_TYPE ${this.fractal_type}
-                   #define ORBIT_TRAP ${this.orbit_trap}`;
+        var def = `#define FRACTAL ${this.fractal}
+                   #define ORBIT_TRAP ${this.orbit_trap}
+                   #define RENDERING_MODE ${this.rendering_mode}
+                   #define COLOURING ${this.colouring}`;
 
         var total = 0;
 
-        if (this.fractal_type == 20) {
+        if (this.fractal == 20) {
 
             for (var i = 1; i < 6; i++) {
 
@@ -84,6 +90,17 @@ class EscapeTime extends Program {
 
             def += `\n#define G_TOTAL ${total}.0`;
 
+        }
+
+        if (this.rendering_mode == 0) {
+            def += `\n#define SMOOTHING ${this.fixed_smoothing}`;
+        
+        } else if (this.rendering_mode == 1) {
+            def += `\n#define CYCLE_VALUE ${this.cyclic_cycle_value}
+                    #define WAVEFORM ${this.cyclic_waveform}`;
+        
+        } else if (this.rendering_mode == 2) {
+            def += `\n#define DECOMPOSITION ${this.radial_decomposition}`;
         }
 
         return shader.replace("//%", def);
@@ -108,7 +125,8 @@ class EscapeTime extends Program {
         document.getElementById("gangopadhyay3").onchange = this.updateGangopadhyay;
         document.getElementById("gangopadhyay4").onchange = this.updateGangopadhyay;
         document.getElementById("gangopadhyay5").onchange = this.updateGangopadhyay;
-
+    
+        document.getElementById("is_julia").onchange = this.updateIsJulia;
         document.getElementById("is_inverted").onchange = this.updateInverted;
         
         document.getElementById("esc_max_iterations").onchange = paramSet(this.max_iterations);
@@ -120,16 +138,21 @@ class EscapeTime extends Program {
         document.getElementById("orbit_cross").onchange = paramSet(this.orbit_trap_param1);
         document.getElementById("orbit_ring_min").onchange = paramSet(this.orbit_trap_param1);
         document.getElementById("orbit_ring_max").onchange = paramSet(this.orbit_trap_param2);
-    
-        document.getElementById("is_julia").onchange = this.updateIsJulia;
-    
-        document.getElementById("smoothing_type").onchange = paramSet(this.smoothing_type);
-        document.getElementById("colouring_type").onchange = this.updateColouringType;
+
+        document.getElementById("rendering_mode").onchange = this.updateRenderingMode;
+
+        document.getElementById("fixed_smoothing").onchange = this.updateFixedSmoothing;
+        document.getElementById("cyclic_cycle_value").onchange = this.updateCyclicValue;
+        document.getElementById("cyclic_waveform").onchange = this.updateCyclicWaveform;
+        document.getElementById("radial_decomposition").onchange = this.updateRadialDecomposition;
+
+        document.getElementById("esc_colouring").onchange = this.updateColouring;
+
         document.getElementById("interior_colouring_type").onchange = paramSet(this.interior_colouring_type);
-    
-        document.getElementById("trapped_colour").onchange = paramSetColour(this.trapped_colour);
-        document.getElementById("close_colour").onchange = paramSetColour(this.close_colour);
-        document.getElementById("far_colour").onchange = paramSetColour(this.far_colour);
+        document.getElementById("interior_colour").onchange = paramSetColour(this.interior_colour);
+
+        document.getElementById("close_colour").onchange = paramSetColour(this.colour2);
+        document.getElementById("far_colour").onchange = paramSetColour(this.colour1);
 
         this.julia_c_handler = new ComplexPickerHandler("julia_selector", this.julia_c_real, this.julia_c_imag, 2.5, 0, 0, "esc_julia_text", "c = $");
         this.phoenix_p_handler = new ComplexPickerHandler("phoenix_p_selector", this.fractal_param1, this.fractal_param2, 2, 0, 0, "phoenix_p_text", "p = $");
@@ -159,13 +182,11 @@ class EscapeTime extends Program {
         this.julia_c_real.getAttr("julia_c_real");
         this.julia_c_imag.getAttr("julia_c_imag");
         
-        this.smoothing_type.getAttr("smoothing_type");
-        this.colouring_type.getAttr("colouring_type");
         this.interior_colouring_type.getAttr("interior_colouring_type");
+        this.interior_colour.getAttr("interior_colour");
 
-        this.trapped_colour.getAttr("trapped_colour");
-        this.close_colour.getAttr("close_colour");
-        this.far_colour.getAttr("far_colour");
+        this.exterior_colour1.getAttr("exterior_colour1");
+        this.exterior_colour2.getAttr("exterior_colour2");
     
     }
 
@@ -186,13 +207,11 @@ class EscapeTime extends Program {
         this.julia_c_real.loadFloat();
         this.julia_c_imag.loadFloat();
 
-        this.smoothing_type.loadInt();
-        this.colouring_type.loadInt();
         this.interior_colouring_type.loadInt();
+        this.interior_colour.loadFloat3();
 
-        this.trapped_colour.loadFloat3();
-        this.close_colour.loadFloat3();
-        this.far_colour.loadFloat3();
+        this.exterior_colour1.loadFloat3();
+        this.exterior_colour2.loadFloat3();
 
     }
 
@@ -275,27 +294,6 @@ class EscapeTime extends Program {
         redraw();
     
     }
-    
-    updateColouringType = function(event) {
-    
-        ESCAPE_TIME.colouring_type.value = event.target.value;
-    
-        const colour_select_style = document.getElementById("colour_select").style;
-        const smoothing_style = document.getElementById("smoothing_div").style;
-        
-        colour_select_style.display = "block";
-        smoothing_style.display = "block";
-        
-        if (ESCAPE_TIME.colouring_type.value == 2) {
-            colour_select_style.display = "none";
-            
-        } else if (ESCAPE_TIME.colouring_type.value == 3) {
-            smoothing_style.display = "none";
-        }
-    
-        redraw();
-    
-    }
 
     updateOrbitTrap = function(event) {
 
@@ -304,14 +302,14 @@ class EscapeTime extends Program {
         var normal_style = document.getElementById("orbit_normal_div").style;
         var circle_style = document.getElementById("orbit_circle_div").style;
         var square_style = document.getElementById("orbit_square_div").style;
-        var cross_style = document.getElementById("orbit_cross_div").style;
         var ring_style = document.getElementById("orbit_ring_div").style;
+        var cross_style = document.getElementById("orbit_cross_div").style;
 
         normal_style.display = "none";
         circle_style.display = "none";
         square_style.display = "none";
-        cross_style.display = "none";
         ring_style.display = "none";
+        cross_style.display = "none";
 
         if (ESCAPE_TIME.orbit_trap == 0) {
             ESCAPE_TIME.orbit_trap_param1.value = document.getElementById("escape_radius").value;
@@ -326,13 +324,13 @@ class EscapeTime extends Program {
             square_style.display = "block";
 
         } else if (ESCAPE_TIME.orbit_trap == 3) {
-            ESCAPE_TIME.orbit_trap_param1.value = document.getElementById("orbit_cross").value;
-            cross_style.display = "block";
-
-        } else if (ESCAPE_TIME.orbit_trap == 4) {
             ESCAPE_TIME.orbit_trap_param1.value = document.getElementById("orbit_ring_min").value;
             ESCAPE_TIME.orbit_trap_param2.value = document.getElementById("orbit_ring_max").value;
             ring_style.display = "block";
+
+        } else if (ESCAPE_TIME.orbit_trap == 4) {
+            ESCAPE_TIME.orbit_trap_param1.value = document.getElementById("orbit_cross").value;
+            cross_style.display = "block";
         }
 
         setupShader();
@@ -343,5 +341,82 @@ class EscapeTime extends Program {
     updateGangopadhyay = function(event) {
         setupShader();
         redraw();
+    }
+
+    updateRenderingMode = function(event) {
+
+        ESCAPE_TIME.rendering_mode = event.target.value;
+
+        const styles = [
+            document.getElementById("fixed_rendering_div").style,
+            document.getElementById("cyclic_rendering_div").style,
+            document.getElementById("radial_rendering_div").style
+        ];
+
+        styles.forEach((style) => style.display = "none");
+        styles[ESCAPE_TIME.rendering_mode].display = "grid";
+
+        setupShader();
+        redraw();
+
+    }
+
+    updateFixedSmoothing = function(event) {
+
+        ESCAPE_TIME.fixed_smoothing = event.target.value;
+
+        setupShader();
+        redraw();
+
+    }
+
+    updateCyclicValue = function(event) {
+
+        ESCAPE_TIME.cyclic_cycle_value = event.target.value;
+
+        setupShader();
+        redraw();
+
+    }
+
+    updateCyclicWaveform = function(event) {
+
+        ESCAPE_TIME.cyclic_waveform = event.target.value;
+
+        setupShader();
+        redraw();
+
+    }
+
+    updateRadialDecomposition = function(event) {
+
+        ESCAPE_TIME.radial_decomposition = event.target.value;
+
+        setupShader();
+        redraw();
+
+    }
+
+    updateColouring = function(event) {
+    
+        ESCAPE_TIME.colouring = event.target.value;
+    
+        const fixed_colour_style = document.getElementById("fixed_colour_select").style;
+        const other_colour_style = document.getElementById("other_colour_select").style;
+        
+        fixed_colour_style.display = "none";
+        other_colour_style.display = "none";
+        
+        if (ESCAPE_TIME.colouring.value == 0) {
+            if (ESCAPE_TIME.rendering_mode == 0) {
+                fixed_colour_style.display = "block";
+                
+            } else {
+                other_colour_style.display = "block";
+            }
+        }
+
+        redraw();
+    
     }
 }

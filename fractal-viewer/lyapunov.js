@@ -7,7 +7,8 @@ LYAPUNOV_FUNCTIONS = [
     "x ← rx(1 - x) + μsin<sup>2</sup>(2πx)",
     "x ← r*sin(x)",
     "x ← r*cos(x)",
-    "x ← r*(a - cosh(x))"
+    "x ← r*(a - cosh(x))",
+    "x ← r/2(xcos<sup>2</sup>(π/2x) + (3x + 1)sin<sup>2</sup>(π/2x))"
 ]
 
 class Lyapunov extends Program {
