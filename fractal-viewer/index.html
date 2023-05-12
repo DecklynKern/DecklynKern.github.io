@@ -162,31 +162,42 @@
                         </div>
                         <div id="orbit_ring_div" style="display: none">
                             Min Radius:
-                            <input id="orbit_ring_min" type="number" value="0.05" step="0.01" min="0" max="1">
+                            <input id="orbit_ring_min" type="number" value="0.05" min="0" max="1" step="0.01" >
                             <br>
                             Max Radius:
-                            <input id="orbit_ring_max" type="number" value="0.12" step="0.01" min="0" max="1">
+                            <input id="orbit_ring_max" type="number" value="0.12" min="0" max="1" step="0.01" >
                         </div>
                     </div>
                     <div class="input-div">
                         <div>
-                            Rendering Mode:
-                            <select id="rendering_mode">
-                                <option value="0">Fixed (Escape Time)</option>
+                            Exterior Colouring Style:
+                            <select id="exterior_colouring_style">
+                                <option value="0">Monotonic</option>
                                 <option value="1">Cyclic</option>
                                 <option value="2">Radial</option>
                             </select>
                         </div>
-                        <div id="fixed_rendering_div">
-                            Smoothing:
-                            <select id="fixed_smoothing">
-                                <option value="0">None</option>
-                                <option value="1">Log</option>
+                        <div id="monotonic_rendering_div">
+                            Function:
+                            <select id="monotonic_function">
+                                <option value="0">Escape Time</option>
+                                <option value="1">Smooth Escape Time</option>
+                                <option value="2">Normal Map (mandel/multibrot only)</option>
+                                <option value="3">Stripe Average</option>
                             </select>
+                            <div id="light_selector_div" style="display: none">
+                                Light Position:
+                                <br>
+                                <canvas id="light_selector" class="selector" width="200px" height="200px"></canvas>
+                            </div>
+                            <div id="stripe_average_div" style="display: none">
+                                Stripe Density:
+                                <input id="stripe_density" type="number" value="3" min="0" step="0.1">
+                            </div>
                         </div>
                         <div id="cyclic_rendering_div" style="display: none">
-                            Cycle Value:
-                            <select id="cyclic_cycle_value">
+                            Cycle Function:
+                            <select id="cyclic_cycle_function">
                                 <option value="0">Escape Time</option>
                                 <option value="1">Orbit Exponential</option>
                             </select>
@@ -196,7 +207,6 @@
                                 <option value="1">Square</option>
                                 <option value="2">Triangle</option>
                                 <option value="3">Sawtooth</option>
-                                <option value="4">Backwards Sawtooth</option>
                             </select>
                         </div>
                         <div id="radial_rendering_div" style="display: none">
@@ -206,14 +216,14 @@
                                 <option value="1">Binary</option>
                             </select>
                         </div>
-                        Exterior Colouring:
+                        Colouring:
                         <select id="esc_exterior_colouring">
                             <option value="0">Interpolate</option>
                             <option value="1">Hue</option>
                         </select>
                         <br>
                         <div style="display: grid">
-                            <div id="fixed_colour_select">
+                            <div id="monotonic_colour_select">
                                 <div class="grid-entry">
                                     Close Colour:
                                     <input id="close_colour" type="color" value="#0000FF">
@@ -241,6 +251,7 @@
                             <option value="0">Solid</option>
                             <option value="1">Average Magnitude</option>
                             <option value="2">Min Dist</option>
+                            <option value="3">Orbit Dist</option>
                         </select>
                         <div style="display: grid">
                             <div id="interior_solid_div">

@@ -116,7 +116,10 @@ class ComplexPickerHandler {
             this.real = real_param.value;
             this.imag = imag_param.value;
 
-            document.getElementById(info_div).innerHTML = template.replace("$", formatComplex(real_param.value, imag_param.value));
+            if (info_div) {
+                document.getElementById(info_div).innerHTML = template.replace("$", formatComplex(real_param.value, imag_param.value));
+            }
+
         
             canvas_context.clearRect(0, 0, 200, 200);
         

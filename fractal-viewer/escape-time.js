@@ -49,10 +49,10 @@ class EscapeTime extends Program {
     julia_c_real = new Param(0.0);
     julia_c_imag = new Param(0.0);
 
-    rendering_mode = 0;
+    exterior_colouring_style = 0;
 
-    fixed_smoothing = 0;
-    cyclic_cycle_value = 0;
+    monotonic_function = 0;
+    cyclic_cycle_function = 0;
     cyclic_waveform = 0;
     radial_decomposition = 0;
 
@@ -60,6 +60,9 @@ class EscapeTime extends Program {
 
     exterior_colour1 = new Param([0.0, 0.0, 1.0]);
     exterior_colour2 = new Param([0.0, 0.0, 0.0]);
+
+    exterior_colouring_param1 = new Param(0.0);
+    exterior_colouring_param2 = new Param(0.0);
 
     interior_colouring = 0;
 
@@ -71,7 +74,7 @@ class EscapeTime extends Program {
         var shader = (' ' + this.baseShader).slice(1);
         var def = `#define FRACTAL ${this.fractal}
                    #define ORBIT_TRAP ${this.orbit_trap}
-                   #define RENDERING_MODE ${this.rendering_mode}
+                   #define EXTERIOR_COLOURING_STYLE ${this.exterior_colouring_style}
                    #define EXTERIOR_COLOURING ${this.exterior_colouring}
                    #define INTERIOR_COLOURING ${this.interior_colouring}`;
 
@@ -96,14 +99,14 @@ class EscapeTime extends Program {
 
         }
 
-        if (this.rendering_mode == 0) {
-            def += `\n#define SMOOTHING ${this.fixed_smoothing}`;
+        if (this.exterior_colouring_style == 0) {
+            def += `\n#define MONOTONIC_FUNCTION ${this.monotonic_function}`;
         
-        } else if (this.rendering_mode == 1) {
-            def += `\n#define CYCLE_VALUE ${this.cyclic_cycle_value}
+        } else if (this.exterior_colouring_style == 1) {
+            def += `\n#define CYCLE_FUNCTION ${this.cyclic_cycle_function}
                     #define WAVEFORM ${this.cyclic_waveform}`;
         
-        } else if (this.rendering_mode == 2) {
+        } else if (this.exterior_colouring_style == 2) {
             def += `\n#define DECOMPOSITION ${this.radial_decomposition}`;
         }
 
@@ -143,14 +146,16 @@ class EscapeTime extends Program {
         document.getElementById("orbit_ring_min").onchange = paramSet(this.orbit_trap_param1);
         document.getElementById("orbit_ring_max").onchange = paramSet(this.orbit_trap_param2);
 
-        document.getElementById("rendering_mode").onchange = this.updateRenderingMode;
+        document.getElementById("exterior_colouring_style").onchange = this.updateRenderingMode;
 
-        document.getElementById("fixed_smoothing").onchange = this.updateFixedSmoothing;
-        document.getElementById("cyclic_cycle_value").onchange = this.updateCyclicValue;
+        document.getElementById("monotonic_function").onchange = this.updateMonotonicFunction;
+        document.getElementById("cyclic_cycle_function").onchange = this.updateCyclicFunction;
         document.getElementById("cyclic_waveform").onchange = this.updateCyclicWaveform;
         document.getElementById("radial_decomposition").onchange = this.updateRadialDecomposition;
 
         document.getElementById("esc_exterior_colouring").onchange = this.updateExteriorColouring;
+
+        document.getElementById("stripe_density").onchange = paramSet(this.exterior_colouring_param1);
 
         document.getElementById("close_colour").onchange = paramSetColour(this.exterior_colour1);
         document.getElementById("far_colour").onchange = paramSetColour(this.exterior_colour2);
@@ -171,6 +176,8 @@ class EscapeTime extends Program {
         this.cmultibrot_p_handler = new ComplexPickerHandler("cmultibrot_p_selector", this.fractal_param1, this.fractal_param2, 6, 0, 0, "cmultibrot_p_text", "p = $");
         
         this.fractal_param1.value = 0;
+
+        this.light_handler = new ComplexPickerHandler("light_selector", this.exterior_colouring_param1, this.exterior_colouring_param2, 1, 0, 0, null, null);
         
     }
 
@@ -193,6 +200,9 @@ class EscapeTime extends Program {
 
         this.exterior_colour1.getAttr("exterior_colour1");
         this.exterior_colour2.getAttr("exterior_colour2");
+
+        this.exterior_colouring_param1.getAttr("exterior_colouring_param1");
+        this.exterior_colouring_param2.getAttr("exterior_colouring_param2");
         
         this.interior_colour1.getAttr("interior_colour1");
         this.interior_colour2.getAttr("interior_colour2");
@@ -218,6 +228,9 @@ class EscapeTime extends Program {
 
         this.exterior_colour1.loadFloat3();
         this.exterior_colour2.loadFloat3();
+
+        this.exterior_colouring_param1.loadFloat();
+        this.exterior_colouring_param2.loadFloat();
 
         this.interior_colour1.loadFloat3();
         this.interior_colour2.loadFloat3();
@@ -354,15 +367,15 @@ class EscapeTime extends Program {
 
     synchExteriorColourSettings = function() {
     
-        const fixed_colour_style = document.getElementById("fixed_colour_select").style;
+        const monotonic_colour_style = document.getElementById("monotonic_colour_select").style;
         const other_colour_style = document.getElementById("other_colour_select").style;
         
-        fixed_colour_style.display = "none";
+        monotonic_colour_style.display = "none";
         other_colour_style.display = "none";
         
         if (ESCAPE_TIME.exterior_colouring == 0) {
-            if (ESCAPE_TIME.rendering_mode == 0) {
-                fixed_colour_style.display = "block";
+            if (ESCAPE_TIME.exterior_colouring_style == 0) {
+                monotonic_colour_style.display = "block";
                 ESCAPE_TIME.exterior_colour1.value = hexToRGB(document.getElementById("close_colour").value);
                 ESCAPE_TIME.exterior_colour2.value = hexToRGB(document.getElementById("far_colour").value);
                 
@@ -376,16 +389,16 @@ class EscapeTime extends Program {
 
     updateRenderingMode = function(event) {
 
-        ESCAPE_TIME.rendering_mode = event.target.value;
+        ESCAPE_TIME.exterior_colouring_style = event.target.value;
 
         const styles = [
-            document.getElementById("fixed_rendering_div").style,
+            document.getElementById("monotonic_rendering_div").style,
             document.getElementById("cyclic_rendering_div").style,
             document.getElementById("radial_rendering_div").style
         ];
 
         styles.forEach((style) => style.display = "none");
-        styles[ESCAPE_TIME.rendering_mode].display = "grid";
+        styles[ESCAPE_TIME.exterior_colouring_style].display = "grid";
 
         ESCAPE_TIME.synchExteriorColourSettings();
         setupShader();
@@ -393,18 +406,34 @@ class EscapeTime extends Program {
 
     }
 
-    updateFixedSmoothing = function(event) {
+    updateMonotonicFunction = function(event) {
 
-        ESCAPE_TIME.fixed_smoothing = event.target.value;
+        ESCAPE_TIME.monotonic_function = event.target.value;
+
+        var light_style = document.getElementById("light_selector_div").style;
+        var stripe_style = document.getElementById("stripe_average_div").style;
+
+        light_style.display = "none";
+        stripe_style.display = "none";
+
+        if (ESCAPE_TIME.monotonic_function == 2) {
+            light_style.display = "block";
+            ESCAPE_TIME.exterior_colouring_param1.value = ESCAPE_TIME.light_handler.real;
+            ESCAPE_TIME.exterior_colouring_param2.value = ESCAPE_TIME.light_handler.imag;
+
+        } else if (ESCAPE_TIME.monotonic_function == 3) {
+            stripe_style.display = "block";
+            ESCAPE_TIME.exterior_colouring_param1.value = document.getElementById("stripe_density").value;
+        }
 
         setupShader();
         redraw();
 
     }
 
-    updateCyclicValue = function(event) {
+    updateCyclicFunction = function(event) {
 
-        ESCAPE_TIME.cyclic_cycle_value = event.target.value;
+        ESCAPE_TIME.cyclic_cycle_function = event.target.value;
 
         setupShader();
         redraw();

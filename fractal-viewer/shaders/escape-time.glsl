@@ -25,6 +25,9 @@ uniform float julia_c_imag;
 uniform vec3 exterior_colour1;
 uniform vec3 exterior_colour2;
 
+uniform float exterior_colouring_param1;
+uniform float exterior_colouring_param2;
+
 uniform vec3 interior_colour1;
 uniform vec3 interior_colour2;
 
@@ -128,6 +131,32 @@ vec3 interpolate(vec3 c1, vec3 c2, float amount) {
     return c1 * amount + c2 * (1.0 - amount);
 }
 
+vec3 hsvToRgb(float h, float s, float v) {
+
+    float c = v * s;
+    float x = c * 1.0 - abs(2.0 * fract(h * 3.0) - 1.0);
+    float m = v - c;
+
+    if (h < 0.16666666666667) {
+        return vec3(c, x, 0) + m;
+
+    } else if (h < 0.3333333333333334) {
+        return vec3(x, c, 0) + m;
+    
+    } else if (h < 0.5) {
+        return vec3(0, c, x) + m;
+    
+    } else if (h < 0.666666666666667) {
+        return vec3(0, x, c) + m;
+    
+    } else if (h < 0.8333333333333334) {
+        return vec3(x, 0, c) + m;
+    
+    } else {
+        return vec3(c, 0, x) + m;
+    }
+}
+
 vec3 getColour(float z_real, float z_imag) {
 
     if (bool(is_inverted)) {
@@ -197,9 +226,18 @@ vec3 getColour(float z_real, float z_imag) {
         float cross_width = orbit_trap_param1 * 0.5;
     #endif
 
-    #if RENDERING_MODE == 1
-        #if CYCLE_VALUE == 1
-            Complex diff;
+    #if EXTERIOR_COLOURING_STYLE == 0
+        #if MONOTONIC_FUNCTION == 2
+            Complex der = Complex(1.0, 0.0);
+        
+        #elif MONOTONIC_FUNCTION == 3
+            float total = 0.0;
+            float total_prev = 0.0;
+        #endif
+
+    #elif EXTERIOR_COLOURING_STYLE == 1
+        #if CYCLE_FUNCTION == 1
+            Complex exp_diff;
             float exponential = 0.0;
         #endif
     #endif
@@ -210,6 +248,10 @@ vec3 getColour(float z_real, float z_imag) {
     #elif INTERIOR_COLOURING == 2
         float bail_dist_sq;
         float min_dist_sq = 1.0;
+
+    #elif INTERIOR_COLOURING == 3
+        Complex diff;
+        float total_dist_sq = 0.0;
 
     #endif
 
@@ -500,10 +542,45 @@ vec3 getColour(float z_real, float z_imag) {
         
         mag_sq = z_real_sq + z_imag_sq;
 
-        #if RENDERING_MODE == 1
-            #if CYCLE_VALUE == 1
-                diff = sub(z, z_prev);
-                exponential += exp(-(sqrt(mag_sq) + 0.5 / sqrt(diff.real * diff.real + diff.imag * diff.imag)));
+        #if EXTERIOR_COLOURING_STYLE == 0
+            #if MONOTONIC_FUNCTION == 2
+                #if FRACTAL == 0
+
+                    der = add(
+                        scale(
+                            prod(
+                                z_prev,
+                                der),
+                            2.0),
+                        Complex(
+                            1.0,
+                            0.0));
+
+                #elif FRACTAL == 5
+
+                    der = add(
+                        scale(
+                            prod(
+                                exponent(
+                                    z_prev,
+                                    fractal_param1 - 1.0),
+                                der),
+                            2.0 * fractal_param1),
+                        Complex(
+                            1.0,
+                            0.0));
+                #endif
+
+            #elif MONOTONIC_FUNCTION == 3
+                total_prev = total;
+                total += 0.5 + 0.5 * sin(exterior_colouring_param1 * argument(z));
+            #endif
+        #endif
+
+        #if EXTERIOR_COLOURING_STYLE == 1
+            #if CYCLE_FUNCTION == 1
+                exp_diff = sub(z, z_prev);
+                exponential += exp(-(sqrt(mag_sq) + 0.5 / sqrt(exp_diff.real * exp_diff.real + exp_diff.imag * exp_diff.imag)));
             #endif
         #endif
 
@@ -552,26 +629,30 @@ vec3 getColour(float z_real, float z_imag) {
                 min_dist_sq = bail_dist_sq;
             }
 
+        #elif INTERIOR_COLOURING == 3
+            diff = sub(z, z_prev);
+            total_dist_sq += diff.real * diff.real + diff.imag * diff.imag;
+
         #endif
 
         #if ORBIT_TRAP == 0
 
             if (mag_sq >= escape_radius_sq) {
-                iterations = iteration;
+                iterations = iteration + 1;
                 break;
             }
 
         #elif ORBIT_TRAP == 1
         
             if (mag_sq <= min_radius_sq) {
-                iterations = iteration;
+                iterations = iteration + 1;
                 break;
             }
 
         #elif ORBIT_TRAP == 2
         
             if (abs(z.real) < orbit_trap_param1 && abs(z.imag) < orbit_trap_param1) {
-                iterations = iteration;
+                iterations = iteration + 1;
                 break;
             }
 
@@ -579,14 +660,14 @@ vec3 getColour(float z_real, float z_imag) {
         
             if ((mag_sq >= ring_min_sq && mag_sq <= ring_max_sq)
             ) {
-                iterations = iteration;
+                iterations = iteration + 1;
                 break;
             }
 
         #elif ORBIT_TRAP == 4
 
             if (abs(z.real) < cross_width || abs(z.imag) < cross_width) {
-                iterations = iteration;
+                iterations = iteration + 1;
                 break;
             }
 
@@ -603,29 +684,56 @@ vec3 getColour(float z_real, float z_imag) {
 
         #elif INTERIOR_COLOURING == 2
             return interpolate(interior_colour1, interior_colour2, min_dist_sq);
+
+        #elif INTERIOR_COLOURING == 3
+            return hsvToRgb(fract(sqrt(total_dist_sq)), 1.0, 1.0);
+
         #endif
 
     } else {
 
-        #if RENDERING_MODE == 0
+        #if EXTERIOR_COLOURING_STYLE == 0
 
-            float f_iterations = float(iterations);
+            #if MONOTONIC_FUNCTION == 0 || MONOTONIC_FUNCTION == 1
+            
+                float f_iterations = float(iterations);
 
-            #if SMOOTHING == 1
-                f_iterations += 1.0 - log(log(mag_sq) / log(escape_radius_sq)) / log(2.0);
+                #if MONOTONIC_FUNCTION == 1
+                    f_iterations += 1.0 + log(log(escape_radius_sq) / log(mag_sq)) / log(2.0);
+                #endif
+
+                colour_val = f_iterations / float(max_iterations);
+
+            #elif MONOTONIC_FUNCTION == 2
+
+                z = div(z, der);
+
+                float mag = sqrt(z.real * z.real + z.imag * z.imag);
+
+                z = Complex(
+                    z.real / mag,
+                    z.imag / mag
+                );
+
+                colour_val = max(0.0, 
+                    exterior_colouring_param1 * z.real +
+                    exterior_colouring_param2 * z.imag +
+                    sqrt(1.0 - exterior_colouring_param1 * exterior_colouring_param1 - exterior_colouring_param2 * exterior_colouring_param2)
+                );
+
+            #elif MONOTONIC_FUNCTION == 3
+                float interp = 1.0 + log(log(escape_radius_sq) / log(mag_sq)) / log(2.0);
+                colour_val = (total * interp + total_prev * (1.0 - interp)) / (float(iterations) + interp);
             #endif
 
-            colour_val = f_iterations / float(max_iterations);
-
-
-        #elif RENDERING_MODE == 1
+        #elif EXTERIOR_COLOURING_STYLE == 1
 
             float val;
 
-            #if CYCLE_VALUE == 0
+            #if CYCLE_FUNCTION == 0
                 val = float(iterations) + 1.0 - log(log(mag_sq) / log(escape_radius_sq)) / log(2.0);
 
-            #elif CYCLE_VALUE == 1
+            #elif CYCLE_FUNCTION == 1
                 val = log(exponential);
 
             #endif
@@ -648,14 +756,10 @@ vec3 getColour(float z_real, float z_imag) {
                 }
 
             #elif WAVEFORM == 3
-                colour_val = 1.0 - fract(val);
-
-            #elif WAVEFORM == 4
                 colour_val = fract(val);
-
             #endif
 
-        #elif RENDERING_MODE == 2
+        #elif EXTERIOR_COLOURING_STYLE == 2
             
             float angle = argument(z);
 
@@ -682,29 +786,7 @@ vec3 getColour(float z_real, float z_imag) {
             return interpolate(exterior_colour1, exterior_colour2, colour_val);
 
         #elif EXTERIOR_COLOURING == 1
-
-            float h = 6.0 * colour_val;
-            float x = 1.0 - abs(2.0 * fract(h / 2.0) - 1.0);
-
-            if (h < 1.0) {
-                return vec3(1.0, x, 0);
-
-            } else if (h < 2.0) {
-                return vec3(x, 1.0, 0);
-            
-            } else if (h < 3.0) {
-                return vec3(0, 1.0, x);
-            
-            } else if (h < 4.0) {
-                return vec3(0, x, 1.0);
-            
-            } else if (h < 5.0) {
-                return vec3(x, 0, 1.0);
-            
-            } else {
-                return vec3(1.0, 0, x);
-            }
-
+            return hsvToRgb(colour_val, 1.0, 1.0);
         #endif
 
     }
