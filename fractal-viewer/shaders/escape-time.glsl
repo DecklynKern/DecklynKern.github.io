@@ -157,6 +157,44 @@ vec3 hsvToRgb(float h, float s, float v) {
     }
 }
 
+float getSmoothIter(float mag_sq, Complex z) {
+
+    float exp;
+
+    #if FRACTAL == 5
+        exp = fractal_param1;
+
+    #elif FRACTAL == 15
+        exp = max(fractal_param1, fractal_param2);
+
+    #elif FRACTAL == 17
+        exp = 4.0;
+
+    #else
+        exp = 2.0;
+
+    #endif
+
+    #if ORBIT_TRAP == 0
+        return 1.0 + log(log(orbit_trap_param1 * orbit_trap_param1) / log(mag_sq)) / log(exp);
+
+    #elif ORBIT_TRAP == 1
+        return 1.0 + log(log(mag_sq) / log(orbit_trap_param1 * orbit_trap_param1)) / log(exp);
+
+    #elif ORBIT_TRAP == 2
+        return 1.0 + log(log(min(abs(z.real), abs(z.imag))) / log(orbit_trap_param1 * 0.5)) / log(exp);
+
+    #elif ORBIT_TRAP == 3
+        float ring_min_sq = orbit_trap_param1 * orbit_trap_param1;
+        float ring_max_sq = orbit_trap_param2 * orbit_trap_param2;
+        // TODO
+
+    #elif ORBIT_TRAP == 4
+        return 1.0 + log(log(min(abs(z.real), abs(z.imag))) / log(orbit_trap_param1 * 0.5)) / log(exp);
+    #endif
+    
+}
+
 vec3 getColour(float z_real, float z_imag) {
 
     if (bool(is_inverted)) {
@@ -230,7 +268,7 @@ vec3 getColour(float z_real, float z_imag) {
         #if MONOTONIC_FUNCTION == 2
             Complex der = Complex(1.0, 0.0);
         
-        #elif MONOTONIC_FUNCTION == 3
+        #elif MONOTONIC_FUNCTION == 3 || MONOTONIC_FUNCTION == 4
             float total = 0.0;
             float total_prev = 0.0;
         #endif
@@ -574,6 +612,10 @@ vec3 getColour(float z_real, float z_imag) {
             #elif MONOTONIC_FUNCTION == 3
                 total_prev = total;
                 total += 0.5 + 0.5 * sin(exterior_colouring_param1 * argument(z));
+
+            #elif MONOTONIC_FUNCTION == 4
+                float m_n = mag_sq - 
+
             #endif
         #endif
 
@@ -699,7 +741,7 @@ vec3 getColour(float z_real, float z_imag) {
                 float f_iterations = float(iterations);
 
                 #if MONOTONIC_FUNCTION == 1
-                    f_iterations += 1.0 + log(log(escape_radius_sq) / log(mag_sq)) / log(2.0);
+                    f_iterations += getSmoothIter(mag_sq, z);
                 #endif
 
                 colour_val = f_iterations / float(max_iterations);
@@ -722,7 +764,7 @@ vec3 getColour(float z_real, float z_imag) {
                 );
 
             #elif MONOTONIC_FUNCTION == 3
-                float interp = 1.0 + log(log(escape_radius_sq) / log(mag_sq)) / log(2.0);
+                float interp = getSmoothIter(mag_sq, z);
                 colour_val = (total * interp + total_prev * (1.0 - interp)) / (float(iterations) + interp);
             #endif
 
@@ -731,7 +773,7 @@ vec3 getColour(float z_real, float z_imag) {
             float val;
 
             #if CYCLE_FUNCTION == 0
-                val = float(iterations) + 1.0 - log(log(mag_sq) / log(escape_radius_sq)) / log(2.0);
+                val = float(iterations) + getSmoothIter(mag_sq, z);
 
             #elif CYCLE_FUNCTION == 1
                 val = log(exponential);
