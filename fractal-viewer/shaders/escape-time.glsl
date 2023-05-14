@@ -225,7 +225,6 @@ vec3 getColour(float z_real, float z_imag) {
     float mag_sq = z_real_sq + z_imag_sq;
 
     int iterations;
-    Complex derivative;
 
     float colour_val = 0.0;
 
@@ -267,10 +266,6 @@ vec3 getColour(float z_real, float z_imag) {
     #if EXTERIOR_COLOURING_STYLE == 0
         #if MONOTONIC_FUNCTION == 2
             Complex der = Complex(1.0, 0.0);
-        
-        #elif MONOTONIC_FUNCTION == 3 || MONOTONIC_FUNCTION == 4
-            float total = 0.0;
-            float total_prev = 0.0;
         #endif
 
     #elif EXTERIOR_COLOURING_STYLE == 1
@@ -278,6 +273,11 @@ vec3 getColour(float z_real, float z_imag) {
             Complex exp_diff;
             float exponential = 0.0;
         #endif
+    #endif
+
+    #if (EXTERIOR_COLOURING_STYLE == 0 && MONOTONIC_FUNCTION == 3) || INTERIOR_COLOURING == 4
+        float total = 0.0;
+        float total_prev = 0.0;
     #endif
 
     #if INTERIOR_COLOURING == 1
@@ -608,15 +608,12 @@ vec3 getColour(float z_real, float z_imag) {
                             1.0,
                             0.0));
                 #endif
-
-            #elif MONOTONIC_FUNCTION == 3
-                total_prev = total;
-                total += 0.5 + 0.5 * sin(exterior_colouring_param1 * argument(z));
-
-            #elif MONOTONIC_FUNCTION == 4
-                float m_n = mag_sq - 
-
             #endif
+        #endif
+        
+        #if (EXTERIOR_COLOURING_STYLE == 0 && MONOTONIC_FUNCTION == 3) || INTERIOR_COLOURING == 4
+            total_prev = total;
+            total += 0.5 + 0.5 * sin(exterior_colouring_param1 * argument(z));
         #endif
 
         #if EXTERIOR_COLOURING_STYLE == 1
@@ -641,17 +638,17 @@ vec3 getColour(float z_real, float z_imag) {
 
                 float square_dist;
 
-                if (abs(z.real) <= orbit_trap_param1) {
+                if (abs(z.real) <= half_side) {
                     square_dist = z_imag_sq;
                 
-                } else if (abs(z.imag) <= orbit_trap_param1) {
+                } else if (abs(z.imag) <= half_side1) {
                     square_dist = z_real_sq;
                 
                 } else {
                     square_dist = mag_sq;
                 }
 
-                bail_dist_sq = 1.0 - orbit_trap_param1 / square_dist;
+                bail_dist_sq = 1.0 - half_side / square_dist;
 
             #elif ORBIT_TRAP == 3
 
@@ -693,7 +690,7 @@ vec3 getColour(float z_real, float z_imag) {
 
         #elif ORBIT_TRAP == 2
         
-            if (abs(z.real) < orbit_trap_param1 && abs(z.imag) < orbit_trap_param1) {
+            if (abs(z.real) < half_side && abs(z.imag) < half_side) {
                 iterations = iteration + 1;
                 break;
             }
@@ -730,6 +727,8 @@ vec3 getColour(float z_real, float z_imag) {
         #elif INTERIOR_COLOURING == 3
             return hsvToRgb(fract(sqrt(total_dist_sq)), 1.0, 1.0);
 
+        #elif INTERIOR_COLOURING == 4
+            return interpolate(interior_colour1, interior_colour2, total / float(max_iterations));
         #endif
 
     } else {
@@ -780,13 +779,15 @@ vec3 getColour(float z_real, float z_imag) {
 
             #endif
 
-            #if WAVEFORM == 0
+            val /= exterior_colouring_param1;
+
+            #if CYCLIC_WAVEFORM == 0
                 colour_val = 0.5 * sin(val * 2.0 * PI) + 0.5;
 
-            #elif WAVEFORM == 1
+            #elif CYCLIC_WAVEFORM == 1
                 colour_val = round(fract(val));
 
-            #elif WAVEFORM == 2
+            #elif CYCLIC_WAVEFORM == 2
 
                 val = fract(val);
 
@@ -797,7 +798,7 @@ vec3 getColour(float z_real, float z_imag) {
                     colour_val = 2.0 * val;
                 }
 
-            #elif WAVEFORM == 3
+            #elif CYCLIC_WAVEFORM == 3
                 colour_val = fract(val);
             #endif
 
@@ -805,7 +806,7 @@ vec3 getColour(float z_real, float z_imag) {
             
             float angle = argument(z);
 
-            #if DECOMPOSITION == 0
+            #if RADIAL_DECOMPOSITION == 0
                 if (angle > 0.0) {
                     colour_val = angle / PI;
 
@@ -813,7 +814,7 @@ vec3 getColour(float z_real, float z_imag) {
                     colour_val = -angle / PI;
                 }
 
-            #elif DECOMPOSITION == 1
+            #elif RADIAL_DECOMPOSITION == 1
                 if (angle > 0.0) {
                     colour_val = 0.0;
                 

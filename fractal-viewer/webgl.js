@@ -23,6 +23,7 @@ var magnitude = new Param(2.0);
 var centre_x = new Param(0.0);
 var centre_y = new Param(0.0);
 var samples = new Param(1);
+var canvas_size = new Param(1000);
 
 function main() {
 
@@ -34,6 +35,7 @@ function main() {
     document.onmouseup = function(_ev) {mouse_down = false};
 
     document.getElementById("samples").onchange = updateSamples;
+    document.getElementById("canvas_size").onchange = updateCanvasSize;
 
     document.getElementById("fractal_canvas").onclick = onFractalClick;
 
@@ -84,6 +86,7 @@ function setupShader() {
     centre_y.getAttr("centre_y");
 
     samples.getAttr("samples");
+    canvas_size.getAttr("canvas_size");
 
     program.setupAttrs();
 
@@ -115,6 +118,7 @@ function redraw() {
     centre_y.loadFloat();
 
     samples.loadInt();
+    canvas_size.loadInt();
 
     program.loadAttrs();
 
@@ -152,6 +156,17 @@ function updateProgram() {
 function updateSamples(event) {
     samples.value = event.target.value;
     redraw();
+}
+
+function updateCanvasSize(event) {
+
+    canvas_size.value = event.target.value;
+
+    gl.canvas.width = gl.canvas.height = canvas_size.value;
+    gl.viewport(0, 0, canvas_size.value, canvas_size.value);
+
+    redraw();
+
 }
 
 function updateDisplayText() {
@@ -236,7 +251,8 @@ function keyhandler(event) {
 }
 
 function onFractalClick(event) {
-    centre_x.value += (event.x - 500) / 500 * magnitude.value;
-    centre_y.value += (event.y - 500) / 500 * magnitude.value;
+    const centre = canvas_size.value / 2;
+    centre_x.value += (event.x - centre) / centre * magnitude.value;
+    centre_y.value += (event.y - centre) / centre * magnitude.value;
     redraw();
 }

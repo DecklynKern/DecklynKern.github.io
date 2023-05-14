@@ -99,17 +99,30 @@ class EscapeTime extends Program {
 
         }
 
-        if (this.exterior_colouring_style == 0) {
-            def += `\n#define MONOTONIC_FUNCTION ${this.monotonic_function}`;
-        
-        } else if (this.exterior_colouring_style == 1) {
-            def += `\n#define CYCLE_FUNCTION ${this.cyclic_cycle_function}
-                    #define WAVEFORM ${this.cyclic_waveform}`;
-        
-        } else if (this.exterior_colouring_style == 2) {
-            def += `\n#define DECOMPOSITION ${this.radial_decomposition}`;
+        var monotonic_function = this.monotonic_function;
+        if (this.exterior_colouring_style != 0) {
+            monotonic_function = -1;
         }
 
+        def += `\n#define MONOTONIC_FUNCTION ${monotonic_function}`;
+
+        var cycle_function = this.cyclic_cycle_function;
+        var cyclic_waveform = this.cyclic_waveform;
+        if (this.exterior_colouring_style != 1) {
+            cycle_function = -1;
+            cyclic_waveform = -1;
+        }
+
+        def += `\n#define CYCLE_FUNCTION ${cycle_function}`;
+        def += `\n#define CYCLIC_WAVEFORM ${cyclic_waveform}`;
+
+        var radial_decomposition = this.radial_decomposition;
+        if (this.exterior_colouring_style != 2) {
+            radial_decomposition = -1
+        }
+
+        def += `\n#define RADIAL_DECOMPOSITION ${radial_decomposition}`;
+        
         return shader.replace("//%", def);
 
     }
@@ -146,11 +159,12 @@ class EscapeTime extends Program {
         document.getElementById("orbit_ring_min").onchange = paramSet(this.orbit_trap_param1);
         document.getElementById("orbit_ring_max").onchange = paramSet(this.orbit_trap_param2);
 
-        document.getElementById("exterior_colouring_style").onchange = this.updateRenderingMode;
+        document.getElementById("exterior_colouring_style").onchange = this.updateExteriorColouringStyle;
 
         document.getElementById("monotonic_function").onchange = this.updateMonotonicFunction;
         document.getElementById("cyclic_cycle_function").onchange = this.updateCyclicFunction;
         document.getElementById("cyclic_waveform").onchange = this.updateCyclicWaveform;
+        document.getElementById("esc_cycle_period").onchange = paramSet(this.exterior_colouring_param1);
         document.getElementById("radial_decomposition").onchange = this.updateRadialDecomposition;
 
         document.getElementById("esc_exterior_colouring").onchange = this.updateExteriorColouring;
@@ -321,38 +335,32 @@ class EscapeTime extends Program {
 
         ESCAPE_TIME.orbit_trap = event.target.value;
 
-        var normal_style = document.getElementById("orbit_normal_div").style;
-        var circle_style = document.getElementById("orbit_circle_div").style;
-        var square_style = document.getElementById("orbit_square_div").style;
-        var ring_style = document.getElementById("orbit_ring_div").style;
-        var cross_style = document.getElementById("orbit_cross_div").style;
+        var styles = [
+            document.getElementById("orbit_normal_div").style,
+            document.getElementById("orbit_circle_div").style,
+            document.getElementById("orbit_square_div").style,
+            document.getElementById("orbit_ring_div").style,
+            document.getElementById("orbit_cross_div").style
+        ];
 
-        normal_style.display = "none";
-        circle_style.display = "none";
-        square_style.display = "none";
-        ring_style.display = "none";
-        cross_style.display = "none";
+        styles.forEach((style) => style.display = "none");
+        styles[ESCAPE_TIME.orbit_trap].display = "block";
 
         if (ESCAPE_TIME.orbit_trap == 0) {
             ESCAPE_TIME.orbit_trap_param1.value = document.getElementById("escape_radius").value;
-            normal_style.display = "block";
 
         } else if (ESCAPE_TIME.orbit_trap == 1) {
             ESCAPE_TIME.orbit_trap_param1.value = document.getElementById("orbit_circle").value;
-            circle_style.display = "block";
         
         } else if (ESCAPE_TIME.orbit_trap == 2) {
             ESCAPE_TIME.orbit_trap_param1.value = document.getElementById("orbit_square").value;
-            square_style.display = "block";
 
         } else if (ESCAPE_TIME.orbit_trap == 3) {
             ESCAPE_TIME.orbit_trap_param1.value = document.getElementById("orbit_ring_min").value;
             ESCAPE_TIME.orbit_trap_param2.value = document.getElementById("orbit_ring_max").value;
-            ring_style.display = "block";
 
         } else if (ESCAPE_TIME.orbit_trap == 4) {
             ESCAPE_TIME.orbit_trap_param1.value = document.getElementById("orbit_cross").value;
-            cross_style.display = "block";
         }
 
         setupShader();
@@ -387,7 +395,7 @@ class EscapeTime extends Program {
         }
     }
 
-    updateRenderingMode = function(event) {
+    updateExteriorColouringStyle = function(event) {
 
         ESCAPE_TIME.exterior_colouring_style = event.target.value;
 
@@ -398,7 +406,11 @@ class EscapeTime extends Program {
         ];
 
         styles.forEach((style) => style.display = "none");
-        styles[ESCAPE_TIME.exterior_colouring_style].display = "grid";
+        styles[ESCAPE_TIME.exterior_colouring_style].display = "block";
+
+        if (ESCAPE_TIME.exterior_colouring_style == 1) {
+            ESCAPE_TIME.exterior_colouring_param1.value = document.getElementById("esc_cycle_period").value;
+        }
 
         ESCAPE_TIME.synchExteriorColourSettings();
         setupShader();
@@ -482,7 +494,7 @@ class EscapeTime extends Program {
             solid_style.display = "block";
             ESCAPE_TIME.interior_colour1.value = hexToRGB(document.getElementById("interior_solid_colour").value);
         
-        } else if (ESCAPE_TIME.interior_colouring == 1 || ESCAPE_TIME.interior_colouring == 2) {
+        } else {
             dist_style.display = "block";
             ESCAPE_TIME.interior_colour1.value = hexToRGB(document.getElementById("interior_close_colour").value);
             ESCAPE_TIME.interior_colour2.value = hexToRGB(document.getElementById("interior_far_colour").value);

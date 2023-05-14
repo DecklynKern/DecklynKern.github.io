@@ -184,7 +184,6 @@
                                 <option value="1">Smooth Escape Time</option>
                                 <option value="2">Normal Map (mandel/multibrot only)</option>
                                 <option value="3">Stripe Average</option>
-                                <option value="4">Triangle Inequality Average</option>
                             </select>
                             <div id="light_selector_div" style="display: none">
                                 Light Position:
@@ -202,6 +201,7 @@
                                 <option value="0">Escape Time</option>
                                 <option value="1">Orbit Exponential</option>
                             </select>
+                            <br>
                             Waveform:
                             <select id="cyclic_waveform">
                                 <option value="0">Sine</option>
@@ -209,6 +209,9 @@
                                 <option value="2">Triangle</option>
                                 <option value="3">Sawtooth</option>
                             </select>
+                            <br>
+                            Period:
+                            <input id="esc_cycle_period" type="number" value="1" min="0" step="0.01">
                         </div>
                         <div id="radial_rendering_div" style="display: none">
                             Decomposition:
@@ -253,6 +256,7 @@
                             <option value="1">Average Magnitude</option>
                             <option value="2">Min Dist</option>
                             <option value="3">Orbit Dist</option>
+                            <option value="4">Stripe Average</option>
                         </select>
                         <div style="display: grid">
                             <div id="interior_solid_div">
@@ -515,6 +519,16 @@
                 <div class="input-div">
                     Samples:
                     <input id="samples" type="number" value="1" min="1" max="10">
+                    <br>
+                    Canvas Size:
+                    <select id="canvas_size" value="1000">
+                        <option value="600">600x600</option>
+                        <option value="800">800x800</option>
+                        <option value="1000" selected="selected">1000x1000</option>
+                        <option value="1200">1200x1200</option>
+                        <option value="1400">1400x1400</option>
+                        <option value="1600">1600x1600</option>
+                    </select>
                     <div id="display_text">
                         z = 0 + 0i
                         <br>

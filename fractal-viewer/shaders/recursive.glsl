@@ -6,6 +6,7 @@ uniform float centre_x;
 uniform float centre_y;
 
 uniform int samples;
+uniform int canvas_size;
 
 uniform int fractal_type;
 uniform int iterations;
@@ -190,7 +191,7 @@ vec3 getColour(Iterator iter) {
 
 void main() {
 
-    float pixel_size = 2.0 * magnitude / 1000.0;
+    float pixel_size = 2.0 * magnitude / float(canvas_size);
 
     float x = centre_x + frag_position.x * magnitude;
     float y = -(centre_y + frag_position.y * magnitude);
