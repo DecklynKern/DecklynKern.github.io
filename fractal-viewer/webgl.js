@@ -251,8 +251,10 @@ function keyhandler(event) {
 }
 
 function onFractalClick(event) {
+
     const centre = canvas_size.value / 2;
     centre_x.value += (event.x - centre) / centre * magnitude.value;
     centre_y.value += (event.y - centre) / centre * magnitude.value;
     redraw();
+    
 }
