@@ -260,6 +260,10 @@
                             <option value="3">Orbit Dist</option>
                             <option value="4">Stripe Average</option>
                         </select>
+						<div id="interior_stripe_div" style="display: none">
+							Density:
+							<input id="interior_stripe_density" type="number" value="3" min="0" step="0.1">
+						</div>
                         <div style="display: grid">
                             <div id="interior_solid_div">
                                 <div class="grid-entry">
@@ -426,6 +430,7 @@
                         <select id="rtf_colouring_type">
                             <option id="rtf_root_colouring" value="0">Root</option>
                             <option id="rtf_shaded_root_colouring" value="1">Shaded Root</option>
+							<option id="rtf_auto_root_colouring" value="5">Auto Root</option>
                             <option id="rtf_convergence_colouring" value="2">Convergence</option>
                             <option id="rtf_max_orbit_dist_colouring" value="3">Max Orbit Distance</option>
                             <option id="rtf_closest_root_dist_colouring" value="4">Closest Root Distance</option>

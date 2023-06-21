@@ -31,6 +31,8 @@ uniform float exterior_colouring_param2;
 uniform vec3 interior_colour1;
 uniform vec3 interior_colour2;
 
+uniform float interior_colouring_param1;
+
 uniform int samples;
 
 const int TRUE_ITER_CAP = 10000;
@@ -275,9 +277,9 @@ vec3 getColour(float z_real, float z_imag) {
         #endif
     #endif
 
-    #if (EXTERIOR_COLOURING_STYLE == 0 && MONOTONIC_FUNCTION == 3) || INTERIOR_COLOURING == 4
-        float total = 0.0;
-        float total_prev = 0.0;
+    #if EXTERIOR_COLOURING_STYLE == 0 && MONOTONIC_FUNCTION == 3
+        float exterior_stripe_total_prev = 0.0;
+        float exterior_stripe_total = 0.0;
     #endif
 
     #if INTERIOR_COLOURING == 1
@@ -290,7 +292,9 @@ vec3 getColour(float z_real, float z_imag) {
     #elif INTERIOR_COLOURING == 3
         Complex diff;
         float total_dist_sq = 0.0;
-
+		
+	#elif INTERIOR_COLOURING == 4
+        float interior_stripe_total = 0.0;
     #endif
 
     for (int iteration = 0; iteration < TRUE_ITER_CAP; iteration++) {
@@ -611,9 +615,9 @@ vec3 getColour(float z_real, float z_imag) {
             #endif
         #endif
         
-        #if (EXTERIOR_COLOURING_STYLE == 0 && MONOTONIC_FUNCTION == 3) || INTERIOR_COLOURING == 4
-            total_prev = total;
-            total += 0.5 + 0.5 * sin(exterior_colouring_param1 * argument(z));
+        #if EXTERIOR_COLOURING_STYLE == 0 && MONOTONIC_FUNCTION == 3
+            exterior_stripe_total_prev = exterior_stripe_total;
+            exterior_stripe_total += 0.5 + 0.5 * sin(exterior_colouring_param1 * argument(z));
         #endif
 
         #if EXTERIOR_COLOURING_STYLE == 1
@@ -671,7 +675,9 @@ vec3 getColour(float z_real, float z_imag) {
         #elif INTERIOR_COLOURING == 3
             diff = sub(z, z_prev);
             total_dist_sq += diff.real * diff.real + diff.imag * diff.imag;
-
+		
+        #elif INTERIOR_COLOURING == 4
+            interior_stripe_total += 0.5 + 0.5 * sin(interior_colouring_param1 * argument(z));
         #endif
 
         #if ORBIT_TRAP == 0
@@ -728,7 +734,7 @@ vec3 getColour(float z_real, float z_imag) {
             return hsvToRgb(fract(sqrt(total_dist_sq)), 1.0, 1.0);
 
         #elif INTERIOR_COLOURING == 4
-            return interpolate(interior_colour1, interior_colour2, total / float(max_iterations));
+            return interpolate(interior_colour1, interior_colour2, interior_stripe_total / float(max_iterations));
         #endif
 
     } else {
@@ -764,7 +770,7 @@ vec3 getColour(float z_real, float z_imag) {
 
             #elif MONOTONIC_FUNCTION == 3
                 float interp = getSmoothIter(mag_sq, z);
-                colour_val = (total * interp + total_prev * (1.0 - interp)) / (float(iterations) + interp);
+                colour_val = (exterior_stripe_total * interp + exterior_stripe_total_prev * (1.0 - interp)) / (float(iterations) + interp);
             #endif
 
         #elif EXTERIOR_COLOURING_STYLE == 1

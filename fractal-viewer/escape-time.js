@@ -64,17 +64,19 @@ class EscapeTime extends Program {
 
     exterior_colouring = 0;
 
-    exterior_colour1 = new Param([0.0, 0.0, 1.0]);
-    exterior_colour2 = new Param([0.0, 0.0, 0.0]);
-
     exterior_colouring_param1 = new Param(0.0);
     exterior_colouring_param2 = new Param(0.0);
 
+    exterior_colour1 = new Param([0.0, 0.0, 1.0]);
+    exterior_colour2 = new Param([0.0, 0.0, 0.0]);
+
     interior_colouring = 0;
+	
+	interior_colouring_param1 = new Param(0.0);
 
     interior_colour1 = new Param([0.0, 0.0, 0.0]);
     interior_colour2 = new Param([0.0, 0.0, 0.0]);
-
+	
     getShader = function() {
 
         var shader = (' ' + this.baseShader).slice(1);
@@ -183,6 +185,8 @@ class EscapeTime extends Program {
         document.getElementById("exterior_colour2").onchange = paramSetColour(this.exterior_colour2);
 
         document.getElementById("interior_colouring").onchange = this.updateInteriorColouring;
+		
+		document.getElementById("interior_stripe_density").onchange = paramSet(this.interior_colouring_param1);
 
         document.getElementById("interior_solid_colour").onchange = paramSetColour(this.interior_colour1);
         document.getElementById("interior_close_colour").onchange = paramSetColour(this.interior_colour1);
@@ -218,11 +222,13 @@ class EscapeTime extends Program {
         this.julia_c_real.getAttr("julia_c_real");
         this.julia_c_imag.getAttr("julia_c_imag");
 
-        this.exterior_colour1.getAttr("exterior_colour1");
-        this.exterior_colour2.getAttr("exterior_colour2");
-
         this.exterior_colouring_param1.getAttr("exterior_colouring_param1");
         this.exterior_colouring_param2.getAttr("exterior_colouring_param2");
+
+        this.exterior_colour1.getAttr("exterior_colour1");
+        this.exterior_colour2.getAttr("exterior_colour2");
+		
+        this.interior_colouring_param1.getAttr("interior_colouring_param1");
         
         this.interior_colour1.getAttr("interior_colour1");
         this.interior_colour2.getAttr("interior_colour2");
@@ -246,11 +252,13 @@ class EscapeTime extends Program {
         this.julia_c_real.loadFloat();
         this.julia_c_imag.loadFloat();
 
+        this.exterior_colouring_param1.loadFloat();
+        this.exterior_colouring_param2.loadFloat();
+
         this.exterior_colour1.loadFloat3();
         this.exterior_colour2.loadFloat3();
 
-        this.exterior_colouring_param1.loadFloat();
-        this.exterior_colouring_param2.loadFloat();
+        this.interior_colouring_param1.loadFloat();
 
         this.interior_colour1.loadFloat3();
         this.interior_colour2.loadFloat3();
@@ -492,9 +500,11 @@ class EscapeTime extends Program {
 
         var solid_style = document.getElementById("interior_solid_div").style;
         var dist_style = document.getElementById("interior_dist_div").style;
+		var stripe_style = document.getElementById("interior_stripe_div").style;
 
         solid_style.display = "none";
         dist_style.display = "none";
+		stripe_style.display = "none";
 
         if (ESCAPE_TIME.interior_colouring == 0) {
             solid_style.display = "block";
@@ -505,6 +515,11 @@ class EscapeTime extends Program {
             ESCAPE_TIME.interior_colour1.value = hexToRGB(document.getElementById("interior_close_colour").value);
             ESCAPE_TIME.interior_colour2.value = hexToRGB(document.getElementById("interior_far_colour").value);
         }
+		
+		if (ESCAPE_TIME.interior_colouring == 4) {
+			ESCAPE_TIME.interior_colouring_param1.value = document.getElementById("interior_stripe_density").value;
+			stripe_style.display = "block";
+		}
 
         setupShader();
         redraw();

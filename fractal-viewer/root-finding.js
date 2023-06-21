@@ -370,7 +370,7 @@ class RootFinding extends Program {
 
             ROOT_FINDING.root1_colour.value = hexToRGB(document.getElementById("convergent_colour").value);
             
-        } else {
+        } else if (colouring_type != 5) {
 
             if (colouring_type == 3) {
                 dist_style.display = "block";

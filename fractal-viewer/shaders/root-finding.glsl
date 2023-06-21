@@ -570,6 +570,19 @@ vec3 getColour(Complex z) {
         return root1_colour * (1.0 - min(1.0, log(min_root1_dist_sq / colouring_param + 1.0))) +
             root2_colour * (1.0 - min(1.0, log(min_root2_dist_sq / colouring_param + 1.0))) +
             root3_colour * (1.0 - min(1.0, log(min_root3_dist_sq / colouring_param + 1.0)));
+			
+	#elif COLOURING_TYPE == 5
+
+        if (iters == max_iterations) {
+            return base_colour;
+        }
+	
+		float thresh = (threshold + 0.000000000000001) * 2.0;
+	
+		float real = thresh * round(z.real / thresh);
+		float imag = thresh * round(z.imag / thresh);
+	
+		return vec3(fract(real * 99.9), fract(imag * 99.9), 1.0);
 
     #else
 
