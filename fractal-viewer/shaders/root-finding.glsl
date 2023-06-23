@@ -10,6 +10,8 @@ uniform float centre_y;
 uniform int max_iterations;
 uniform float threshold;
 
+uniform int is_inverted;
+
 uniform float root1_real;
 uniform float root1_imag;
 uniform float root2_real;
@@ -128,6 +130,10 @@ float root_dist_sq(Complex z, Complex root) {
 #define ADD3(a, b, c) add(add(a, b), c)
 
 vec3 getColour(Complex z) {
+
+	if (bool(is_inverted)) {
+		z = reciprocal(z);
+	}
 
     Complex z_prev;
 

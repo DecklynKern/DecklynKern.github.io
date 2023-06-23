@@ -9,6 +9,8 @@ class RootFinding extends Program {
     algorithm = 0;
     secant_start = 0;
     fractal_type = 0;
+	
+	is_inverted = new Param(0);
 
     colouring_type = 0;
 
@@ -57,6 +59,8 @@ class RootFinding extends Program {
         document.getElementById("rtf_algorithm").onchange = this.updateAlgorithm;
         document.getElementById("secant_start").onchange = this.updateSecantStart;
         document.getElementById("rtf_fractal_type").onchange = this.updateFractalType;
+		
+        document.getElementById("rtf_invert").onchange = this.updateInverted;
         
         document.getElementById("rtf_iterations").onchange = paramSet(this.max_iterations);
         document.getElementById("rtf_threshold").onchange = paramSet(this.threshold);
@@ -93,6 +97,8 @@ class RootFinding extends Program {
 
         this.max_iterations.getAttr("max_iterations");
         this.threshold.getAttr("threshold");
+		
+		this.is_inverted.getAttr("is_inverted");
         
         this.root1_real.getAttr("root1_real");
         this.root1_imag.getAttr("root1_imag");
@@ -120,6 +126,8 @@ class RootFinding extends Program {
 
         this.max_iterations.loadInt();
         this.threshold.loadFloat();
+		
+		this.is_inverted.loadInt();
         
         this.root1_real.loadFloat();
         this.root1_imag.loadFloat();
@@ -238,6 +246,11 @@ class RootFinding extends Program {
         setupShader();
         redraw();
 
+    }
+
+    updateInverted = function(event) {
+        ROOT_FINDING.is_inverted.value = +event.target.checked;
+        redraw();
     }
 
     drawRoots = function() {

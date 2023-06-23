@@ -169,19 +169,18 @@ float getSmoothIter(float mag_sq, Complex z) {
     #elif FRACTAL == 15
         exp = max(fractal_param1, fractal_param2);
 
-    #elif FRACTAL == 17
+    #elif FRACTAL == 17 || FRACTAL == 25
         exp = 4.0;
 
     #else
         exp = 2.0;
-
     #endif
 
     #if ORBIT_TRAP == 0
         return 1.0 + log(log(orbit_trap_param1 * orbit_trap_param1) / log(mag_sq)) / log(exp);
 
     #elif ORBIT_TRAP == 1
-        return 1.0 + log(log(mag_sq) / log(orbit_trap_param1 * orbit_trap_param1)) / log(exp);
+        return log(log(orbit_trap_param1 * orbit_trap_param1) / log(mag_sq)) / log(exp);
 
     #elif ORBIT_TRAP == 2
         return 1.0 + log(log(min(abs(z.real), abs(z.imag))) / log(orbit_trap_param1 * 0.5)) / log(exp);
@@ -190,9 +189,16 @@ float getSmoothIter(float mag_sq, Complex z) {
         float ring_min_sq = orbit_trap_param1 * orbit_trap_param1;
         float ring_max_sq = orbit_trap_param2 * orbit_trap_param2;
         // TODO
+		return 1.0;
 
     #elif ORBIT_TRAP == 4
         return 1.0 + log(log(min(abs(z.real), abs(z.imag))) / log(orbit_trap_param1 * 0.5)) / log(exp);
+		
+	#elif ORBIT_TRAP == 5
+        return 1.0 + log(log(orbit_trap_param1 * 0.5) / log(mag_sq) * 2.0) / log(exp);
+
+    #elif ORBIT_TRAP == 6
+        return (log(orbit_trap_param1 * 0.5) / log(mag_sq) * 4.0) / log(exp);
     #endif
     
 }
@@ -262,6 +268,12 @@ vec3 getColour(float z_real, float z_imag) {
         float ring_max_sq = orbit_trap_param2 * orbit_trap_param2;
 
     #elif ORBIT_TRAP == 4
+        float cross_width = orbit_trap_param1 * 0.5;
+		
+	#elif ORBIT_TRAP == 5
+		float half_side = orbit_trap_param1 * 0.5;
+
+    #elif ORBIT_TRAP == 6
         float cross_width = orbit_trap_param1 * 0.5;
     #endif
 
@@ -645,7 +657,7 @@ vec3 getColour(float z_real, float z_imag) {
                 if (abs(z.real) <= half_side) {
                     square_dist = z_imag_sq;
                 
-                } else if (abs(z.imag) <= half_side1) {
+                } else if (abs(z.imag) <= half_side) {
                     square_dist = z_real_sq;
                 
                 } else {
@@ -666,6 +678,27 @@ vec3 getColour(float z_real, float z_imag) {
             #elif ORBIT_TRAP == 4
                 float cross_dist = min(z_real_sq, z_imag_sq);
                 bail_dist_sq = 1.0 - cross_width / cross_dist;
+				
+			#elif ORBIT_TRAP == 5
+
+                float square_dist;
+
+                if (abs(z.real) <= half_side) {
+                    square_dist = half_side * half_side - z_imag_sq;
+                
+                } else if (abs(z.imag) <= half_side1) {
+                    square_dist = half_side * half_side - z_real_sq;
+                
+                } else {
+                    square_dist = 0.0;
+                }
+
+                bail_dist_sq = square_dist / half_side;
+				
+
+            #elif ORBIT_TRAP == 6
+                float cross_dist = min(z_real_sq, z_imag_sq);
+                bail_dist_sq = 1.0 - cross_dist / cross_width;
             #endif
 
             if (bail_dist_sq < min_dist_sq) {
@@ -679,44 +712,35 @@ vec3 getColour(float z_real, float z_imag) {
         #elif INTERIOR_COLOURING == 4
             interior_stripe_total += 0.5 + 0.5 * sin(interior_colouring_param1 * argument(z));
         #endif
+		
+		bool stop;
 
         #if ORBIT_TRAP == 0
-
-            if (mag_sq >= escape_radius_sq) {
-                iterations = iteration + 1;
-                break;
-            }
+            stop = mag_sq >= escape_radius_sq;
 
         #elif ORBIT_TRAP == 1
-        
-            if (mag_sq <= min_radius_sq) {
-                iterations = iteration + 1;
-                break;
-            }
+			stop = mag_sq <= min_radius_sq;
 
         #elif ORBIT_TRAP == 2
-        
-            if (abs(z.real) < half_side && abs(z.imag) < half_side) {
-                iterations = iteration + 1;
-                break;
-            }
+			stop = abs(z.real) < half_side && abs(z.imag) < half_side;
 
         #elif ORBIT_TRAP == 3
-        
-            if ((mag_sq >= ring_min_sq && mag_sq <= ring_max_sq)
-            ) {
-                iterations = iteration + 1;
-                break;
-            }
+			stop = mag_sq >= ring_min_sq && mag_sq <= ring_max_sq;
 
         #elif ORBIT_TRAP == 4
+			stop = abs(z.real) < cross_width || abs(z.imag) < cross_width;
 
-            if (abs(z.real) < cross_width || abs(z.imag) < cross_width) {
-                iterations = iteration + 1;
-                break;
-            }
+        #elif ORBIT_TRAP == 5
+			stop = abs(z.real) > half_side || abs(z.imag) > half_side;
 
+        #elif ORBIT_TRAP == 6
+			stop = abs(z.real) > cross_width && abs(z.imag) > cross_width;
         #endif
+        
+        if (stop) {
+            iterations = iteration + 1;
+            break;
+        }
     }
 
     if (iterations == TRUE_ITER_CAP) {

@@ -24,8 +24,8 @@
                         <option value="escape-time">Escape Time</option>
                         <option value="lyapunov">Lyapunov</option>
                         <option value="root-finding">Root Finding</option>
-                        <option value="pendulum">Pendulum</option>
                         <option value="recursive">Recursive</option>
+						<!-- <option value="9"><option value="pendulum">Pendulum</option></option> -->
                     </select>
                 </div>
                 <div id="escape_time_options">
@@ -122,7 +122,7 @@
                             <canvas id="cmultibrot_p_selector" class="selector" width="200px" height="200px"></canvas>
                         </div>
                         Invert: 
-                        <input type="checkbox" id="is_inverted">
+                        <input type="checkbox" id="esc_invert">
                     </div>
                     <div class="input-div" id="julia_div">
                         Julia:
@@ -140,27 +140,37 @@
                         <br>
                         Orbit Trap:
                         <select id="orbit_trap">
-                            <option value="0">Normal</option>
-                            <option value="1">Circle</option>
-                            <option value="2">Square</option>
+                            <option value="0">Normal (Outer Circle)</option>
+							<option value="5">Outer Square</option>
+							<option value="6">Outer Cross</option>
+                            <option value="1">Inner Circle</option>
+                            <option value="2">Inner Square</option>
+                            <option value="4">Inner Cross</option>
                             <option value="3">Ring</option>
-                            <option value="4">Cross</option>
                         </select>
                         <div id="orbit_normal_div">
                             Escape Radius:
-                            <input id="escape_radius" type="number" value="2.0" step="0.1" min="0">
+                            <input id="escape_radius" type="number" value="2" step="0.1" min="0">
+                        </div>
+                        <div id="orbit_outer_square_div" style="display: none">
+                            Width:
+                            <input id="orbit_outer_square" type="number" value="4" step="0.1" min="0">
+                        </div>
+                        <div id="orbit_outer_cross_div" style="display: none">
+                            Width:
+                            <input id="orbit_outer_cross" type="number" value="4" step="0.1" min="0">
                         </div>
                         <div id="orbit_circle_div" style="display: none">
                             Radius:
                             <input id="orbit_circle" type="number" value="0.1" step="0.01" min="0" max="1">
                         </div>
-                        <div id="orbit_square_div" style="display: none">
+                        <div id="orbit_inner_square_div" style="display: none">
                             Width:
-                            <input id="orbit_square" type="number" value="0.1" step="0.01" min="0" max="1">
+                            <input id="orbit_inner_square" type="number" value="0.1" step="0.01" min="0" max="1">
                         </div>
-                        <div id="orbit_cross_div" style="display: none">
+                        <div id="orbit_inner_cross_div" style="display: none">
                             Width:
-                            <input id="orbit_cross" type="number" value="0.1" step="0.01" min="0" max="1">
+                            <input id="orbit_inner_cross" type="number" value="0.1" step="0.01" min="0" max="1">
                         </div>
                         <div id="orbit_ring_div" style="display: none">
                             Min Radius:
@@ -392,6 +402,9 @@
                             <option value="2">Nova Julia</option>
                             <option value="3">Meta Convergence</option>
                         </select>
+						<br>
+                        Invert: 
+                        <input type="checkbox" id="rtf_invert">
                     </div>
                     <div class="input-div">
                         <div id="root_selector_div">
