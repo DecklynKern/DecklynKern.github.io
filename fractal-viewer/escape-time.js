@@ -23,7 +23,7 @@ ESCAPE_TIME_FUNCTIONS = [
     "z ← ce<sup>z</sup>",
     "z ← z(z·z - c / ⊙c)",
     "z ← z<sup>p</sup> + c",
-    "z ← x / cos(y) + yi / x + c",
+    "z ← x / cos(y) + yi / sin(x) + c",
     "z ← (z<sup>2</sup> + c)<sup>2</sup> + (z + c<sup>2</sup>)",
     "z ← Re(z<sup>2</sup>) - |x| + |Im(z<sup>2</sup>)| - |y| + c",
     "z ← [(z<sup>2</sup> + c - 1)/(2z + c - 2)]<sup>2</sup>",
@@ -46,10 +46,7 @@ class EscapeTime extends Program {
     
     max_iterations = new Param(30);
 
-    orbit_trap = 0;
-
-    orbit_trap_param1 = new Param(2.0);
-    orbit_trap_param2 = new Param(0.0);
+    escape_radius = new Param(2.0);
     
     is_julia = new Param(0);
     julia_c_real = new Param(0.0);
@@ -81,7 +78,6 @@ class EscapeTime extends Program {
 
         var shader = (' ' + this.baseShader).slice(1);
         var def = `#define FRACTAL ${this.fractal}
-                   #define ORBIT_TRAP ${this.orbit_trap}
                    #define EXTERIOR_COLOURING_STYLE ${this.exterior_colouring_style}
                    #define EXTERIOR_COLOURING ${this.exterior_colouring}
                    #define INTERIOR_COLOURING ${this.interior_colouring}`;
@@ -107,6 +103,10 @@ class EscapeTime extends Program {
 
         }
 
+        var monitor_orbit_traps = document.getElementById("orbit_traps").childElementCount != 0;
+
+        def += `\n#define MONITOR_ORBIT_TRAPS ${+monitor_orbit_traps}`;
+
         var monotonic_function = this.monotonic_function;
         if (this.exterior_colouring_style != 0) {
             monotonic_function = -1;
@@ -130,6 +130,61 @@ class EscapeTime extends Program {
         }
 
         def += `\n#define RADIAL_DECOMPOSITION ${radial_decomposition}`;
+
+        if (monitor_orbit_traps) {
+
+            def += "\nfloat monitorOrbitTraps(Complex z, float min_dist, float mag_sq) {\n";
+
+            const orbit_traps = document.getElementById("orbit_traps").children;
+
+            for (var i = 0; i < orbit_traps.length; i++) {
+
+                const param = (+orbit_traps[i].children[1].children[0].value).toFixed(2);
+
+                switch (+orbit_traps[i].children[0].value) {
+
+                    case 0:
+                        def += "min_dist = min(min_dist, sqrt(mag_sq));\n";
+                        break;
+
+                    case 1:
+                        def += `min_dist = min(min_dist, abs(sqrt(mag_sq) - ${param}));\n`;
+                        break;
+
+                    /*
+                    case 2:
+                        def += `
+                        float areal = abs(z.real);
+                        float aimag = abs(z.imag);
+
+                        bool px = areal <= ${param};
+                        bool py = aimag <= ${param};
+                        
+                        if (px) {
+                            min_dist = min(min_dist, abs(z.imag - ${param}));
+                        }
+                        
+                        if (py) {
+                            min_dist = min(min_dist, abs(z.real - ${param}));
+                        }
+                        
+                        if (!(py || px)) {
+                            float dreal = areal - ${param};
+                            float dimag = aimag - ${param};
+                            min_dist = min(min_dist, sqrt(dreal * dreal + dimag * dimag));
+                        }\n`;
+                        break;*/
+
+                    case 3:
+                        def += `min_dist = min(min_dist, min(abs(z.real - ${param}), abs(z.imag - ${param})));\n`;
+                        break;
+
+                }
+            }
+
+            def += "return min_dist;\n}";
+
+        }
         
         return shader.replace("//%", def);
 
@@ -159,15 +214,9 @@ class EscapeTime extends Program {
         
         document.getElementById("esc_max_iterations").onchange = paramSet(this.max_iterations);
         
-        document.getElementById("orbit_trap").onchange = this.updateOrbitTrap;
-        document.getElementById("escape_radius").onchange = paramSet(this.orbit_trap_param1);
-        document.getElementById("orbit_outer_square").onchange = paramSet(this.orbit_trap_param1);
-        document.getElementById("orbit_outer_cross").onchange = paramSet(this.orbit_trap_param1);
-        document.getElementById("orbit_circle").onchange = paramSet(this.orbit_trap_param1);
-        document.getElementById("orbit_inner_square").onchange = paramSet(this.orbit_trap_param1);
-        document.getElementById("orbit_inner_cross").onchange = paramSet(this.orbit_trap_param1);
-        document.getElementById("orbit_ring_min").onchange = paramSet(this.orbit_trap_param1);
-        document.getElementById("orbit_ring_max").onchange = paramSet(this.orbit_trap_param2);
+        document.getElementById("escape_radius").onchange = paramSet(this.escape_radius);
+        
+        document.getElementById("orbit_trap_add").onclick = this.addOrbitTrap;
 
         document.getElementById("exterior_colouring_style").onchange = this.updateExteriorColouringStyle;
 
@@ -217,8 +266,7 @@ class EscapeTime extends Program {
         
         this.max_iterations.getAttr("max_iterations");
 
-        this.orbit_trap_param1.getAttr("orbit_trap_param1");
-        this.orbit_trap_param2.getAttr("orbit_trap_param2");
+        this.escape_radius.getAttr("escape_radius_sq");
             
         this.is_julia.getAttr("is_julia");
         this.julia_c_real.getAttr("julia_c_real");
@@ -247,8 +295,7 @@ class EscapeTime extends Program {
 
         this.max_iterations.loadInt();
 
-        this.orbit_trap_param1.loadFloat();
-        this.orbit_trap_param2.loadFloat();
+        gl.uniform1f(this.escape_radius.attr, this.escape_radius.value * this.escape_radius.value);
 
         this.is_julia.loadInt();
         this.julia_c_real.loadFloat();
@@ -349,54 +396,62 @@ class EscapeTime extends Program {
     
     }
 
-    updateOrbitTrap = function(event) {
+    updateGangopadhyay = function(_event) {
+        setupShader();
+        redraw();
+    }
 
-        ESCAPE_TIME.orbit_trap = event.target.value;
+    addOrbitTrap = function(_event) {
 
-        var styles = [
-            document.getElementById("orbit_normal_div").style,
-            document.getElementById("orbit_circle_div").style,
-            document.getElementById("orbit_inner_square_div").style,
-            document.getElementById("orbit_ring_div").style,
-            document.getElementById("orbit_inner_cross_div").style,
-			document.getElementById("orbit_outer_square_div").style,
-			document.getElementById("orbit_outer_cross_div").style
-        ];
+        var new_orbit_trap = document.createElement("div");
+        new_orbit_trap.className = "grid-entry";
+        new_orbit_trap.innerHTML = `
+        <select onchange="ESCAPE_TIME.updateOrbitTrap(event)">
+            <option value="0">Centre Point</option>
+            <option value="1">Circle</option>
+            <!-- <option value="2">Square</option> -->
+            <option value="3">Cross</option>
+        </select>
+        <div style="display: none">
+            <input type="number" value="2" min="0" step="0.1" onchange="setupShader();redraw()">
+        </div>
+        <button onclick="ESCAPE_TIME.deleteOrbitTrap(event)">
+            X
+        </button>
+        `;
 
-        styles.forEach((style) => style.display = "none");
-        styles[ESCAPE_TIME.orbit_trap].display = "block";
-
-        if (ESCAPE_TIME.orbit_trap == 0) {
-            ESCAPE_TIME.orbit_trap_param1.value = document.getElementById("escape_radius").value;
-
-        } else if (ESCAPE_TIME.orbit_trap == 1) {
-            ESCAPE_TIME.orbit_trap_param1.value = document.getElementById("orbit_circle").value;
-        
-        } else if (ESCAPE_TIME.orbit_trap == 2) {
-            ESCAPE_TIME.orbit_trap_param1.value = document.getElementById("orbit_inner_square").value;
-
-        } else if (ESCAPE_TIME.orbit_trap == 3) {
-            ESCAPE_TIME.orbit_trap_param1.value = document.getElementById("orbit_ring_min").value;
-            ESCAPE_TIME.orbit_trap_param2.value = document.getElementById("orbit_ring_max").value;
-
-        } else if (ESCAPE_TIME.orbit_trap == 4) {
-            ESCAPE_TIME.orbit_trap_param1.value = document.getElementById("orbit_inner_cross").value;
-        
-		} else if (ESCAPE_TIME.orbit_trap == 5) {
-            ESCAPE_TIME.orbit_trap_param1.value = document.getElementById("orbit_outer_square").value;
-			
-		} else if (ESCAPE_TIME.orbit_trap == 6) {
-            ESCAPE_TIME.orbit_trap_param1.value = document.getElementById("orbit_outer_cross").value;
-		}
+        document.getElementById("orbit_traps").appendChild(new_orbit_trap);
 
         setupShader();
         redraw();
 
     }
 
-    updateGangopadhyay = function(_event) {
+    deleteOrbitTrap = function(event) {
+
+        event.target.parentElement.remove();
+
         setupShader();
         redraw();
+    }
+
+    updateOrbitTrap = function(event) {
+
+        var settings_style = event.target.parentElement.childNodes[3].style;
+        settings_style.display = "none";
+
+        if (event.target.value == 1) {
+            settings_style.display = "block";
+            event.target.parentElement.childNodes[3].firstChild.nodeValue = "Radius:";
+
+        } else if (event.target.value == 2 || event.target.value == 3) {
+            settings_style.display = "block";
+            event.target.parentElement.childNodes[3].firstChild.nodeValue = "Size:";
+        }
+
+        setupShader();
+        redraw();
+
     }
 
     synchExteriorColourSettings = function() {

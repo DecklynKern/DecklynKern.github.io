@@ -138,46 +138,16 @@
                         Max Iterations:
                         <input id="esc_max_iterations" type="number" value="30" min="0">
                         <br>
-                        Orbit Trap:
-                        <select id="orbit_trap">
-                            <option value="0">Normal (Outer Circle)</option>
-							<option value="5">Outer Square</option>
-							<option value="6">Outer Cross</option>
-                            <option value="1">Inner Circle</option>
-                            <option value="2">Inner Square</option>
-                            <option value="4">Inner Cross</option>
-                            <option value="3">Ring</option>
-                        </select>
-                        <div id="orbit_normal_div">
-                            Escape Radius:
-                            <input id="escape_radius" type="number" value="2" step="0.1" min="0">
-                        </div>
-                        <div id="orbit_outer_square_div" style="display: none">
-                            Width:
-                            <input id="orbit_outer_square" type="number" value="4" step="0.1" min="0">
-                        </div>
-                        <div id="orbit_outer_cross_div" style="display: none">
-                            Width:
-                            <input id="orbit_outer_cross" type="number" value="4" step="0.1" min="0">
-                        </div>
-                        <div id="orbit_circle_div" style="display: none">
-                            Radius:
-                            <input id="orbit_circle" type="number" value="0.1" step="0.01" min="0" max="1">
-                        </div>
-                        <div id="orbit_inner_square_div" style="display: none">
-                            Width:
-                            <input id="orbit_inner_square" type="number" value="0.1" step="0.01" min="0" max="1">
-                        </div>
-                        <div id="orbit_inner_cross_div" style="display: none">
-                            Width:
-                            <input id="orbit_inner_cross" type="number" value="0.1" step="0.01" min="0" max="1">
-                        </div>
-                        <div id="orbit_ring_div" style="display: none">
-                            Min Radius:
-                            <input id="orbit_ring_min" type="number" value="0.05" min="0" max="1" step="0.01" >
-                            <br>
-                            Max Radius:
-                            <input id="orbit_ring_max" type="number" value="0.12" min="0" max="1" step="0.01" >
+                        Escape Radius:
+                        <input id="escape_radius" type="number" value="2" step="0.1" min="0">
+                    </div>
+                    <div class="input-div">
+                        Orbit Traps (enable orbit trap colouring to see):
+                        <br>
+                        <button id="orbit_trap_add" style="height: 15px">
+                            Add new
+                        </button>
+                        <div id="orbit_traps" style="display: grid">
                         </div>
                     </div>
                     <div class="input-div">
@@ -196,6 +166,7 @@
                                 <option value="1">Smooth Escape Time</option>
                                 <option value="2">Normal Map (mandel/multibrot only)</option>
                                 <option value="3">Stripe Average</option>
+                                <option value="4">Orbit Trap</option>
                             </select>
                             <div id="light_selector_div" style="display: none">
                                 Light Position:
@@ -212,6 +183,7 @@
                             <select id="cyclic_cycle_function">
                                 <option value="0">Escape Time</option>
                                 <option value="1">Orbit Exponential</option>
+                                <option value="2">Orbit Trap</option>
                             </select>
                             <br>
                             Waveform:
@@ -267,8 +239,9 @@
                             <option value="0">Solid</option>
                             <option value="1">Average Magnitude</option>
                             <option value="2">Min Dist</option>
-                            <option value="3">Orbit Dist</option>
+                            <option value="3">Total Orbit Dist</option>
                             <option value="4">Stripe Average</option>
+                            <option value="5">Orbit Trap</option>
                         </select>
 						<div id="interior_stripe_div" style="display: none">
 							Density:

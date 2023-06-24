@@ -1,8 +1,6 @@
 #version 300 es
 precision highp float;
 
-//%
-
 uniform float magnitude;
 uniform float centre_x;
 uniform float centre_y;
@@ -15,12 +13,11 @@ uniform int is_inverted;
 
 uniform int max_iterations;
 
-uniform float orbit_trap_param1;
-uniform float orbit_trap_param2;
-
 uniform int is_julia;
 uniform float julia_c_real;
 uniform float julia_c_imag;
+
+uniform float escape_radius_sq;
 
 uniform vec3 exterior_colour1;
 uniform vec3 exterior_colour2;
@@ -47,6 +44,8 @@ struct Complex {
     float real;
     float imag;
 };
+
+//%
 
 Complex add(Complex x, Complex y) {
     return Complex(
@@ -175,66 +174,32 @@ float getSmoothIter(float mag_sq, Complex z) {
     #else
         exp = 2.0;
     #endif
-
-    #if ORBIT_TRAP == 0
-        return 1.0 + log(log(orbit_trap_param1 * orbit_trap_param1) / log(mag_sq)) / log(exp);
-
-    #elif ORBIT_TRAP == 1
-        return log(log(orbit_trap_param1 * orbit_trap_param1) / log(mag_sq)) / log(exp);
-
-    #elif ORBIT_TRAP == 2
-        return 1.0 + log(log(min(abs(z.real), abs(z.imag))) / log(orbit_trap_param1 * 0.5)) / log(exp);
-
-    #elif ORBIT_TRAP == 3
-        float ring_min_sq = orbit_trap_param1 * orbit_trap_param1;
-        float ring_max_sq = orbit_trap_param2 * orbit_trap_param2;
-        // TODO
-		return 1.0;
-
-    #elif ORBIT_TRAP == 4
-        return 1.0 + log(log(min(abs(z.real), abs(z.imag))) / log(orbit_trap_param1 * 0.5)) / log(exp);
-		
-	#elif ORBIT_TRAP == 5
-        return 1.0 + log(log(orbit_trap_param1 * 0.5) / log(mag_sq) * 2.0) / log(exp);
-
-    #elif ORBIT_TRAP == 6
-        return (log(orbit_trap_param1 * 0.5) / log(mag_sq) * 4.0) / log(exp);
-    #endif
+    
+    return 1.0 + log(log(escape_radius_sq) / log(mag_sq)) / log(exp);
     
 }
 
-vec3 getColour(float z_real, float z_imag) {
+vec3 getColour(Complex z) {
 
     if (bool(is_inverted)) {
-
-        Complex inv = reciprocal(Complex(z_real, z_imag));
-
-        z_real = inv.real;
-        z_imag = inv.imag;
-
+        z = reciprocal(Complex(z.real, z.imag));
     }
 
-    float c_real, c_imag;
+    Complex c;
 
     if (bool(is_julia)) {
-        c_real = julia_c_real;
-        c_imag = julia_c_imag;
+        c = Complex(julia_c_real, julia_c_imag);
         
     } else {
-        c_real = z_real;
-        c_imag = z_imag;
+        c = z;
     }
 
-    Complex z = Complex(z_real, z_imag);
-    Complex z_prev = Complex(z_imag, z_real);
-    Complex c = Complex(c_real, c_imag);
-    float z_real_sq = z_real * z_real;
-    float z_imag_sq = z_imag * z_imag;
+    Complex z_prev;
+    float z_real_sq = z.real * z.real;
+    float z_imag_sq = z.imag * z.imag;
     float mag_sq = z_real_sq + z_imag_sq;
 
     int iterations;
-
-    float colour_val = 0.0;
 
     #if FRACTAL == 10
         z = Complex(1.0, 0.0);
@@ -254,27 +219,8 @@ vec3 getColour(float z_real, float z_imag) {
 
     #endif
 
-    #if ORBIT_TRAP == 0
-        float escape_radius_sq = orbit_trap_param1 * orbit_trap_param1;
-
-    #elif ORBIT_TRAP == 1
-        float min_radius_sq = orbit_trap_param1 * orbit_trap_param1;
-
-    #elif ORBIT_TRAP == 2
-        float half_side = orbit_trap_param1 * 0.5;
-
-    #elif ORBIT_TRAP == 3
-        float ring_min_sq = orbit_trap_param1 * orbit_trap_param1;
-        float ring_max_sq = orbit_trap_param2 * orbit_trap_param2;
-
-    #elif ORBIT_TRAP == 4
-        float cross_width = orbit_trap_param1 * 0.5;
-		
-	#elif ORBIT_TRAP == 5
-		float half_side = orbit_trap_param1 * 0.5;
-
-    #elif ORBIT_TRAP == 6
-        float cross_width = orbit_trap_param1 * 0.5;
+    #if MONITOR_ORBIT_TRAPS != 0
+        float orbit_min_dist = monitorOrbitTraps(z, 99999999.9, mag_sq);
     #endif
 
     #if EXTERIOR_COLOURING_STYLE == 0
@@ -416,15 +362,15 @@ vec3 getColour(float z_real, float z_imag) {
 
         #elif FRACTAL == 11 // duffing
             z.real = z.imag;
-            z.imag = c.imag * z_real + c.real * z.imag - z.imag * z_imag_sq;
+            z.imag = c.imag * z.real + c.real * z.imag - z.imag * z_imag_sq;
 
         #elif FRACTAL == 12 // gingerbread/ 2.0
-            z.real = 1.0 - z.imag + abs(z_real) + c.real;
-            z.imag = z_real + c.imag;
+            z.real = 1.0 - z.imag + abs(z.real) + c.real;
+            z.imag = z.real + c.imag;
 
         #elif FRACTAL == 13 // henon
             z.real = 1.0 - c.real * z_real_sq + z.imag;
-            z.imag = c.imag * z_real;
+            z.imag = c.imag * z.real;
 
         #elif FRACTAL == 14 // sin
 
@@ -523,7 +469,7 @@ vec3 getColour(float z_real, float z_imag) {
 
         #elif FRACTAL == 24 // thorn
             z.real = z.real / cos(z.imag) + c.real;
-            z.imag = z.imag / sin(z_real) + c.imag;
+            z.imag = z.imag / sin(z.real) + c.imag;
 
         #elif FRACTAL == 25 // meta
 
@@ -596,6 +542,10 @@ vec3 getColour(float z_real, float z_imag) {
         
         mag_sq = z_real_sq + z_imag_sq;
 
+        #if MONITOR_ORBIT_TRAPS != 0
+            orbit_min_dist = monitorOrbitTraps(z, orbit_min_dist, mag_sq);
+        #endif
+
         #if EXTERIOR_COLOURING_STYLE == 0
             #if MONOTONIC_FUNCTION == 2
                 #if FRACTAL == 0
@@ -643,67 +593,7 @@ vec3 getColour(float z_real, float z_imag) {
             mag_sum += mag_sq;
 
         #elif INTERIOR_COLOURING == 2
-            
-            #if ORBIT_TRAP == 0
-                bail_dist_sq = 1.0 - mag_sq / escape_radius_sq;
-
-            #elif ORBIT_TRAP == 1
-                bail_dist_sq = 1.0 - min_radius_sq / mag_sq;
-
-            #elif ORBIT_TRAP == 2
-
-                float square_dist;
-
-                if (abs(z.real) <= half_side) {
-                    square_dist = z_imag_sq;
-                
-                } else if (abs(z.imag) <= half_side) {
-                    square_dist = z_real_sq;
-                
-                } else {
-                    square_dist = mag_sq;
-                }
-
-                bail_dist_sq = 1.0 - half_side / square_dist;
-
-            #elif ORBIT_TRAP == 3
-
-                if (ring_min_sq > mag_sq) {
-                    bail_dist_sq = 1.0 - mag_sq / ring_min_sq;
-                
-                } else {
-                    bail_dist_sq = 1.0 - ring_max_sq / mag_sq;
-                }
-
-            #elif ORBIT_TRAP == 4
-                float cross_dist = min(z_real_sq, z_imag_sq);
-                bail_dist_sq = 1.0 - cross_width / cross_dist;
-				
-			#elif ORBIT_TRAP == 5
-
-                float square_dist;
-
-                if (abs(z.real) <= half_side) {
-                    square_dist = half_side * half_side - z_imag_sq;
-                
-                } else if (abs(z.imag) <= half_side1) {
-                    square_dist = half_side * half_side - z_real_sq;
-                
-                } else {
-                    square_dist = 0.0;
-                }
-
-                bail_dist_sq = square_dist / half_side;
-				
-
-            #elif ORBIT_TRAP == 6
-                float cross_dist = min(z_real_sq, z_imag_sq);
-                bail_dist_sq = 1.0 - cross_dist / cross_width;
-            #endif
-
-            if (bail_dist_sq < min_dist_sq) {
-                min_dist_sq = bail_dist_sq;
-            }
+            min_dist_sq = min(min_dist_sq, 1.0 - mag_sq / escape_radius_sq);
 
         #elif INTERIOR_COLOURING == 3
             diff = sub(z, z_prev);
@@ -712,32 +602,8 @@ vec3 getColour(float z_real, float z_imag) {
         #elif INTERIOR_COLOURING == 4
             interior_stripe_total += 0.5 + 0.5 * sin(interior_colouring_param1 * argument(z));
         #endif
-		
-		bool stop;
-
-        #if ORBIT_TRAP == 0
-            stop = mag_sq >= escape_radius_sq;
-
-        #elif ORBIT_TRAP == 1
-			stop = mag_sq <= min_radius_sq;
-
-        #elif ORBIT_TRAP == 2
-			stop = abs(z.real) < half_side && abs(z.imag) < half_side;
-
-        #elif ORBIT_TRAP == 3
-			stop = mag_sq >= ring_min_sq && mag_sq <= ring_max_sq;
-
-        #elif ORBIT_TRAP == 4
-			stop = abs(z.real) < cross_width || abs(z.imag) < cross_width;
-
-        #elif ORBIT_TRAP == 5
-			stop = abs(z.real) > half_side || abs(z.imag) > half_side;
-
-        #elif ORBIT_TRAP == 6
-			stop = abs(z.real) > cross_width && abs(z.imag) > cross_width;
-        #endif
         
-        if (stop) {
+        if (mag_sq >= escape_radius_sq) {
             iterations = iteration + 1;
             break;
         }
@@ -759,9 +625,18 @@ vec3 getColour(float z_real, float z_imag) {
 
         #elif INTERIOR_COLOURING == 4
             return interpolate(interior_colour1, interior_colour2, interior_stripe_total / float(max_iterations));
+
+        #elif INTERIOR_COLOURING == 5
+            #if MONITOR_ORBIT_TRAPS == 0
+                return interior_colour1;
+            #else
+                return interpolate(interior_colour1, interior_colour2, 1.0 - orbit_min_dist / 2.0);
+            #endif
         #endif
 
     } else {
+
+        float colour_val = 0.0;
 
         #if EXTERIOR_COLOURING_STYLE == 0
 
@@ -795,6 +670,14 @@ vec3 getColour(float z_real, float z_imag) {
             #elif MONOTONIC_FUNCTION == 3
                 float interp = getSmoothIter(mag_sq, z);
                 colour_val = (exterior_stripe_total * interp + exterior_stripe_total_prev * (1.0 - interp)) / (float(iterations) + interp);
+
+            #elif MONOTONIC_FUNCTION == 4
+                #if MONITOR_ORBIT_TRAPS == 0
+                    colour_val = 0.0;
+
+                #else
+                    colour_val = 1.0 - orbit_min_dist / 2.0;
+                #endif
             #endif
 
         #elif EXTERIOR_COLOURING_STYLE == 1
@@ -807,6 +690,12 @@ vec3 getColour(float z_real, float z_imag) {
             #elif CYCLE_FUNCTION == 1
                 val = log(exponential);
 
+            #elif CYCLE_FUNCTION == 2
+                #if MONITOR_ORBIT_TRAPS == 0
+                    val = 0.0;
+                #else
+                    val = log(orbit_min_dist);
+                #endif
             #endif
 
             val /= exterior_colouring_param1;
@@ -815,7 +704,7 @@ vec3 getColour(float z_real, float z_imag) {
                 colour_val = 0.5 * sin(val * 2.0 * PI) + 0.5;
 
             #elif CYCLIC_WAVEFORM == 1
-                colour_val = round(fract(val));
+                colour_val = round(fract(val + 0.5));
 
             #elif CYCLIC_WAVEFORM == 2
 
@@ -829,7 +718,7 @@ vec3 getColour(float z_real, float z_imag) {
                 }
 
             #elif CYCLIC_WAVEFORM == 3
-                colour_val = fract(val);
+                colour_val = fract(val + 0.5);
             #endif
 
         #elif EXTERIOR_COLOURING_STYLE == 2
@@ -883,7 +772,7 @@ void main() {
         float real_offset = fract(0.1234 * float(s));
         float imag_offset = fract(0.7654 * float(s));
 
-        colour_sum += getColour(real + real_offset * pixel_size, imag + imag_offset * pixel_size);
+        colour_sum += getColour(Complex(real + real_offset * pixel_size, imag + imag_offset * pixel_size));
 
     }
 
