@@ -44,6 +44,8 @@
                                 <option value="16">Phoenix</option>
                                 <option value="18">Tippetts</option>
                                 <option value="25">Meta-Mandelbrot</option>
+								<option value="32">Zubieta</option>
+								<option value="33">Cubic</option>
                             </optgroup>
                             <optgroup label="Other Fractals">
                                 <option value="3">Heart</option>
@@ -58,6 +60,7 @@
                                 <option value="27">Magnet</option>
                                 <option value="28">Triple Dragon</option>
                                 <option value="29">Spiral</option>
+								<option value="31">Hyperbolic Sine</option>
                             </optgroup>
                             <optgroup label="Chaotic Maps (generally not very fractal-ly)">
                                 <option value="7">Chirikov</option>
@@ -67,7 +70,8 @@
                             </optgroup>
                             <optgroup label="Custom">
                                 <option value="8">Smelly Shoe</option>
-                                <!-- <option value="9">Custom</option> -->
+                                <option value="9">Dog Skull</option>
+                                <option value="30">Mandelbruh</option>
                             </optgroup>
                         </select>
                         <br>
@@ -121,6 +125,20 @@
                             </div>
                             <canvas id="cmultibrot_p_selector" class="selector" width="200px" height="200px"></canvas>
                         </div>
+                        <div id="mandelbruh_div" style="display: none">
+                            a:
+                            <input id="mandelbruh_a" type="number" value="2.0" step="0.1">
+                        </div>
+                        <div id="hyperbolic_sine_div" style="display: none">
+                            p:
+                            <input id="hyperbolic_sine_p" type="number" value="2.0" step="0.025">
+                        </div>
+                        <div id="zubieta_div" style="display: none">
+                            <div id="zubieta_a_text" class="complex-text">
+                                p = 1 + 0i
+                            </div>
+                            <canvas id="zubieta_a_selector" class="selector" width="200px" height="200px"></canvas>
+                        </div>
                         Invert: 
                         <input type="checkbox" id="esc_invert">
                     </div>
@@ -144,7 +162,7 @@
                     <div class="input-div">
                         Orbit Traps (enable orbit trap colouring to see):
                         <br>
-                        <button id="orbit_trap_add" style="height: 15px">
+                        <button id="orbit_trap_add">
                             Add new
                         </button>
                         <div id="orbit_traps" style="display: grid">
@@ -164,7 +182,7 @@
                             <select id="monotonic_function">
                                 <option value="0">Escape Time</option>
                                 <option value="1">Smooth Escape Time</option>
-                                <option value="2">Normal Map (mandel/multibrot only)</option>
+                                <option value="2">Normal Map</option>
                                 <option value="3">Stripe Average</option>
                                 <option value="4">Orbit Trap</option>
                             </select>
@@ -198,6 +216,13 @@
                             <input id="esc_cycle_period" type="number" value="1" min="0" step="0.01">
                         </div>
                         <div id="radial_rendering_div" style="display: none">
+							Angle:
+                            <select id="radial_angle">
+                                <option value="0">Final</option>
+                                <option value="1">Initial</option>
+                                <option value="2">Average</option>
+                            </select>
+							<br>
                             Decomposition:
                             <select id="radial_decomposition">
                                 <option value="0">Smooth</option>

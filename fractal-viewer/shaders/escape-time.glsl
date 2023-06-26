@@ -125,6 +125,13 @@ Complex exponent(Complex z) {
     );
 }
 
+Complex abs_each(Complex z) {
+	return Complex(
+		abs(z.real),
+		abs(z.imag)
+	);
+}
+
 #define div(x, y) prod(x, reciprocal(y))
 #define ADD3(a, b, c) add(add(a, b), c)
 
@@ -233,6 +240,14 @@ vec3 getColour(Complex z) {
             Complex exp_diff;
             float exponential = 0.0;
         #endif
+		
+	#elif EXTERIOR_COLOURING_STYLE == 2
+		#if RADIAL_ANGLE == 1
+			float init_angle = argument(z);
+			
+		#elif RADIAL_ANGLE == 2
+			Complex total_orbit = z;
+		#endif
     #endif
 
     #if EXTERIOR_COLOURING_STYLE == 0 && MONOTONIC_FUNCTION == 3
@@ -269,9 +284,8 @@ vec3 getColour(Complex z) {
             z.real = z_real_sq - z_imag_sq + c.real;
 
         #elif FRACTAL == 1 // burning ship
-
-            z.imag = abs(z.imag);
-            z.real = abs(z.real);
+		
+			z = abs_each(z);
 
             z.imag = 2.0 * z.real * z.imag + c.imag;
             z.real = z_real_sq - z_imag_sq + c.real;
@@ -346,16 +360,10 @@ vec3 getColour(Complex z) {
             z.imag = 2.0 * z.real * z.imag + c.imag;
             z.real = z_real_sq - z_imag_sq + c.real;
 
-        #elif FRACTAL == 9 // custom
-
-            float z_real = z.real;
-
-            z.real += sin(z.imag);
-            z.real += sin(z_real);
-    
-            z.imag = 2.0 * z.real * z.imag + c.imag;
-
-            z.real = z_real_sq - z_imag_sq + c.real;
+        #elif FRACTAL == 9 // dog skull
+			float z_real = z.real;
+			z.real = z_real_sq + tan(z.imag) + c.real;
+			z.imag = z.imag * z_imag_sq - z_real + c.imag;
 
         #elif FRACTAL == 10 // power tower
             z = exponent(c, z);
@@ -534,7 +542,40 @@ vec3 getColour(Complex z) {
                 sin(dz2c.real) / denom,
                 sinh(dz2c.imag) / denom
             );
+		
+		#elif FRACTAL == 30 // mandelbruh
+            z.imag = fractal_param1 * z.real * z.imag + c.imag;
+            z.real = z_real_sq - z_imag_sq + c.real;
+			
+		#elif FRACTAL == 31 // sinh
+		
+			z = add(
+				abs_each(exponent(
+					Complex(
+						sinh(z.real) * cos(z.imag),
+						cosh(z.real) * sin(z.imag)),
+					fractal_param1)),
+				c);
+				
+		#elif FRACTAL == 32
+		
+			Complex recip = div(prod(c, Complex(fractal_param1, fractal_param2)), z);
+		
+            z.imag = 2.0 * z.real * z.imag + recip.imag;
+            z.real = z_real_sq - z_imag_sq + recip.real;
+			
+		#elif FRACTAL == 33
             
+			z = add(
+				sub(
+					exponent(z, 3.0),
+					exponent(
+						Complex(
+							-z.real,
+							-z.imag),
+						2.00001)),
+					c);
+			
         #endif
         
         z_real_sq = z.real * z.real;
@@ -587,6 +628,11 @@ vec3 getColour(Complex z) {
                 exp_diff = sub(z, z_prev);
                 exponential += exp(-(sqrt(mag_sq) + 0.5 / sqrt(exp_diff.real * exp_diff.real + exp_diff.imag * exp_diff.imag)));
             #endif
+			
+		#elif EXTERIOR_COLOURING_STYLE == 2
+			#if RADIAL_ANGLE == 2
+				total_orbit = add(total_orbit, z);
+			#endif
         #endif
 
         #if INTERIOR_COLOURING == 1
@@ -723,7 +769,17 @@ vec3 getColour(Complex z) {
 
         #elif EXTERIOR_COLOURING_STYLE == 2
             
-            float angle = argument(z);
+            float angle;
+
+			#if RADIAL_ANGLE == 0
+				angle = argument(z);
+				
+			#elif RADIAL_ANGLE == 1
+				angle = init_angle;
+				
+			#elif RADIAL_ANGLE == 2
+				angle = argument(total_orbit);
+			#endif
 
             #if RADIAL_DECOMPOSITION == 0
                 if (angle > 0.0) {

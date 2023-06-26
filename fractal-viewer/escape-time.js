@@ -57,6 +57,7 @@ class EscapeTime extends Program {
     monotonic_function = 0;
     cyclic_cycle_function = 0;
     cyclic_waveform = 0;
+	radial_angle = 0;
     radial_decomposition = 0;
 
     exterior_colouring = 0;
@@ -117,22 +118,23 @@ class EscapeTime extends Program {
         var cycle_function = this.cyclic_cycle_function;
         var cyclic_waveform = this.cyclic_waveform;
         if (this.exterior_colouring_style != 1) {
-            cycle_function = -1;
-            cyclic_waveform = -1;
+            cycle_function = cyclic_waveform = -1;
         }
 
         def += `\n#define CYCLE_FUNCTION ${cycle_function}`;
         def += `\n#define CYCLIC_WAVEFORM ${cyclic_waveform}`;
 
+		var radial_angle = this.radial_angle;
         var radial_decomposition = this.radial_decomposition;
         if (this.exterior_colouring_style != 2) {
-            radial_decomposition = -1
+			radial_angle = radial_decomposition = -1;
         }
 
+        def += `\n#define RADIAL_ANGLE ${radial_angle}`;
         def += `\n#define RADIAL_DECOMPOSITION ${radial_decomposition}`;
 
         if (monitor_orbit_traps) {
-
+	
             def += "\nfloat monitorOrbitTraps(Complex z, float min_dist, float mag_sq) {\n";
 
             const orbit_traps = document.getElementById("orbit_traps").children;
@@ -208,6 +210,9 @@ class EscapeTime extends Program {
         document.getElementById("gangopadhyay3").onchange = this.updateGangopadhyay;
         document.getElementById("gangopadhyay4").onchange = this.updateGangopadhyay;
         document.getElementById("gangopadhyay5").onchange = this.updateGangopadhyay;
+		
+        document.getElementById("mandelbruh_a").onchange = paramSet(this.fractal_param1);
+        document.getElementById("hyperbolic_sine_p").onchange = paramSet(this.fractal_param1);
     
         document.getElementById("is_julia").onchange = this.updateIsJulia;
         document.getElementById("esc_invert").onchange = this.updateInverted;
@@ -221,9 +226,12 @@ class EscapeTime extends Program {
         document.getElementById("exterior_colouring_style").onchange = this.updateExteriorColouringStyle;
 
         document.getElementById("monotonic_function").onchange = this.updateMonotonicFunction;
+		
         document.getElementById("cyclic_cycle_function").onchange = this.updateCyclicFunction;
         document.getElementById("cyclic_waveform").onchange = this.updateCyclicWaveform;
         document.getElementById("esc_cycle_period").onchange = paramSet(this.exterior_colouring_param1);
+		
+        document.getElementById("radial_angle").onchange = this.updateRadialAngle;
         document.getElementById("radial_decomposition").onchange = this.updateRadialDecomposition;
 
         document.getElementById("esc_exterior_colouring").onchange = this.updateExteriorColouring;
@@ -247,13 +255,14 @@ class EscapeTime extends Program {
         this.phoenix_p_handler = new ComplexPickerHandler("phoenix_p_selector", this.fractal_param1, this.fractal_param2, 2, 0, 0, "phoenix_p_text", "p = $");
 
         this.fractal_param1.value = 2;
-        
         this.cmultibrot_p_handler = new ComplexPickerHandler("cmultibrot_p_selector", this.fractal_param1, this.fractal_param2, 6, 0, 0, "cmultibrot_p_text", "p = $");
         
         this.fractal_param1.value = 0;
-
         this.light_handler = new ComplexPickerHandler("light_selector", this.exterior_colouring_param1, this.exterior_colouring_param2, 1, 0, 0, null, null);
         
+		this.fractal_param1.value = 1;
+		this.zubieta_a_handler = new ComplexPickerHandler("zubieta_a_selector", this.fractal_param1, this.fractal_param2, 2, 0, 0, "zubieta_a_text", "a = $");
+		
     }
 
     setupAttrs = function() {
@@ -326,6 +335,9 @@ class EscapeTime extends Program {
         var phoenix_style = document.getElementById("phoenix_div").style;
         var dragon_style = document.getElementById("dragon_div").style;
         var gangopadhyay_style = document.getElementById("gangopadhyay_div").style;
+		var mandelbruh_style = document.getElementById("mandelbruh_div").style;
+		var hyperbolic_sine_style = document.getElementById("hyperbolic_sine_div").style;
+		var zubieta_style = document.getElementById("zubieta_div").style;
         var function_text = document.getElementById("esc_function_text");
     
         julia_style.display = "block";
@@ -336,6 +348,9 @@ class EscapeTime extends Program {
         phoenix_style.display = "none";
         dragon_style.display = "none";
         gangopadhyay_style.display = "none";
+        mandelbruh_style.display = "none";
+        zubieta_style.display = "none";
+        hyperbolic_sine_style.display = "none";
 
         function_text.innerHTML = ESCAPE_TIME_FUNCTIONS[ESCAPE_TIME.fractal];
 
@@ -369,7 +384,20 @@ class EscapeTime extends Program {
             cmultibrot_style.display = "block";
 			ESCAPE_TIME.fractal_param1.value = ESCAPE_TIME.cmultibrot_p_handler.real;
 			ESCAPE_TIME.fractal_param2.value = ESCAPE_TIME.cmultibrot_p_handler.imag;
-        }
+        
+        } else if (ESCAPE_TIME.fractal == 30) {
+            mandelbruh_style.display = "block";
+			ESCAPE_TIME.fractal_param1.value = document.getElementById("mandelbruh_a").value;
+		
+		} else if (ESCAPE_TIME.fractal == 31) {
+            hyperbolic_sine_style.display = "block";
+			ESCAPE_TIME.fractal_param1.value = document.getElementById("hyperbolic_sine_p").value;
+		
+		} else if (ESCAPE_TIME.fractal == 32) {
+            zubieta_style.display = "block";
+			ESCAPE_TIME.fractal_param1.value = ESCAPE_TIME.zubieta_a_handler.real;
+			ESCAPE_TIME.fractal_param2.value = ESCAPE_TIME.zubieta_a_handler.imag;
+		}
         
         setupShader();
         redraw();
@@ -536,6 +564,15 @@ class EscapeTime extends Program {
     updateCyclicWaveform = function(event) {
 
         ESCAPE_TIME.cyclic_waveform = event.target.value;
+
+        setupShader();
+        redraw();
+
+    }
+	
+    updateRadialAngle = function(event) {
+
+        ESCAPE_TIME.radial_angle = event.target.value;
 
         setupShader();
         redraw();
