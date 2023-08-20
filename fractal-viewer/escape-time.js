@@ -215,9 +215,15 @@ class EscapeTime extends Program {
         document.getElementById("gangopadhyay3").onchange = this.updateGangopadhyay;
         document.getElementById("gangopadhyay4").onchange = this.updateGangopadhyay;
         document.getElementById("gangopadhyay5").onchange = this.updateGangopadhyay;
+
+        this.fractal_param1.value = 2;
+        this.cmultibrot_p_handler = new ComplexPickerHandler("cmultibrot_p_selector", this.fractal_param1, this.fractal_param2, 6, 0, 0, "cmultibrot_p_text", "p = $");
 		
         document.getElementById("mandelbruh_a").onchange = paramSet(this.fractal_param1);
         document.getElementById("hyperbolic_sine_p").onchange = paramSet(this.fractal_param1);
+        
+		this.fractal_param1.value = 1;
+		this.zubieta_a_handler = new ComplexPickerHandler("zubieta_a_selector", this.fractal_param1, this.fractal_param2, 2, 0, 0, "zubieta_a_text", "a = $");
     
         document.getElementById("is_julia").onchange = this.updateIsJulia;
         document.getElementById("esc_invert").onchange = this.updateInverted;
@@ -258,15 +264,9 @@ class EscapeTime extends Program {
 
         this.julia_c_handler = new ComplexPickerHandler("julia_selector", this.julia_c_real, this.julia_c_imag, 2.5, 0, 0, "esc_julia_text", "c = $");
         this.phoenix_p_handler = new ComplexPickerHandler("phoenix_p_selector", this.fractal_param1, this.fractal_param2, 2, 0, 0, "phoenix_p_text", "p = $");
-
-        this.fractal_param1.value = 2;
-        this.cmultibrot_p_handler = new ComplexPickerHandler("cmultibrot_p_selector", this.fractal_param1, this.fractal_param2, 6, 0, 0, "cmultibrot_p_text", "p = $");
         
         this.fractal_param1.value = 0;
         this.light_handler = new ComplexPickerHandler("light_selector", this.exterior_colouring_param1, this.exterior_colouring_param2, 1, 0, 0, null, null);
-        
-		this.fractal_param1.value = 1;
-		this.zubieta_a_handler = new ComplexPickerHandler("zubieta_a_selector", this.fractal_param1, this.fractal_param2, 2, 0, 0, "zubieta_a_text", "a = $");
 		
     }
 
@@ -343,6 +343,7 @@ class EscapeTime extends Program {
 		var mandelbruh_style = document.getElementById("mandelbruh_div").style;
 		var hyperbolic_sine_style = document.getElementById("hyperbolic_sine_div").style;
 		var zubieta_style = document.getElementById("zubieta_div").style;
+		var gauss_style = document.getElementById("gauss_div").style;
         var function_text = document.getElementById("esc_function_text");
     
         julia_style.display = "block";
@@ -356,6 +357,7 @@ class EscapeTime extends Program {
         mandelbruh_style.display = "none";
         hyperbolic_sine_style.display = "none";
         zubieta_style.display = "none";
+        gauss_style.display = "none";
 
         function_text.innerHTML = ESCAPE_TIME_FUNCTIONS[ESCAPE_TIME.fractal];
 
@@ -402,9 +404,9 @@ class EscapeTime extends Program {
             zubieta_style.display = "block";
 			ESCAPE_TIME.fractal_param1.value = ESCAPE_TIME.zubieta_a_handler.real;
 			ESCAPE_TIME.fractal_param2.value = ESCAPE_TIME.zubieta_a_handler.imag;
-		
+
         } else if (ESCAPE_TIME.fractal == 34) {
-            julia_style.display = "none";
+            julia_style.display = "none"
         }
         
         setupShader();
