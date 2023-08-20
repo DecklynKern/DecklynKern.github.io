@@ -1,6 +1,42 @@
 #version 300 es
 precision highp float;
 
+#define MANDELBROT          0
+#define BURNING_SHIP        1
+#define TRICORN             2
+#define HEART               3
+#define MANDELBOX           4
+#define MULTIBROT           5
+#define FEATHER             6
+#define CHIRIKOV            7
+#define SMELLY_SHOE         8
+#define DOG_SKULL           9
+#define EXPONENT2           10
+#define DUFFING             11
+#define GINGERBREAD         12
+#define HENON               13
+#define SINE                14
+#define RATIONAL_MAP        15
+#define PHOENIX             16
+#define SIMONBROT           17
+#define TIPPETTS            18
+#define MAREK_DRAGON        19
+#define GANGOPADHYAY        20
+#define EXPONENT            21
+#define SFX                 22
+#define COMPLEX_MULTIBROT   23
+#define THORN               24
+#define META_MANDELBROT     25
+#define BUFFALO             26
+#define MAGNET              27
+#define TRIPLE_DRAGON       28
+#define SPIRAL              29
+#define MANDELBRUH          30
+#define HYPERBOLIC_SINE     31
+#define ZUBIETA             32
+#define CUBIC               33
+#define LOGISTIC            34
+
 uniform float magnitude;
 uniform float centre_x;
 uniform float centre_y;
@@ -169,13 +205,13 @@ float getSmoothIter(float mag_sq, Complex z) {
 
     float exp;
 
-    #if FRACTAL == 5
+    #if FRACTAL == MULTIBROT
         exp = fractal_param1;
 
-    #elif FRACTAL == 15
+    #elif FRACTAL == RATIONAL_MAP
         exp = max(fractal_param1, fractal_param2);
 
-    #elif FRACTAL == 17 || FRACTAL == 25
+    #elif FRACTAL == SIMONBROT || FRACTAL == META_MANDELBROT
         exp = 4.0;
 
     #else
@@ -193,13 +229,20 @@ vec3 getColour(Complex z) {
     }
 
     Complex c;
-
-    if (bool(is_julia)) {
-        c = Complex(julia_c_real, julia_c_imag);
-        
-    } else {
+    
+    #if FRACTAL == LOGISTIC
         c = z;
-    }
+        z = Complex(0.5, 0.0);
+    #else
+
+        if (bool(is_julia)) {
+            c = Complex(julia_c_real, julia_c_imag);
+            
+        } else {
+            c = z;
+        }
+
+    #endif
 
     Complex z_prev;
     float z_real_sq = z.real * z.real;
@@ -208,22 +251,21 @@ vec3 getColour(Complex z) {
 
     int iterations;
 
-    #if FRACTAL == 10
+    #if FRACTAL == EXPONENT2
         z = Complex(1.0, 0.0);
 
-    #elif FRACTAL == 19
+    #elif FRACTAL == MAREK_DRAGON
         float r = PI * 2.0 * fractal_param1;
         Complex zc = Complex(
             cos(r),
             sin(r)
         );
 
-    #elif FRACTAL == 22
+    #elif FRACTAL == SFX
         Complex c_mul = Complex(
             c.real * c.real,
             c.imag * c.imag
         );
-
     #endif
 
     #if MONITOR_ORBIT_TRAPS != 0
@@ -279,25 +321,25 @@ vec3 getColour(Complex z) {
         
         z_prev = z;
 
-        #if FRACTAL == 0 // mandelbrot
+        #if FRACTAL == MANDELBROT
             z.imag = 2.0 * z.real * z.imag + c.imag;
             z.real = z_real_sq - z_imag_sq + c.real;
 
-        #elif FRACTAL == 1 // burning ship
+        #elif FRACTAL == BURNING_SHIP
 		
 			z = abs_each(z);
 
             z.imag = 2.0 * z.real * z.imag + c.imag;
             z.real = z_real_sq - z_imag_sq + c.real;
 
-        #elif FRACTAL == 2 // tricorn
+        #elif FRACTAL == TRICORN
 
             z.imag = -z.real * z.imag;
             z.imag = 2.0 * z.imag + c.imag;
 
             z.real = z_real_sq - z_imag_sq + c.real;
 
-        #elif FRACTAL == 3 // heart
+        #elif FRACTAL == HEART
 
             float temp;
 
@@ -305,7 +347,7 @@ vec3 getColour(Complex z) {
             z.imag = abs(z.imag) - abs(z.real) + c.imag;
             z.real = temp;
 
-        #elif FRACTAL == 4 // mandelbox
+        #elif FRACTAL == MANDELBOX
 
             if (mag_sq < 0.25) {
                 z.real *= 4.0;
@@ -333,12 +375,12 @@ vec3 getColour(Complex z) {
                 z.imag = -2.0 - z.imag;
             }
 
-        #elif FRACTAL == 5 // multibrot
+        #elif FRACTAL == MULTIBROT
             z = add(
                 exponent(z, fractal_param1),
                 c);
 
-        #elif FRACTAL == 6 // feather
+        #elif FRACTAL == FEATHER
             z = add(
                 div(
                     Complex(
@@ -349,38 +391,38 @@ vec3 getColour(Complex z) {
                         1.0 + z_imag_sq)),
                 c);
 
-        #elif FRACTAL == 7 // chrikov
+        #elif FRACTAL == CHIRIKOV
             z.imag += c.imag * sin(z.real);
             z.real += c.real * z.imag;
 
-        #elif FRACTAL == 8 // shoe
+        #elif FRACTAL == SMELLY_SHOE
 
             z.real = sin(z.imag * z.real);
     
             z.imag = 2.0 * z.real * z.imag + c.imag;
             z.real = z_real_sq - z_imag_sq + c.real;
 
-        #elif FRACTAL == 9 // dog skull
+        #elif FRACTAL == DOG_SKULL
 			float z_real = z.real;
 			z.real = z_real_sq + tan(z.imag) + c.real;
 			z.imag = z.imag * z_imag_sq - z_real + c.imag;
 
-        #elif FRACTAL == 10 // power tower
+        #elif FRACTAL == EXPONENT2
             z = exponent(c, z);
 
-        #elif FRACTAL == 11 // duffing
+        #elif FRACTAL == DUFFING
             z.real = z.imag;
             z.imag = c.imag * z.real + c.real * z.imag - z.imag * z_imag_sq;
 
-        #elif FRACTAL == 12 // gingerbread/ 2.0
+        #elif FRACTAL == GINGERBREAD
             z.real = 1.0 - z.imag + abs(z.real) + c.real;
             z.imag = z.real + c.imag;
 
-        #elif FRACTAL == 13 // henon
+        #elif FRACTAL == HENON
             z.real = 1.0 - c.real * z_real_sq + z.imag;
             z.imag = c.imag * z.real;
 
-        #elif FRACTAL == 14 // sin
+        #elif FRACTAL == SINE
 
             float sin_real = sin(z.real) * cosh(z.imag);
             float sin_imag = cos(z.real) * sinh(z.imag);
@@ -388,7 +430,7 @@ vec3 getColour(Complex z) {
             z.real = sin_real * c.real - sin_imag * c.imag;
             z.imag = c.real * sin_imag + sin_real * c.imag;
 
-        #elif FRACTAL == 15 // rational map
+        #elif FRACTAL == RATIONAL_MAP
             z = add(
                 sub(
                     exponent(z, fractal_param1),
@@ -397,29 +439,29 @@ vec3 getColour(Complex z) {
                         fractal_param3)),
                 c);
 
-        #elif FRACTAL == 16 // phoenix
+        #elif FRACTAL == PHOENIX
 
             float z_real = z.real;
 
             z.real = z_real_sq - z_imag_sq + fractal_param1 * z.real - fractal_param2 * z.imag + c.real;
             z.imag = 2.0 * z_real * z.imag + fractal_param1 * z.imag + fractal_param2 * z_real + c.imag;
 
-        #elif FRACTAL == 17 // simonbrot
+        #elif FRACTAL == SIMONBROT
             z.imag = 2.0 * (z.real * z.imag) * mag_sq + c.imag;
             z.real = (z_real_sq - z_imag_sq) * mag_sq + c.real;
 
-        #elif FRACTAL == 18 //tippetts
+        #elif FRACTAL == TIPPETTS
             z.real = z_real_sq - z_imag_sq + c.real;
             z.imag = 2.0 * z.real * z.imag + c.imag;
 
-        #elif FRACTAL == 19 // marek dragon
+        #elif FRACTAL == MAREK_DRAGON
             z = prod(
                 z, 
                 Complex(
                     zc.real + z.real,
                     zc.imag + z.imag));
 
-        #elif FRACTAL == 20 // gangopadhyay
+        #elif FRACTAL == GANGOPADHYAY
 
             Complex z_run = Complex(0.0, 0.0);
 
@@ -457,10 +499,10 @@ vec3 getColour(Complex z) {
             z.imag = 2.0 * z.real * z.imag + c.imag;
             z.real = z_real_sq - z_imag_sq + c.real;
 
-        #elif FRACTAL == 21 // exponent
+        #elif FRACTAL == EXPONENT
             z = prod(c, exponent(z));
 
-        #elif FRACTAL == 22 // sfx
+        #elif FRACTAL == SFX
 
             Complex zc = prod(z, c_mul);
 
@@ -468,18 +510,18 @@ vec3 getColour(Complex z) {
                 z.real * mag_sq - zc.real,
                 z.imag * mag_sq - zc.imag);
 
-        #elif FRACTAL == 23 // complex multibrot
+        #elif FRACTAL == COMPLEX_MULTIBROT
             z = add(
                 exponent(
                     z,
                     Complex(fractal_param1, fractal_param2)),
                 c);
 
-        #elif FRACTAL == 24 // thorn
+        #elif FRACTAL == THORN
             z.real = z.real / cos(z.imag) + c.real;
             z.imag = z.imag / sin(z.real) + c.imag;
 
-        #elif FRACTAL == 25 // meta
+        #elif FRACTAL == META_MANDELBROT
 
             Complex meta_z = Complex(
                 z_real_sq - z_imag_sq + c.real,
@@ -494,13 +536,13 @@ vec3 getColour(Complex z) {
                 square(meta_z),
                 meta_c);
 
-        #elif FRACTAL == 26 // buffalo
+        #elif FRACTAL == BUFFALO
             z = Complex(
                 z_real_sq - z_imag_sq - abs(z.real) + c.real,
                 2.0 * abs(z.real * z.imag) - abs(z.imag) + c.imag
             );
 
-        #elif FRACTAL == 27 // magnet
+        #elif FRACTAL == MAGNET
 
             float dzr = 2.0 * z.real;
 
@@ -513,7 +555,7 @@ vec3 getColour(Complex z) {
                         dzr + c.real - 2.0,
                         2.0 * z.imag + c.imag)));
 
-        #elif FRACTAL == 28 // triple dragon
+        #elif FRACTAL == TRIPLE_DRAGON
 
             Complex z3 = prod(
                 z,
@@ -529,7 +571,7 @@ vec3 getColour(Complex z) {
                         z3.imag)),
                 c);
 
-        #elif FRACTAL == 29 // spiral
+        #elif FRACTAL == SPIRAL
 
             Complex dz2c = Complex(
                 2.0 * (z_real_sq - z_imag_sq + c.real),
@@ -543,11 +585,11 @@ vec3 getColour(Complex z) {
                 sinh(dz2c.imag) / denom
             );
 		
-		#elif FRACTAL == 30 // mandelbruh
+		#elif FRACTAL == MANDELBRUH
             z.imag = fractal_param1 * z.real * z.imag + c.imag;
             z.real = z_real_sq - z_imag_sq + c.real;
 			
-		#elif FRACTAL == 31 // sinh
+		#elif FRACTAL == HYPERBOLIC_SINE
 		
 			z = add(
 				abs_each(exponent(
@@ -557,14 +599,14 @@ vec3 getColour(Complex z) {
 					fractal_param1)),
 				c);
 				
-		#elif FRACTAL == 32
+		#elif FRACTAL == ZUBIETA
 		
 			Complex recip = div(prod(c, Complex(fractal_param1, fractal_param2)), z);
 		
             z.imag = 2.0 * z.real * z.imag + recip.imag;
             z.real = z_real_sq - z_imag_sq + recip.real;
 			
-		#elif FRACTAL == 33
+		#elif FRACTAL == CUBIC
             
 			z = add(
 				sub(
@@ -575,6 +617,16 @@ vec3 getColour(Complex z) {
 							-z.imag),
 						2.00001)),
 					c);
+
+        #elif FRACTAL == LOGISTIC
+
+            z = prod(
+                c,
+                prod(
+                    z,
+                    Complex(
+                        1.0 - z.real,
+                        -z.imag)));
 			
         #endif
         
@@ -589,7 +641,7 @@ vec3 getColour(Complex z) {
 
         #if EXTERIOR_COLOURING_STYLE == 0
             #if MONOTONIC_FUNCTION == 2
-                #if FRACTAL == 0
+                #if FRACTAL == MANDELBROT
 
                     der = add(
                         scale(
@@ -601,7 +653,7 @@ vec3 getColour(Complex z) {
                             1.0,
                             0.0));
 
-                #elif FRACTAL == 5
+                #elif FRACTAL == MULTIBROT
 
                     der = add(
                         scale(

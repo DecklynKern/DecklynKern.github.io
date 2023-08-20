@@ -28,7 +28,12 @@ ESCAPE_TIME_FUNCTIONS = [
     "z ← Re(z<sup>2</sup>) - |x| + |Im(z<sup>2</sup>)| - |y| + c",
     "z ← [(z<sup>2</sup> + c - 1)/(2z + c - 2)]<sup>2</sup>",
     "z ← z<sup>3</sup>/(z<sup>3</sup> + 1) + c",
-    "z ← tan(z<sup>2</sup> + c)"
+    "z ← tan(z<sup>2</sup> + c)",
+    "",
+    "",
+    "",
+    "",
+    "z ← cz(1 - z) [z<sub>0</sub> = 0.5]"
 ];
 
 class EscapeTime extends Program {
@@ -349,8 +354,8 @@ class EscapeTime extends Program {
         dragon_style.display = "none";
         gangopadhyay_style.display = "none";
         mandelbruh_style.display = "none";
-        zubieta_style.display = "none";
         hyperbolic_sine_style.display = "none";
+        zubieta_style.display = "none";
 
         function_text.innerHTML = ESCAPE_TIME_FUNCTIONS[ESCAPE_TIME.fractal];
 
@@ -397,7 +402,10 @@ class EscapeTime extends Program {
             zubieta_style.display = "block";
 			ESCAPE_TIME.fractal_param1.value = ESCAPE_TIME.zubieta_a_handler.real;
 			ESCAPE_TIME.fractal_param2.value = ESCAPE_TIME.zubieta_a_handler.imag;
-		}
+		
+        } else if (ESCAPE_TIME.fractal == 34) {
+            julia_style.display = "none";
+        }
         
         setupShader();
         redraw();
