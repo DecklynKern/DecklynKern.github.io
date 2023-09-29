@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="en" style="width: 100%; height: 100%; margin: 0 !important; padding: 0 !important; overflow: hidden;">
+    <head>
+        <script src="main.js"></script>
+        <style>
+        </style>
+	</head>
+	<body onload="setup()" onresize="redraw()" style="width: 100%; height: 100%; margin: 0 !important; padding: 0 !important; overflow: hidden;">
+        <canvas id="main_canvas"></canvas>
+        <div style="position: absolute; top: 0; left: 0;">
+            Iterations:
+            <input id="rows" type="number" value="120" min="1" onchange="redraw()">
+            <br>
+            Rule #:
+            <input id="rule" type="number" value="90" min="0" max="255" onchange="redraw()">
+        </div>
+	</body>
+</html>
