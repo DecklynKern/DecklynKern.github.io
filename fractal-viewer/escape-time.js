@@ -1,4 +1,4 @@
-ESCAPE_TIME_FUNCTIONS = [
+const ESCAPE_TIME_FUNCTIONS = [
     "z ← z<sup>2</sup> + c",
     "z ← (|x| + |y|i)<sup>2</sup> + c",
     "z ← z̄<sup>2</sup> + c",
@@ -34,6 +34,17 @@ ESCAPE_TIME_FUNCTIONS = [
     "",
     "",
     "z ← cz(1 - z) [z<sub>0</sub> = 0.5]"
+];
+
+const ESCAPE_TIME_ANIMATIONS = [
+    function(ms) {
+        ESCAPE_TIME.julia_c_real.value = animation_param1 * Math.sin(ms / 1000);
+        ESCAPE_TIME.julia_c_imag.value = animation_param1 * Math.cos(ms / 1000);
+    },
+    function(ms) {
+        ESCAPE_TIME.julia_c_real.value = animation_param1 * Math.sin(ms / 1000) * Math.sin(ms / 2500);
+        ESCAPE_TIME.julia_c_imag.value = animation_param1 * Math.cos(ms / 1000) * Math.sin(ms / 2500);
+    },
 ];
 
 class EscapeTime extends Program {
@@ -197,17 +208,26 @@ class EscapeTime extends Program {
     }
 
     setupGUI = function() {
+        
+        document.querySelectorAll('[esc_param="1"]').forEach(
+            function(fractal_param) {
+                fractal_param.onchange = paramSet(ESCAPE_TIME.fractal_param1);
+            }
+        );
+        
+        document.querySelectorAll('[esc_param="2"]').forEach(
+            function(fractal_param) {
+                fractal_param.onchange = paramSet(ESCAPE_TIME.fractal_param2);
+            }
+        );
+        
+        document.querySelectorAll('[esc_param="3"]').forEach(
+            function(fractal_param) {
+                fractal_param.onchange = paramSet(ESCAPE_TIME.fractal_param3);
+            }
+        );
 
         document.getElementById("esc_fractal").onchange = this.updateFractal;
-        
-        document.getElementById("scaling").onchange = paramSet(this.fractal_param1);
-        document.getElementById("exponent").onchange = paramSet(this.fractal_param1);
-
-        document.getElementById("rational_p").onchange = paramSet(this.fractal_param1);
-        document.getElementById("rational_q").onchange = paramSet(this.fractal_param2);
-        document.getElementById("rational_lambda").onchange = paramSet(this.fractal_param3);
-
-        document.getElementById("dragon_r").onchange = paramSet(this.fractal_param1);
 
         document.getElementById("gangopadhyay1").onchange = this.updateGangopadhyay;
         document.getElementById("gangopadhyay2").onchange = this.updateGangopadhyay;
@@ -217,9 +237,6 @@ class EscapeTime extends Program {
 
         this.fractal_param1.value = 2;
         this.cmultibrot_p_handler = new ComplexPickerHandler("cmultibrot_p_selector", this.fractal_param1, this.fractal_param2, 6, 0, 0, "cmultibrot_p_text", "p = $");
-		
-        document.getElementById("mandelbruh_a").onchange = paramSet(this.fractal_param1);
-        document.getElementById("hyperbolic_sine_p").onchange = paramSet(this.fractal_param1);
         
         this.fractal_param1.value = 1;
         this.zubieta_a_handler = new ComplexPickerHandler("zubieta_a_selector", this.fractal_param1, this.fractal_param2, 2, 0, 0, "zubieta_a_text", "a = $");

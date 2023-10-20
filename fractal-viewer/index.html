@@ -16,7 +16,7 @@
     </head>
     <body onload="main()">
         <div class="main">
-            <canvas id="fractal_canvas" width="1000px" height="1000px"></canvas>
+            <canvas id="fractal_canvas" width="1000px" height="1000px" style="max-height: 1000px"></canvas>
             <div class="sidebar">
                 <details open="true">
                     <summary>
@@ -80,28 +80,28 @@
                                 <option value="30">Mandelbruh</option>
                             </optgroup>
                         </select>
-                        <br>
+                        <hr>
                         z = x + yi
-                        <div id="esc_function_text">
+                        <div id="esc_function_text" style="font-family: monospace">
                             z ← z<sup>2</sup> + c
                         </div>
-                        <div id="scaling_div" style="display: none">
+                        <div id="scaling_div" style="display: none" esc_param="1">
                             Scale:
                             <input id="scaling" type="number" value="2.0" step="0.025">
                         </div>
-                        <div id="exponent_div" style="display: none">
+                        <div id="exponent_div" style="display: none" esc_param="1">
                             p:
                             <input id="exponent" type="number" value="2.0" step="0.025">
                         </div>
                         <div id="rational_div" style="display: none">
                             p:
-                            <input id="rational_p" type="number" value="2.0" step="0.025" min="0">
+                            <input id="rational_p" type="number" value="2.0" step="0.025" min="0" esc_param="1">
                             <br>
                             q:
-                            <input id="rational_q" type="number" value="-2.0" step="0.025" max="0">
+                            <input id="rational_q" type="number" value="-2.0" step="0.025" max="0" esc_param="2">
                             <br>
                             λ:
-                            <input id="rational_lambda" type="number" value="0.0" step="0.0025">
+                            <input id="rational_lambda" type="number" value="0.0" step="0.0025" esc_param="3">
                         </div>
                         <div id="phoenix_div" style="display: none">
                             <div id="phoenix_p_text" class="complex-text">
@@ -111,7 +111,7 @@
                         </div>
                         <div id="dragon_div" style="display: none">
                             r:
-                            <input id="dragon_r" type="number" value="0.041" step="0.001">
+                            <input id="dragon_r" type="number" value="0.041" step="0.001" esc_param="1">
                         </div>
                         <div id="gangopadhyay_div" style="display: none">
                             ax1:
@@ -133,11 +133,11 @@
                         </div>
                         <div id="mandelbruh_div" style="display: none">
                             a:
-                            <input id="mandelbruh_a" type="number" value="2.0" step="0.1">
+                            <input id="mandelbruh_a" type="number" value="2.0" step="0.1" esc_param="1">
                         </div>
                         <div id="hyperbolic_sine_div" style="display: none">
                             p:
-                            <input id="hyperbolic_sine_p" type="number" value="2.0" step="0.025">
+                            <input id="hyperbolic_sine_p" type="number" value="2.0" step="0.025" esc_param="1">
                         </div>
                         <div id="zubieta_div" style="display: none">
                             <div id="zubieta_a_text" class="complex-text">
@@ -145,6 +145,7 @@
                             </div>
                             <canvas id="zubieta_a_selector" class="selector" width="200px" height="200px"></canvas>
                         </div>
+                        <hr>
                         Invert: 
                         <input type="checkbox" id="esc_invert">
                     </details>
@@ -180,6 +181,7 @@
                         <button id="orbit_trap_add">
                             Add new
                         </button>
+                        <hr>
                         <div id="orbit_traps" style="display: grid">
                         </div>
                     </details>
@@ -247,12 +249,13 @@
                                 <option value="1">Binary</option>
                             </select>
                         </div>
+                        <hr>
                         Colouring:
                         <select id="esc_exterior_colouring">
                             <option value="0">Interpolate</option>
                             <option value="1">Hue</option>
                         </select>
-                        <br>
+                        <hr>
                         <div style="display: grid">
                             <div id="monotonic_colour_select">
                                 <div class="grid-entry">
@@ -293,6 +296,7 @@
                             Density:
                             <input id="interior_stripe_density" type="number" value="3" min="0" step="0.1">
                         </div>
+                        <hr>
                         <div style="display: grid">
                             <div id="interior_solid_div">
                                 <div class="grid-entry">
@@ -312,12 +316,6 @@
                             </div>
                         </div>
                     </details>
-                    <details>
-                        <summary>
-                            Animations
-                        </summary>
-                        WIP
-                    </details>
                 </div>
                 <div id="lyapunov_options" style="display: none">
                     <details open="true">
@@ -336,7 +334,7 @@
                             <option value="7">Cosine</option>
                             <option value="8">Hyperbolic Cosine</option>
                         </select>
-                        <div id="lya_function_text">
+                        <div id="lya_function_text" style="font-family: monospace">
                             x ← rx(1 - x)
                         </div>
                         <div id="lya_gauss_div" style="display: none">
@@ -373,7 +371,7 @@
                         <br>
                         Value of "3":
                         <input id="c_value" type="range" min="0.5" max="4.5" value="2.5" step="0.005" style="width:95%">
-                        <br>
+                        <hr>
                         Initial Value:
                         <input id="lya_initial" type="number" value="0.5" min="0" max="1" step="0.01">
                     </details>
@@ -415,7 +413,6 @@
                             <option value="1">Sine</option>
                             <option value="2">General Exponent</option>
                         </select>
-                        <br>
                         Algorithm:
                         <select id="rtf_algorithm">
                             <option value="0">Newton</option>
@@ -436,7 +433,7 @@
                                 <option value="4">z0 = z²</option>
                             </select>
                         </div>
-                        <br>
+                        <hr>
                         Fractal Type:
                         <select id="rtf_fractal_type">
                             <option value="0">Classic</option>
@@ -456,18 +453,21 @@
                             Roots:
                             <br>
                             <canvas id="root_selector" class="selector" width="200px" height="200px"></canvas>
+                            <hr>
                         </div>
                         <div id="rtf_exponent_div" style="display:none">
                             <div id="rtf_exponent_text" class="complex-text">
                                 p: 3 + 0i
                             </div>
                             <canvas id="rtf_exponent_selector" class="selector" width="200px" height="200px"></canvas>
+                            <hr>
                         </div>
                         <div>
                             <div id="a_text" class="complex-text">
                                 a = 0 + 1i
                             </div>
                             <canvas id="a_selector" class="selector" width="200px" height="200px"></canvas>
+                            <hr>
                         </div>
                         <div id="rtf_julia_div" style="display: none">
                             <div id="rtf_julia_text" class="complex-text">
@@ -605,6 +605,33 @@
                         <input id="rc_iterations" type="number" value="8" min="0" max="20">
                     </details>
                 </div>
+                <details>
+                    <summary>
+                        Animations
+                    </summary>
+                    Frame delay:
+                    <input id="animation_frame_delay" type="number" value="50" min="5" step="1" style="width: 40px">ms
+                    <br>
+                    Duration:
+                    <input id="animation_duration" type="number" value="5" min="0.5" step="0.5">s
+                    <br>
+                    Speed:
+                    <input id="animation_speed" type="number" value="1" min="0.1" step="0.1" style="width: 40px">x
+                    <hr>
+                    <select id="esc_animations">
+                        <optgroup label="Julia">
+                            <option value="0">Circular walk</option>
+                            <option value="1">Spiral walk</option>
+                        </optgroup>
+                    </select>
+                    <div>
+                        Radius:
+                        <input type="number" value="1" min="0" step="0.1" anim_param="1">
+                    </div>
+                    <button onclick="playAnimation()">
+                        Play
+                    </button>
+                </details>
                 <details open="true">
                     <summary>
                         Global view options
@@ -621,19 +648,23 @@
                         <option value="1400">1400x1400</option>
                         <option value="1600">1600x1600</option>
                     </select>
-                    <div id="display_text">
+                    <hr>
+                    <div id="display_text" style="font-family: monospace">
                         z = 0 + 0i
                         <br>
                         zoom = 0.5
                     </div>
-                    <button onclick="resetView()">Reset View</button>
+                    <button onclick="resetView()">
+                        Reset View
+                    </button>
                 </details>
                 <details open="true">
                     <summary>
                         Notes
                     </summary>
                     WASD = Move <br>
-                    +/- = Zoom <br>
+                    +/- = Zoom
+                    <hr>
                     Don't expect every feature to <br>
                     play well with every other feature!<br>
                     <a href="sources.html">Sources</a>

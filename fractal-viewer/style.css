@@ -14,6 +14,14 @@ body {
     align-content: baseline;
 }
 
+hr {
+    border: 1px black solid;
+    margin-left: 0px;
+    margin-right: 0px;
+    margin-top: 4px;
+    margin-bottom: 0px;
+}
+
 .selector {
     border: 2px black solid;
 }
@@ -30,6 +38,7 @@ input[type="number"] {
 
 .complex-text {
     user-select: none;
+    font-family: monospace;
 }
 
 details {

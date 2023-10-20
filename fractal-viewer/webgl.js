@@ -25,6 +25,10 @@ var centre_y = new Param(0.0);
 var samples = new Param(1);
 var canvas_size = new Param(1000);
 
+var busy = false;
+
+var animation_param1 = 1;
+
 function main() {
 
     document.getElementById("program").onchange = updateProgram;
@@ -38,6 +42,14 @@ function main() {
     document.getElementById("canvas_size").onchange = updateCanvasSize;
 
     document.getElementById("fractal_canvas").onclick = onFractalClick;
+    
+    document.querySelectorAll('[anim_param="1"]').forEach(
+        function(anim_param) {
+        anim_param.onchange = function(event) {
+                animation_param1 = event.target.value;
+            }
+        }
+    );
 
     ESCAPE_TIME.setupGUI();
     LYAPUNOV.setupGUI();
@@ -112,6 +124,16 @@ function initWebGL() {
 }
 
 function redraw() {
+    try_redraw(false);
+}
+
+function try_redraw(force) {
+    
+    if (busy && !force) {
+        return;
+    }
+    
+    busy = true;
 
     magnitude.loadFloat();
     centre_x.loadFloat();
@@ -124,6 +146,8 @@ function redraw() {
 
     gl.clear(gl.COLOR_BUFFER_BIT);
     gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+    
+    busy = false;
 
 }
 
@@ -161,8 +185,11 @@ function updateSamples(event) {
 function updateCanvasSize(event) {
 
     canvas_size.value = event.target.value;
+    
+    var canvas = document.getElementById("fractal_canvas");
 
-    gl.canvas.width = gl.canvas.height = canvas_size.value;
+    canvas.width = canvas.height = canvas_size.value;
+    canvas.style.maxHeight = canvas_size.value + "px"
     gl.viewport(0, 0, canvas_size.value, canvas_size.value);
 
     redraw();
@@ -182,6 +209,27 @@ function updateDisplayText() {
 
     document.getElementById("display_text").innerHTML = text + `<br>Zoom = ${(1 / magnitude.value).toPrecision(5)}`;
 
+}
+
+async function playAnimation() {
+    
+    const frame_delay = document.getElementById("animation_frame_delay").value;
+    const frames = document.getElementById("animation_duration").value * 1000 / frame_delay;
+    const speed = document.getElementById("animation_speed").value;
+    
+    // todo
+    const func = ESCAPE_TIME_ANIMATIONS[document.getElementById("esc_animations").value];
+    
+    busy = true;
+    
+    for (var frame_num = 0; frame_num < frames; frame_num++) {
+        await new Promise(r => setTimeout(r, frame_delay));
+        func(frame_num * speed * frame_delay);
+        try_redraw(true);
+    }
+    
+    busy = false;
+    
 }
 
 function resetView() {
