@@ -11,13 +11,7 @@ body {
 .sidebar {
     margin: 8px;
     display: grid;
-    align-content: center;
-}
-
-.input-div {
-    padding-bottom: 5px;
-    border-spacing: 0;
-    border: 1px grey dashed;
+    align-content: baseline;
 }
 
 .selector {
@@ -36,4 +30,18 @@ input[type="number"] {
 
 .complex-text {
     user-select: none;
+}
+
+details {
+    border-spacing: 0;
+    border: 1px black solid;
+}
+
+summary {
+    background-color: darkslategrey;
+    color: white;
+    font-size: 8pt;
+    padding-left: 5px;
+    user-select: none;
+    border-bottom: 1px black solid;
 }

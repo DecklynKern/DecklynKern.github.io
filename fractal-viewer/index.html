@@ -18,8 +18,10 @@
         <div class="main">
             <canvas id="fractal_canvas" width="1000px" height="1000px"></canvas>
             <div class="sidebar">
-                <div class="input-div">
-                    Program: 
+                <details open="true">
+                    <summary>
+                        Program
+                    </summary>
                     <select id="program">
                         <option value="escape-time">Escape Time</option>
                         <option value="lyapunov">Lyapunov</option>
@@ -27,9 +29,12 @@
                         <option value="recursive">Recursive</option>
                         <!-- <option value="9"><option value="pendulum">Pendulum</option></option> -->
                     </select>
-                </div>
+                </details>
                 <div id="escape_time_options">
-                    <div class="input-div">
+                    <details open="true">
+                        <summary>
+                            Fractal options
+                        </summary>
                         Fractal:
                         <select id="esc_fractal">
                             <optgroup label="Mandelbrot variants">
@@ -142,9 +147,12 @@
                         </div>
                         Invert: 
                         <input type="checkbox" id="esc_invert">
-                    </div>
-                    <div class="input-div" id="julia_div">
-                        Julia:
+                    </details>
+                    <details id="julia_div" open="true">
+                        <summary>
+                            Julia Set view
+                        </summary>
+                        Enable:
                         <input type="checkbox" id="is_julia">
                         <div id="julia_options" style="display: none">
                             <div id="esc_julia_text" class="complex-text">
@@ -152,26 +160,35 @@
                             </div>
                             <canvas id="julia_selector" class="selector" width="200px" height="200px"></canvas>
                         </div>
-                    </div>
-                    <div class="input-div">
+                    </details>
+                    <details open="true">
+                        <summary>
+                            Iteration parameters
+                        </summary>
                         Max Iterations:
                         <input id="esc_max_iterations" type="number" value="30" min="0">
                         <br>
                         Escape Radius:
                         <input id="escape_radius" type="number" value="2" step="0.1" min="0">
-                    </div>
-                    <div class="input-div">
-                        Orbit Traps (enable orbit trap colouring to see):
+                    </details>
+                    <details>
+                        <summary>
+                            Orbit traps
+                        </summary>
+                        (Enable an orbit trap colouring to see)
                         <br>
                         <button id="orbit_trap_add">
                             Add new
                         </button>
                         <div id="orbit_traps" style="display: grid">
                         </div>
-                    </div>
-                    <div class="input-div">
+                    </details>
+                    <details open="true">
+                        <summary>
+                            Exterior colouring
+                        </summary>
                         <div>
-                            Exterior Colouring Style:
+                            Style:
                             <select id="exterior_colouring_style">
                                 <option value="0">Monotonic</option>
                                 <option value="1">Cyclic</option>
@@ -258,9 +275,12 @@
                                 </div>
                             </div>
                         </div>
-                    </div>
-                    <div class="input-div">
-                        Interior Colouring:
+                    </details>
+                    <details>
+                        <summary>
+                            Interior colouring
+                        </summary>
+                        Style:
                         <select id="interior_colouring">
                             <option value="0">Solid</option>
                             <option value="1">Average Magnitude</option>
@@ -269,14 +289,14 @@
                             <option value="4">Stripe Average</option>
                             <option value="5">Orbit Trap</option>
                         </select>
-						<div id="interior_stripe_div" style="display: none">
-							Density:
-							<input id="interior_stripe_density" type="number" value="3" min="0" step="0.1">
-						</div>
+                        <div id="interior_stripe_div" style="display: none">
+                            Density:
+                            <input id="interior_stripe_density" type="number" value="3" min="0" step="0.1">
+                        </div>
                         <div style="display: grid">
                             <div id="interior_solid_div">
                                 <div class="grid-entry">
-                                    Interior Colour:
+                                    Colour:
                                     <input id="interior_solid_colour" type="color" value="#000000">
                                 </div>
                             </div>
@@ -291,11 +311,20 @@
                                 </div>
                             </div>
                         </div>
-                    </div>
+                    </details>
+                    <details>
+                        <summary>
+                            Animations
+                        </summary>
+                        WIP
+                    </details>
                 </div>
                 <div id="lyapunov_options" style="display: none">
-                    <div class="input-div">
-                        Chaotic Map:
+                    <details open="true">
+                        <summary>
+                            Chaotic map options
+                        </summary>
+                        Map:
                         <select id="lya_fractal_type">
                             <option value="0">Logistic</option>
                             <option value="1">Gaussian</option>
@@ -334,8 +363,11 @@
                             a:
                             <input id="lya_cosh_a" type="number" value="2" min="1" max="5" step="0.01">
                         </div>
-                    </div>
-                    <div class="input-div">
+                    </details>
+                    <details open="true">
+                        <summary>
+                            Sequence
+                        </summary>
                         Sequence (1s, 2s, and 3s only):
                         <input id="lya_sequence" type="text" value="12" maxlength="8" size="8">
                         <br>
@@ -344,28 +376,39 @@
                         <br>
                         Initial Value:
                         <input id="lya_initial" type="number" value="0.5" min="0" max="1" step="0.01">
-                    </div>
-                    <div class="input-div">
+                    </details>
+                    <details open="true">
+                        <summary>
+                            Iteration parameters
+                        </summary>
                         Iterations:
                         <input id="lya_iterations" type="number" value="250" min="0">
-                    </div>
-                    <div class="input-div" style="display: grid">
-                        <div class="grid-entry">
-                            Stable Colour:
-                            <input id="stable_colour" type="color" value="#FFFF00">
+                    </details>
+                    <details open="true">
+                        <summary>
+                            Colouring
+                        </summary>
+                        <div style="display: grid">
+                            <div class="grid-entry">
+                                Stable:
+                                <input id="stable_colour" type="color" value="#FFFF00">
+                            </div>
+                            <div class="grid-entry">
+                                Chaotic:
+                                <input id="chaotic_colour" type="color" value="#0000FF">
+                            </div>
+                            <div class="grid-entry">
+                                Infinity:
+                                <input id="infinity_colour" type="color" value="#000000">
+                            </div>
                         </div>
-                        <div class="grid-entry">
-                            Chaotic Colour:
-                            <input id="chaotic_colour" type="color" value="#0000FF">
-                        </div>
-                        <div class="grid-entry">
-                            Infinity Colour:
-                            <input id="infinity_colour" type="color" value="#000000">
-                        </div>
-                    </div>
+                    </details>
                 </div>
                 <div id="root_finding_options" style="display: none">
-                    <div class="input-div">
+                    <details open="true">
+                        <summary>
+                            Function options
+                        </summary>
                         Function:
                         <select id="rtf_function">
                             <option value="0">Cubic</option>
@@ -401,11 +444,14 @@
                             <option value="2">Nova Julia</option>
                             <option value="3">Meta Convergence</option>
                         </select>
-						<br>
+                        <br>
                         Invert: 
                         <input type="checkbox" id="rtf_invert">
-                    </div>
-                    <div class="input-div">
+                    </details>
+                    <details open="true">
+                        <summary>
+                            Fun movables
+                        </summary>
                         <div id="root_selector_div">
                             Roots:
                             <br>
@@ -429,16 +475,22 @@
                             </div>
                             <canvas id="rtf_julia_c_selector" class="selector" width="200px" height="200px"></canvas>
                         </div>
-                    </div>
-                    <div class="input-div">
+                    </details>
+                    <details open="true">
+                        <summary>
+                            Iteration options
+                        </summary>
                         Max Iterations:
                         <input id="rtf_iterations" type="number" value="40" min="0">
                         <br>
                         Bailout Threshold:
                         <input id="rtf_threshold" type="number" value="0.01" min="0" step="0.01" style="width: 70px">
-                    </div>
-                    <div class="input-div">
-                        Colouring:
+                    </details>
+                    <details open="true">
+                        <summary>
+                            Colouring style
+                        </summary>
+                        Style:
                         <select id="rtf_colouring_type">
                             <option id="rtf_root_colouring" value="0">Root</option>
                             <option id="rtf_shaded_root_colouring" value="1">Shaded Root</option>
@@ -455,8 +507,11 @@
                             Brightness:
                             <input id="rtf_root_dist_brightness" type="number" value="2" min="0.1" max="10" step="0.1">
                         </div>
-                    </div>
-                    <div class="input-div">
+                    </details>
+                    <details open="true">
+                        <summary>
+                            Colouring
+                        </summary>
                         <div id="root1_colour_div" class="grid-entry">
                             Root 1 Colour:
                             <input id="root1_colour" type="color" value="#FF0000">
@@ -477,10 +532,13 @@
                             Unconvergent Colour:
                             <input id="base_colour" type="color" value="#000000">
                         </div>
-                    </div>
+                    </details>
                 </div>
                 <div id="pendulum_options" style="display: none">
-                    <div class="input-div">
+                    <details open="true">
+                        <summary>
+                            Iteration parameters
+                        </summary>
                         Iterations:
                         <input id="pend_iterations" type="number" value="40" min="0">
                         <br>
@@ -492,8 +550,11 @@
                         <br>
                         dt:
                         <input id="pend_dt" type="number" value="0.25" min="0" max="4" step="0.01">
-                    </div>
-                    <div class="input-div">
+                    </details>
+                    <details open="true">
+                        <summary>
+                            Magnet stength
+                        </summary>
                         Magnet 1 Strength:
                         <input id="magnet1_strength" type="number" value="1.0" min="0" step="0.01">
                         <br>
@@ -502,8 +563,11 @@
                         <br>
                         Magnet 3 Strength:
                         <input id="magnet3_strength" type="number" value="1.0" min="0" step="0.01">
-                    </div>
-                    <div class="input-div" style="display: grid">
+                    </details>
+                    <details style="display: grid" open="true">
+                        <summary>
+                            Colouring
+                        </summary>
                         <div class="grid-entry">
                             Magnet 1 Colour:
                             <input id="magnet1_colour" type="color" value="#FF0000">
@@ -516,10 +580,13 @@
                             Magnet 3 Colour:
                             <input id="magnet3_colour" type="color" value="#0000FF">
                         </div>
-                    </div>
+                    </details>
                 </div>
                 <div id="recursive_options" style="display: none">
-                    <div class="input-div">
+                    <details open="true">
+                        <summary>
+                            Fractal options
+                        </summary>
                         Fractal Type:
                         <select id="rc_fractal_type">
                             <option value="0">Sierpiński Carpet</option>
@@ -529,13 +596,19 @@
                             <option value="4">H Tree</option>
                             <option value="5">Vicsek</option>
                         </select>
-                    </div>
-                    <div class="input-div">
+                    </details>
+                    <details open="true">
+                        <summary>
+                            Iteration options
+                        </summary>
                         Iterations:
                         <input id="rc_iterations" type="number" value="8" min="0" max="20">
-                    </div>
+                    </details>
                 </div>
-                <div class="input-div">
+                <details open="true">
+                    <summary>
+                        Global view options
+                    </summary>
                     Samples:
                     <input id="samples" type="number" value="1" min="1" max="10">
                     <br>
@@ -554,12 +627,17 @@
                         zoom = 0.5
                     </div>
                     <button onclick="resetView()">Reset View</button>
+                </details>
+                <details open="true">
+                    <summary>
+                        Notes
+                    </summary>
+                    WASD = Move <br>
+                    +/- = Zoom <br>
+                    Don't expect every feature to <br>
+                    play well with every other feature!<br>
+                    <a href="sources.html">Sources</a>
                 </div>
-                WASD = Move <br>
-                +/- = Zoom <br>
-                Don't expect every feature to <br>
-                play well with every other feature!
-                <a href="sources.html">Sources</a>
             </div>
         </div>
     </body>
