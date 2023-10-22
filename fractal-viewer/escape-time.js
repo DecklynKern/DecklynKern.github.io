@@ -93,10 +93,13 @@ class EscapeTime extends Program {
     getShader = function() {
 
         var shader = (' ' + this.baseShader).slice(1);
-        var def = `#define FRACTAL ${this.fractal}
-                   #define EXTERIOR_COLOURING_STYLE ${this.exterior_colouring_style}
-                   #define EXTERIOR_COLOURING ${this.exterior_colouring}
-                   #define INTERIOR_COLOURING ${this.interior_colouring}`;
+
+        var def = `
+        //%
+        #define FRACTAL ${this.fractal}
+        #define EXTERIOR_COLOURING_STYLE ${this.exterior_colouring_style}
+        #define EXTERIOR_COLOURING ${this.exterior_colouring}
+        #define INTERIOR_COLOURING ${this.interior_colouring}`;
 
         var total = 0;
 

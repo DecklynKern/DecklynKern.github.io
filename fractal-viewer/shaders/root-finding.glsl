@@ -33,10 +33,7 @@ uniform vec3 root3_colour;
 uniform vec3 base_colour;
 
 const int TRUE_ITER_CAP = 10000;
-const int TRUE_SAMPLE_CAP = 10;
 const float MAX = 9999999999999.9;
-
-uniform int samples;
 
 in vec2 frag_position;
 out vec4 colour;
@@ -634,19 +631,26 @@ void main() {
 
     vec3 colour_sum;
 
-    for (int s = 0; s < TRUE_SAMPLE_CAP; s++) {
-
-        if (s == samples) {
-            break;
-        }
+    for (int s = 0; s < SAMPLES; s++) {
 
         float real_offset = fract(0.1234 * float(s));
         float imag_offset = fract(0.7654 * float(s));
+        vec3 pixel_sample = getColour(Complex(real + real_offset * pixel_size, imag + imag_offset * pixel_size));
 
-        colour_sum += getColour(Complex(real + real_offset * pixel_size, imag + imag_offset * pixel_size));
+        #if MULTISAMPLING_ALGORITHM == 0
+            colour_sum += pixel_sample;
+
+        #elif MULTISAMPLING_ALGORITHM == 1
+            colour_sum += pixel_sample * pixel_sample;
+        #endif
 
     }
 
-    colour = vec4(colour_sum / float(samples), 1.0);
+    #if MULTISAMPLING_ALGORITHM == 0
+        colour = vec4(colour_sum / float(SAMPLES), 1.0);
+
+    #elif MULTISAMPLING_ALGORITHM == 1
+        colour = vec4(sqrt(colour_sum / float(SAMPLES)), 1.0);
+    #endif
     
 }

@@ -1,4 +1,5 @@
-const VERTEX_SHADER = `#version 300 es
+const VERTEX_SHADER = `
+#version 300 es
 in vec2 position;
 out vec2 frag_position;
 
@@ -22,8 +23,10 @@ var mouse_down = false;
 var magnitude = new Param(2.0);
 var centre_x = new Param(0.0);
 var centre_y = new Param(0.0);
-var samples = new Param(1);
 var canvas_size = new Param(1000);
+
+var samples = 1;
+var multisampling_algorithm = 1;
 
 var busy = false;
 
@@ -40,6 +43,7 @@ function main() {
 
     document.getElementById("samples").onchange = updateSamples;
     document.getElementById("canvas_size").onchange = updateCanvasSize;
+    document.getElementById("multisampling_algorithm").onchange = updateMultisamplingAlgorithm;
 
     document.getElementById("fractal_canvas").onclick = onFractalClick;
     
@@ -85,7 +89,11 @@ function receiveShader() {
 
 function setupShader() {
 
-    FRAGMENT_SHADER = program.getShader();
+    const global_settings = `
+    #define SAMPLES ${samples}
+    #define MULTISAMPLING_ALGORITHM ${multisampling_algorithm}`;
+
+    FRAGMENT_SHADER = program.getShader().replace("//%", global_settings);
     initShaders(gl, VERTEX_SHADER, FRAGMENT_SHADER);
 
     const position_attr = gl.getAttribLocation(gl.program, "position");
@@ -97,7 +105,6 @@ function setupShader() {
     centre_x.getAttr("centre_x");
     centre_y.getAttr("centre_y");
 
-    samples.getAttr("samples");
     canvas_size.getAttr("canvas_size");
 
     program.setupAttrs();
@@ -124,10 +131,10 @@ function initWebGL() {
 }
 
 function redraw() {
-    try_redraw(false);
+    tryRedraw(false);
 }
 
-function try_redraw(force) {
+function tryRedraw(force) {
     
     if (busy && !force) {
         return;
@@ -139,7 +146,6 @@ function try_redraw(force) {
     centre_x.loadFloat();
     centre_y.loadFloat();
 
-    samples.loadInt();
     canvas_size.loadInt();
 
     program.loadAttrs();
@@ -178,7 +184,8 @@ function updateProgram() {
 }
 
 function updateSamples(event) {
-    samples.value = event.target.value;
+    samples = event.target.value;
+    setupShader();
     redraw();
 }
 
@@ -194,6 +201,12 @@ function updateCanvasSize(event) {
 
     redraw();
 
+}
+
+function updateMultisamplingAlgorithm(event) {
+    multisampling_algorithm = event.target.value;
+    setupShader();
+    redraw();
 }
 
 function updateDisplayText() {
@@ -225,7 +238,7 @@ async function playAnimation() {
     for (var frame_num = 0; frame_num < frames; frame_num++) {
         await new Promise(r => setTimeout(r, frame_delay));
         func(frame_num * speed * frame_delay);
-        try_redraw(true);
+        tryRedraw(true);
     }
     
     busy = false;

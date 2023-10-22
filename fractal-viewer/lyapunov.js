@@ -43,7 +43,9 @@ class Lyapunov extends Program {
     getShader = function() {
         
         var shader = (' ' + this.baseShader).slice(1);
-        var def = `#define FRACTAL_TYPE ${this.fractal_type}`;
+        var def = `
+        //%
+        #define FRACTAL_TYPE ${this.fractal_type}`;
 
         return shader.replace("//%", def);
 

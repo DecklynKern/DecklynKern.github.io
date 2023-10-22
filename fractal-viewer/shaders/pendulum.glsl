@@ -100,13 +100,29 @@ void main() {
         float x_offset = fract(0.1234 * float(s));
         float y_offset = fract(0.7654 * float(s));
 
-        colour_sum += getColour(vec2(
-            x + x_offset * pixel_size,
-            y + y_offset * pixel_size
+
+        vec3 pixel_sample = getColour(vec2(
+            vec2(
+                x + x_offset * pixel_size,
+                y + y_offset * pixel_size
+            ),
+            pixel_size
         ));
+
+        #if MULTISAMPLING_ALGORITHM == 0
+            colour_sum += pixel_sample;
+
+        #elif MULTISAMPLING_ALGORITHM == 1
+            colour_sum += pixel_sample * pixel_sample;
+        #endif
 
     }
 
-    colour = vec4(colour_sum / float(samples), 1.0);
+    #if MULTISAMPLING_ALGORITHM == 0
+        colour = vec4(colour_sum / float(SAMPLES), 1.0);
+
+    #elif MULTISAMPLING_ALGORITHM == 1
+        colour = vec4(sqrt(colour_sum / float(SAMPLES)), 1.0);
+    #endif
 
 }

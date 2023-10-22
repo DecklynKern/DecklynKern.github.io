@@ -1,11 +1,12 @@
 #version 300 es
 precision highp float;
 
+//%
+
 uniform float magnitude;
 uniform float centre_x;
 uniform float centre_y;
 
-uniform int samples;
 uniform int canvas_size;
 
 uniform int fractal_type;
@@ -15,7 +16,6 @@ in vec2 frag_position;
 out vec4 colour;
 
 const int TRUE_ITER_CAP = 20;
-const int TRUE_SAMPLE_CAP = 10;
 
 const vec3 WHITE = vec3(1.0, 1.0, 1.0);
 const vec3 BLACK = vec3(0.0, 0.0, 0.0);
@@ -198,16 +198,12 @@ void main() {
 
     vec3 colour_sum;
 
-    for (int s = 0; s < TRUE_SAMPLE_CAP; s++) {
-
-        if (s == samples) {
-            break;
-        }
+    for (int s = 0; s < SAMPLES; s++) {
 
         float x_offset = fract(0.1234 * float(s));
         float y_offset = fract(0.7654 * float(s));
 
-        colour_sum += getColour(Iterator(
+        vec3 pixel_sample = getColour(Iterator(
             vec2(
                 x + x_offset * pixel_size,
                 y + y_offset * pixel_size
@@ -215,8 +211,20 @@ void main() {
             pixel_size
         ));
 
+        #if MULTISAMPLING_ALGORITHM == 0
+            colour_sum += pixel_sample;
+
+        #elif MULTISAMPLING_ALGORITHM == 1
+            colour_sum += pixel_sample * pixel_sample;
+        #endif
+
     }
 
-    colour = vec4(colour_sum / float(samples), 1.0);
+    #if MULTISAMPLING_ALGORITHM == 0
+        colour = vec4(colour_sum / float(SAMPLES), 1.0);
+
+    #elif MULTISAMPLING_ALGORITHM == 1
+        colour = vec4(sqrt(colour_sum / float(SAMPLES)), 1.0);
+    #endif
 
 }

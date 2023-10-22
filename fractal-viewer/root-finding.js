@@ -40,10 +40,12 @@ class RootFinding extends Program {
     getShader = function() {
         
         var shader = (' ' + this.baseShader).slice(1);
-        var def = `#define FUNCTION ${this.function}
-        \n#define FRACTAL_TYPE ${this.fractal_type}
-        \n#define ALGORITHM ${this.algorithm}
-        \n#define COLOURING_TYPE ${this.colouring_type}`;
+        var def = `
+        //%
+        #define FUNCTION ${this.function}
+        #define FRACTAL_TYPE ${this.fractal_type}
+        #define ALGORITHM ${this.algorithm}
+        #define COLOURING_TYPE ${this.colouring_type}`;
 
         if (this.algorithm == 4) {
             def += `\n#define START_POINT ${this.secant_start}`;
