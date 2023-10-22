@@ -13,7 +13,8 @@ function formatComplex(real, imag) {
 
     if (imag < 0) {
         return `${real} - ${-imag}i`;
-    } else {
+    }
+    else {
         return `${real} + ${imag}i`;
     }
 }

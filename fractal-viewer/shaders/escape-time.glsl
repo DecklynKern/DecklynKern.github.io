@@ -1,6 +1,3 @@
-#version 300 es
-precision highp float;
-
 #define MANDELBROT          0
 #define BURNING_SHIP        1
 #define TRICORN             2
@@ -37,10 +34,6 @@ precision highp float;
 #define CUBIC               33
 #define LOGISTIC            34
 
-uniform float magnitude;
-uniform float centre_x;
-uniform float centre_y;
-
 uniform float fractal_param1;
 uniform float fractal_param2;
 uniform float fractal_param3;
@@ -68,17 +61,10 @@ uniform float interior_colouring_param1;
 
 const int TRUE_ITER_CAP = 10000;
 
-in vec2 frag_position;
-out vec4 colour;
-
-const float PI = 3.1415926535;
-
 struct Complex {
     float real;
     float imag;
 };
-
-//%
 
 Complex add(Complex x, Complex y) {
     return Complex(
@@ -172,32 +158,6 @@ vec3 interpolate(vec3 c1, vec3 c2, float amount) {
     return c1 * amount + c2 * (1.0 - amount);
 }
 
-vec3 hsvToRgb(float h, float s, float v) {
-
-    float c = v * s;
-    float x = c * 1.0 - abs(2.0 * fract(h * 3.0) - 1.0);
-    float m = v - c;
-
-    if (h < 0.16666666666667) {
-        return vec3(c, x, 0) + m;
-
-    } else if (h < 0.3333333333333334) {
-        return vec3(x, c, 0) + m;
-    
-    } else if (h < 0.5) {
-        return vec3(0, c, x) + m;
-    
-    } else if (h < 0.666666666666667) {
-        return vec3(0, x, c) + m;
-    
-    } else if (h < 0.8333333333333334) {
-        return vec3(x, 0, c) + m;
-    
-    } else {
-        return vec3(c, 0, x) + m;
-    }
-}
-
 float getSmoothIter(float mag_sq, Complex z) {
 
     float exp;
@@ -219,10 +179,12 @@ float getSmoothIter(float mag_sq, Complex z) {
     
 }
 
-vec3 getColour(Complex z) {
+vec3 getColour(float real, float imag) {
+
+    Complex z = Complex(real, imag);
 
     if (bool(is_inverted)) {
-        z = reciprocal(Complex(z.real, z.imag));
+        z = reciprocal(z);
     }
 
     Complex c;
@@ -231,14 +193,12 @@ vec3 getColour(Complex z) {
         c = z;
         z = Complex(0.5, 0.0);
     #else
-
         if (bool(is_julia)) {
             c = Complex(julia_c_real, julia_c_imag);
-            
-        } else {
+        }
+        else {
             c = z;
         }
-
     #endif
 
     Complex z_prev;
@@ -349,10 +309,13 @@ vec3 getColour(Complex z) {
             if (mag_sq < 0.25) {
                 z.real *= 4.0;
                 z.imag *= 4.0;
-            
-            } else if (mag_sq < 1.0) {
-                z.real /= mag_sq;
-                z.imag /= mag_sq;
+            }
+            else if (mag_sq < 1.0) {
+
+                float temp = 1.0 / mag_sq;
+
+                z.real /= temp;
+                z.imag /= temp;
             }
 
             z.real = -fractal_param1 * z.real + c.real;
@@ -360,15 +323,15 @@ vec3 getColour(Complex z) {
             
             if (z.real > 1.0) {
                 z.real = 2.0 - z.real;
-            
-            } else if (z.real < -1.0) {
+            }
+            else if (z.real < -1.0) {
                 z.real = -2.0 - z.real;
             }
             
             if (z.imag > 1.0) {
                 z.imag = 2.0 - z.imag;
-            
-            } else if (z.imag < -1.0) {
+            }
+            else if (z.imag < -1.0) {
                 z.imag = -2.0 - z.imag;
             }
 
@@ -716,7 +679,7 @@ vec3 getColour(Complex z) {
             return interpolate(interior_colour1, interior_colour2, min_dist_sq);
 
         #elif INTERIOR_COLOURING == 3
-            return hsvToRgb(fract(sqrt(total_dist_sq)), 1.0, 1.0);
+            return hsv2rgb(vec3(fract(sqrt(total_dist_sq)), 1.0, 1.0));
 
         #elif INTERIOR_COLOURING == 4
             return interpolate(interior_colour1, interior_colour2, interior_stripe_total / float(max_iterations));
@@ -729,7 +692,8 @@ vec3 getColour(Complex z) {
             #endif
         #endif
 
-    } else {
+    }
+else {
 
         float colour_val = 0.0;
 
@@ -802,15 +766,8 @@ vec3 getColour(Complex z) {
                 colour_val = round(fract(val + 0.5));
 
             #elif CYCLIC_WAVEFORM == 2
-
                 val = fract(val);
-
-                if (val > 0.5) {
-                    colour_val = 1.0 - 2.0 * (val - 0.5);
-                
-                } else {
-                    colour_val = 2.0 * val;
-                }
+                colour_val = val > 0.5 ? 1.0 - 2.0 * (val - 0.5) : 2.0 * val;
 
             #elif CYCLIC_WAVEFORM == 3
                 colour_val = fract(val + 0.5);
@@ -831,21 +788,10 @@ vec3 getColour(Complex z) {
 			#endif
 
             #if RADIAL_DECOMPOSITION == 0
-                if (angle > 0.0) {
-                    colour_val = angle / PI;
-
-                } else {
-                    colour_val = -angle / PI;
-                }
+                colour_val = abs(angle) / PI;
 
             #elif RADIAL_DECOMPOSITION == 1
-                if (angle > 0.0) {
-                    colour_val = 0.0;
-                
-                } else {
-                    colour_val = 1.0;
-                }
-
+                colour_val = angle > 0.0 ? 0.0 : 1.0;
             #endif
         #endif
 
@@ -853,42 +799,8 @@ vec3 getColour(Complex z) {
             return interpolate(exterior_colour1, exterior_colour2, colour_val);
 
         #elif EXTERIOR_COLOURING == 1
-            return hsvToRgb(colour_val, 1.0, 1.0);
+            return hsv2rgb(vec3(colour_val, 1.0, 1.0));
         #endif
 
     }
-}
-
-void main() {
-
-    float pixel_size = 2.0 * magnitude / 1000.0;
-
-    float real = centre_x + frag_position.x * magnitude;
-    float imag = centre_y + frag_position.y * magnitude;
-
-    vec3 colour_sum;
-
-    for (int s = 0; s < SAMPLES; s++) {
-
-        float real_offset = fract(0.1234 * float(s));
-        float imag_offset = fract(0.7654 * float(s));
-
-        vec3 pixel_sample = getColour(Complex(real + real_offset * pixel_size, imag + imag_offset * pixel_size));
-
-        #if MULTISAMPLING_ALGORITHM == 0
-            colour_sum += pixel_sample;
-
-        #elif MULTISAMPLING_ALGORITHM == 1
-            colour_sum += pixel_sample * pixel_sample;
-        #endif
-
-    }
-
-    #if MULTISAMPLING_ALGORITHM == 0
-        colour = vec4(colour_sum / float(SAMPLES), 1.0);
-
-    #elif MULTISAMPLING_ALGORITHM == 1
-        colour = vec4(sqrt(colour_sum / float(SAMPLES)), 1.0);
-    #endif
-    
 }

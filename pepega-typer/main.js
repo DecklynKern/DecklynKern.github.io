@@ -4,8 +4,8 @@ function generate() {
 
     if (document.getElementById("is-wide").checked) {
         prefix = "wide";
-
-    } else {
+    }
+    else {
         prefix = "";
     }
     
@@ -21,7 +21,8 @@ function generate() {
             case 'p':
                 if (ps % 2 == 1) {
                     img = "0";
-                } else {
+                }
+                else {
                     img = "2";
                 }
                 ps += 1;
@@ -29,7 +30,8 @@ function generate() {
             case 'e':
                 if (es % 2 == 1) {
                     img = "1";
-                } else {
+                }
+                else {
                     img = "3";
                 }
                 es += 1;

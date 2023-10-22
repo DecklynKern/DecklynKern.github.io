@@ -46,7 +46,8 @@ function setupBoard() {
                 board.children[selected_square[0]].children[selected_square[1]].classList.remove("selected-square");
                 selected_square = null;
 
-            } else {
+            }
+            else {
 
                 if (selected_square != null) {
                     board.children[selected_square[0]].children[selected_square[1]].classList.remove("selected-square");
@@ -87,7 +88,8 @@ function setupBoard() {
             if ((row + col) % 2 == 1) {
                 square.classList.add("dark-square");
 
-            } else {
+            }
+            else {
                 square.classList.add("light-square");
             }
     
@@ -192,22 +194,19 @@ function setToFen(fen) {
 
         if (player_is_computer[0]) {
             playEngineMove(board_fen);
-
-        } else {
+        }
+        else {
             possible_moves = getPossibleMoves(board_fen);
         }
-
-    } else {
-
+    }
+    else {
         if (player_is_computer[1]) {
             playEngineMove(board_fen);
-
-        } else {
+        }
+        else {
             possible_moves = getPossibleMoves(board_fen);
         }
-
     }
-
 }
 
 function longAnToRowCol(pos) {

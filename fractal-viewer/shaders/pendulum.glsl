@@ -73,11 +73,11 @@ vec3 getColour(vec2 pos) {
 
     if (magnet1_dist < magnet2_dist && magnet1_dist < magnet3_dist) {
         return magnet1_colour;
-    
-    } else if (magnet2_dist < magnet3_dist) {
+    }
+    else if (magnet2_dist < magnet3_dist) {
         return magnet2_colour;
-    
-    } else {
+    }
+    else {
         return magnet3_colour;
     }
 }

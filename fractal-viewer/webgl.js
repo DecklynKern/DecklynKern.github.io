@@ -7,6 +7,7 @@ void main() {
     frag_position = position;
 }`;
 
+var FRAGMENT_MAIN = "";
 var FRAGMENT_SHADER = "";
 var gl;
 
@@ -32,6 +33,13 @@ var busy = false;
 var animation_param1 = 1;
 
 function main() {
+
+    const main_request = new XMLHttpRequest();
+    main_request.addEventListener("load", function() {
+        FRAGMENT_MAIN = this.responseText;
+    });
+    main_request.open("GET", "shaders/main.glsl");
+    main_request.send();
 
     document.getElementById("program").onchange = updateProgram;
 
@@ -81,7 +89,7 @@ function loadProgram(prgrm) {
 }
 
 function receiveShader() {
-    program.baseShader = this.responseText;
+    program.baseShader = FRAGMENT_MAIN + this.responseText;
     setupShader();
     resetView();
 }
@@ -214,8 +222,8 @@ function updateDisplayText() {
     
     if (program == ESCAPE_TIME || program == ROOT_FINDING) {
         text = `z = ${formatComplex(centre_x.value, centre_y.value)}`;
-
-    } else {
+    }
+    else {
         text = `centre = (${centre_x.value.toPrecision(6)}, ${centre_y.value.toPrecision(6)})`;
     }
 
@@ -251,13 +259,13 @@ function resetView() {
     if (program == LYAPUNOV) {
         centre_x.value = 2.0;
         centre_y.value = -2.0;
-
-    } else if (program == RECURSIVE) {
+    }
+    else if (program == RECURSIVE) {
         centre_x.value = 0.5;
         centre_y.value = -0.5;
         magnitude.value = 0.5;
-
-    } else {
+    }
+    else {
         centre_x.value = 0.0;
         centre_y.value = 0.0;
     }

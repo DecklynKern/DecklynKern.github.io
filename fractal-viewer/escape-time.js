@@ -112,8 +112,8 @@ class EscapeTime extends Program {
                 if (document.getElementById("gangopadhyay" + i).checked) {
                     def += " 1";
                     total++;
-
-                } else {
+                }
+                else {
                     def += " 0";
                 }
             }
@@ -381,48 +381,48 @@ class EscapeTime extends Program {
         if (ESCAPE_TIME.fractal == 4) {
             scaling_style.display = "block";
             ESCAPE_TIME.fractal_param1.value = document.getElementById("scaling").value;
-    
-        } else if (ESCAPE_TIME.fractal == 5) {
+        }
+        else if (ESCAPE_TIME.fractal == 5) {
             exponent_style.display = "block";
             ESCAPE_TIME.fractal_param1.value = document.getElementById("exponent").value;
-        
-        } else if (ESCAPE_TIME.fractal == 15) {
+        }
+        else if (ESCAPE_TIME.fractal == 15) {
             rational_style.display = "block";
             ESCAPE_TIME.fractal_param1.value = document.getElementById("rational_p").value;
             ESCAPE_TIME.fractal_param2.value = document.getElementById("rational_q").value;
             ESCAPE_TIME.fractal_param3.value = document.getElementById("rational_lambda").value;
-        
-        } else if (ESCAPE_TIME.fractal == 16) {
+        }
+        else if (ESCAPE_TIME.fractal == 16) {
             phoenix_style.display = "block";
             ESCAPE_TIME.fractal_param1.value = ESCAPE_TIME.phoenix_p_handler.real;
             ESCAPE_TIME.fractal_param2.value = ESCAPE_TIME.phoenix_p_handler.imag;
-
-        } else if (ESCAPE_TIME.fractal == 19) {
+        }
+        else if (ESCAPE_TIME.fractal == 19) {
             julia_style.display = "none";
             dragon_style.display = "block";
-        
-        } else if (ESCAPE_TIME.fractal == 20) {
+        }
+        else if (ESCAPE_TIME.fractal == 20) {
             gangopadhyay_style.display = "block";
-        
-        } else if (ESCAPE_TIME.fractal == 23) {
+        }
+        else if (ESCAPE_TIME.fractal == 23) {
             cmultibrot_style.display = "block";
 	    ESCAPE_TIME.fractal_param1.value = ESCAPE_TIME.cmultibrot_p_handler.real;
             ESCAPE_TIME.fractal_param2.value = ESCAPE_TIME.cmultibrot_p_handler.imag;
-        
-        } else if (ESCAPE_TIME.fractal == 30) {
+        }
+        else if (ESCAPE_TIME.fractal == 30) {
             mandelbruh_style.display = "block";
             ESCAPE_TIME.fractal_param1.value = document.getElementById("mandelbruh_a").value;
-		
-        } else if (ESCAPE_TIME.fractal == 31) {
+        }
+        else if (ESCAPE_TIME.fractal == 31) {
             hyperbolic_sine_style.display = "block";
             ESCAPE_TIME.fractal_param1.value = document.getElementById("hyperbolic_sine_p").value;
-		
-        } else if (ESCAPE_TIME.fractal == 32) {
+        }
+        else if (ESCAPE_TIME.fractal == 32) {
             zubieta_style.display = "block";
             ESCAPE_TIME.fractal_param1.value = ESCAPE_TIME.zubieta_a_handler.real;
             ESCAPE_TIME.fractal_param2.value = ESCAPE_TIME.zubieta_a_handler.imag;
-
-        } else if (ESCAPE_TIME.fractal == 34) {
+        }
+        else if (ESCAPE_TIME.fractal == 34) {
             julia_style.display = "none"
         }
         
@@ -442,8 +442,8 @@ class EscapeTime extends Program {
         
         if (ESCAPE_TIME.is_julia.value) {
             document.getElementById("julia_options").style.display = "block";
-        
-        } else {
+        }
+        else {
             document.getElementById("julia_options").style.display = "none";
         }
         
@@ -498,8 +498,8 @@ class EscapeTime extends Program {
         if (event.target.value == 1) {
             settings_style.display = "block";
             event.target.parentElement.childNodes[3].firstChild.nodeValue = "Radius:";
-
-        } else if (event.target.value == 2 || event.target.value == 3) {
+        }
+        else if (event.target.value == 2 || event.target.value == 3) {
             settings_style.display = "block";
             event.target.parentElement.childNodes[3].firstChild.nodeValue = "Size:";
         }
@@ -521,9 +521,9 @@ class EscapeTime extends Program {
             if (ESCAPE_TIME.exterior_colouring_style == 0) {
                 monotonic_colour_style.display = "block";
                 ESCAPE_TIME.exterior_colour1.value = hexToRGB(document.getElementById("close_colour").value);
-                ESCAPE_TIME.exterior_colour2.value = hexToRGB(document.getElementById("far_colour").value);
-                
-            } else {
+                ESCAPE_TIME.exterior_colour2.value = hexToRGB(document.getElementById("far_colour").value);    
+            }
+            else {
                 other_colour_style.display = "block";
                 ESCAPE_TIME.exterior_colour1.value = hexToRGB(document.getElementById("exterior_colour1").value);
                 ESCAPE_TIME.exterior_colour2.value = hexToRGB(document.getElementById("exterior_colour2").value);
@@ -568,8 +568,8 @@ class EscapeTime extends Program {
             light_style.display = "block";
             ESCAPE_TIME.exterior_colouring_param1.value = ESCAPE_TIME.light_handler.real;
             ESCAPE_TIME.exterior_colouring_param2.value = ESCAPE_TIME.light_handler.imag;
-
-        } else if (ESCAPE_TIME.monotonic_function == 3) {
+        }
+        else if (ESCAPE_TIME.monotonic_function == 3) {
             stripe_style.display = "block";
             ESCAPE_TIME.exterior_colouring_param1.value = document.getElementById("stripe_density").value;
         }
@@ -641,7 +641,8 @@ class EscapeTime extends Program {
             solid_style.display = "block";
             ESCAPE_TIME.interior_colour1.value = hexToRGB(document.getElementById("interior_solid_colour").value);
         
-        } else {
+        }
+        else {
             dist_style.display = "block";
             ESCAPE_TIME.interior_colour1.value = hexToRGB(document.getElementById("interior_close_colour").value);
             ESCAPE_TIME.interior_colour2.value = hexToRGB(document.getElementById("interior_far_colour").value);

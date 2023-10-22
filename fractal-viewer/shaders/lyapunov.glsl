@@ -1,12 +1,3 @@
-#version 300 es
-precision highp float;
-
-//%
-
-uniform float magnitude;
-uniform float centre_x;
-uniform float centre_y;
-
 uniform float fractal_param;
 
 uniform int sequence0;
@@ -28,13 +19,7 @@ uniform vec3 stable_colour;
 uniform vec3 chaotic_colour;
 uniform vec3 infinity_colour;
 
-in vec2 frag_position;
-out vec4 colour;
-
 const int TRUE_ITER_CAP = 10000;
-
-const float PI = 3.141592653589;
-const float TAU = 2.0 * PI;
 
 vec3 getColour(float a, float b) {
 
@@ -59,35 +44,36 @@ vec3 getColour(float a, float b) {
         if (letter_idx == 0) {
             letter = sequence0;
         
-        } else if (letter_idx == 1) {
+        }
+        else if (letter_idx == 1) {
             letter = sequence1;
-        
-        } else if (letter_idx == 2) {
+        }
+        else if (letter_idx == 2) {
             letter = sequence2;
-        
-        } else if (letter_idx == 3) {
+        }
+        else if (letter_idx == 3) {
             letter = sequence3;
-        
-        } else if (letter_idx == 4) {
+        }
+        else if (letter_idx == 4) {
             letter = sequence4;
-        
-        } else if (letter_idx == 5) {
+        }
+        else if (letter_idx == 5) {
             letter = sequence5;
-        
-        } else if (letter_idx == 6) {
+        }
+        else if (letter_idx == 6) {
             letter = sequence6;
-        
-        } else {
+        }
+        else {
             letter = sequence7;
         }
         
         if (letter == 0) {
             r = a;
-        
-        } else if (letter == 1) {
+        }
+        else if (letter == 1) {
             r = b;
-        
-        } else {
+        }
+        else {
             r = c_value;
         }
 
@@ -139,42 +125,9 @@ vec3 getColour(float a, float b) {
     if (lambda < 0.0) {
         float amount = min(sqrt(-lambda), 1.0);
         return stable_colour * (1.0 - amount) + infinity_colour * amount;
-
-    } else {
+    }
+    else {
         float amount = sqrt(lambda);
         return chaotic_colour * (1.0 - amount) + infinity_colour * amount;
     }
-}
-
-void main() {
-
-    float pixel_size = 2.0 * magnitude / 1000.0;
-
-    float x = centre_x + frag_position.x * magnitude;
-    float y = -(centre_y + frag_position.y * magnitude);
-
-    vec3 colour_sum;
-
-    for (int s = 0; s < SAMPLES; s++) {
-
-        float x_offset = fract(0.1234 * float(s));
-        float y_offset = fract(0.7654 * float(s));
-
-        vec3 pixel_sample = getColour(x + x_offset * pixel_size, y + y_offset * pixel_size);
-
-        #if MULTISAMPLING_ALGORITHM == 0
-            colour_sum += pixel_sample;
-
-        #elif MULTISAMPLING_ALGORITHM == 1
-            colour_sum += pixel_sample * pixel_sample;
-        #endif
-    }
-
-    #if MULTISAMPLING_ALGORITHM == 0
-        colour = vec4(colour_sum / float(SAMPLES), 1.0);
-
-    #elif MULTISAMPLING_ALGORITHM == 1
-        colour = vec4(sqrt(colour_sum / float(SAMPLES)), 1.0);
-    #endif
-
 }

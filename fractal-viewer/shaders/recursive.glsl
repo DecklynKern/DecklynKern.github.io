@@ -112,7 +112,8 @@ void pTreeUpdate(inout Iterator iter) {
         mat2 rot = rotMat(radians(-45.0));
         iter.pos = rot * (iter.pos - vec2(0.4375, 0.125)) * TREE_SCALING + vec2(0.4375, 0.0);
 
-    } else {
+    }
+    else {
         mat2 rot = rotMat(radians(45.0));
         iter.pos = rot * (iter.pos - vec2(0.5625, 0.125)) * TREE_SCALING + vec2(0.5625, 0.0);
     }
@@ -154,7 +155,8 @@ vec3 getColour(Iterator iter) {
     if (fractal_type == 0) {
         ITERATE(carpetEscape, carpetUpdate, WHITE, BLACK);
     
-    } else if (fractal_type == 1) {
+    }
+    else if (fractal_type == 1) {
         
         if (triangleEscape(iter)) {
             return WHITE;
@@ -164,10 +166,12 @@ vec3 getColour(Iterator iter) {
 
         ITERATE(triangleEscape, triangleUpdate, WHITE, BLACK);
 
-    } else if (fractal_type == 2) {
+    }
+    else if (fractal_type == 2) {
         ITERATE(tSquareEscape, tSquareUpdate, BLACK, WHITE);
 
-    } else if (fractal_type == 3) {
+    }
+    else if (fractal_type == 3) {
 
         if (pTreeEscape(iter)) {
             return BLACK;
@@ -177,10 +181,12 @@ vec3 getColour(Iterator iter) {
 
         ITERATE(pTreeEscape, pTreeUpdate, BLACK, WHITE);
 
-    } else if (fractal_type == 4) {
+    }
+    else if (fractal_type == 4) {
         ITERATE(hTreeEscape, hTreeUpdate, BLACK, WHITE);
     
-    } else if (fractal_type == 5) {
+    }
+    else if (fractal_type == 5) {
         ITERATE(vicsekEscape, vicsekUpdate, BLACK, WHITE);
 
     }

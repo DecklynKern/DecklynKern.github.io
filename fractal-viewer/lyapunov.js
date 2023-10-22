@@ -45,6 +45,7 @@ class Lyapunov extends Program {
         var shader = (' ' + this.baseShader).slice(1);
         var def = `
         //%
+        #define FLIP_Y
         #define FRACTAL_TYPE ${this.fractal_type}`;
 
         return shader.replace("//%", def);
@@ -148,24 +149,24 @@ class Lyapunov extends Program {
         if (LYAPUNOV.fractal_type == 1) {
             LYAPUNOV.fractal_param.value = document.getElementById("lya_gauss_alpha").value;
             gauss_style.display = "block";
-            
-        } else if (LYAPUNOV.fractal_type == 2) {
+        }
+        else if (LYAPUNOV.fractal_type == 2) {
             LYAPUNOV.fractal_param.value = document.getElementById("lya_circle_omega").value;
-            circle_style.display = "block";
-            
-        } else if (LYAPUNOV.fractal_type == 3) {
+            circle_style.display = "block";    
+        }
+        else if (LYAPUNOV.fractal_type == 3) {
             LYAPUNOV.fractal_param.value = document.getElementById("lya_quadratic_a").value;
             quadratic_style.display = "block";
-
-        } else if (LYAPUNOV.fractal_type == 5) {
+        }
+        else if (LYAPUNOV.fractal_type == 5) {
             LYAPUNOV.fractal_param.value = document.getElementById("lya_squared_sine_mu").value;
             squared_sine_style.display = "block";
-        
-        } else if (LYAPUNOV.fractal_type == 6 || LYAPUNOV.fractal_type == 7) {
+        }
+        else if (LYAPUNOV.fractal_type == 6 || LYAPUNOV.fractal_type == 7) {
             LYAPUNOV.fractal_param.value = document.getElementById("lya_trig_theta").value;
             trig_style.display = "block";
-        
-        } else if (LYAPUNOV.fractal_type == 8) {
+        }
+        else if (LYAPUNOV.fractal_type == 8) {
             LYAPUNOV.fractal_param.value = document.getElementById("lya_cosh_a").value;
             cosh_style.display = "block";
         }

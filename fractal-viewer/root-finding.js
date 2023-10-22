@@ -182,7 +182,8 @@ class RootFinding extends Program {
             
             root_selector_style.display = "block";
 
-        } else {
+        }
+        else {
 
             if (ROOT_FINDING.function == 2) {
 
@@ -302,8 +303,8 @@ class RootFinding extends Program {
             const dx3 = 100 + 50 * ROOT_FINDING.root3_real.value - event.offsetX;
             const dy3 = 100 + 50 * ROOT_FINDING.root3_imag.value - event.offsetY;
             root3_dist = dx3 * dx3 + dy3 * dy3;
-        
-        } else {
+        }
+        else {
             root3_dist = 999999999;
         }
 
@@ -316,10 +317,11 @@ class RootFinding extends Program {
         if (min_dist == root1_dist) {
             ROOT_FINDING.root_clicked = 1;
             
-        } else if (min_dist == root2_dist) {
-            ROOT_FINDING.root_clicked = 2;
-            
-        } else {
+        }
+        else if (min_dist == root2_dist) {
+            ROOT_FINDING.root_clicked = 2;    
+        }
+        else {
             ROOT_FINDING.root_clicked = 3;
         }
     }
@@ -385,12 +387,14 @@ class RootFinding extends Program {
 
             ROOT_FINDING.root1_colour.value = hexToRGB(document.getElementById("convergent_colour").value);
             
-        } else if (colouring_type != 5) {
+        }
+else if (colouring_type != 5) {
 
             if (colouring_type == 3) {
                 dist_style.display = "block";
 
-            } else if (colouring_type == 4) {
+            }
+else if (colouring_type == 4) {
                 root_dist_style.display = "block";
             }
             

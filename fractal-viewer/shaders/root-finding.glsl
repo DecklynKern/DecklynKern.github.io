@@ -1,12 +1,3 @@
-#version 300 es
-precision highp float;
-
-//%
-
-uniform float magnitude;
-uniform float centre_x;
-uniform float centre_y;
-
 uniform int max_iterations;
 uniform float threshold;
 
@@ -34,9 +25,6 @@ uniform vec3 base_colour;
 
 const int TRUE_ITER_CAP = 10000;
 const float MAX = 9999999999999.9;
-
-in vec2 frag_position;
-out vec4 colour;
 
 struct Complex {
     float real;
@@ -126,7 +114,9 @@ float root_dist_sq(Complex z, Complex root) {
 #define div(x, y) prod(x, reciprocal(y))
 #define ADD3(a, b, c) add(add(a, b), c)
 
-vec3 getColour(Complex z) {
+vec3 getColour(float real, float imag) {
+
+    Complex z = Complex(real, imag);
 
 	if (bool(is_inverted)) {
 		z = reciprocal(z);
@@ -611,46 +601,13 @@ vec3 getColour(Complex z) {
 
         if (root_dist_1 < root_dist_2 && root_dist_1 < root_dist_3) {
             return root1_colour * (1.0 - amount) + base_colour * amount;
-        
-        } else if (root_dist_2 < root_dist_3) {
+        }
+        else if (root_dist_2 < root_dist_3) {
             return root2_colour * (1.0 - amount) + base_colour * amount;
-        
-        } else {
+        }
+        else {
             return root3_colour * (1.0 - amount) + base_colour * amount;
         }
 
     #endif
-}
-
-void main() {
-
-    float pixel_size = 2.0 * magnitude / 1000.0;
-
-    float real = centre_x + frag_position.x * magnitude;
-    float imag = centre_y + frag_position.y * magnitude;
-
-    vec3 colour_sum;
-
-    for (int s = 0; s < SAMPLES; s++) {
-
-        float real_offset = fract(0.1234 * float(s));
-        float imag_offset = fract(0.7654 * float(s));
-        vec3 pixel_sample = getColour(Complex(real + real_offset * pixel_size, imag + imag_offset * pixel_size));
-
-        #if MULTISAMPLING_ALGORITHM == 0
-            colour_sum += pixel_sample;
-
-        #elif MULTISAMPLING_ALGORITHM == 1
-            colour_sum += pixel_sample * pixel_sample;
-        #endif
-
-    }
-
-    #if MULTISAMPLING_ALGORITHM == 0
-        colour = vec4(colour_sum / float(SAMPLES), 1.0);
-
-    #elif MULTISAMPLING_ALGORITHM == 1
-        colour = vec4(sqrt(colour_sum / float(SAMPLES)), 1.0);
-    #endif
-    
 }

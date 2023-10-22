@@ -15,11 +15,11 @@ function drop(ev) {
 
   if(ev.target.parentElement.className == "imagelistelem") {
   	ev.target.parentElement.parentElement.insertBefore(document.getElementById(data), ev.target.parentElement);
-
-  } else if (ev.target.tagName == "DIV" && (ev.target.className == "tierslot" || ev.target.className == "imagelist")) {
+  }
+  else if (ev.target.tagName == "DIV" && (ev.target.className == "tierslot" || ev.target.className == "imagelist")) {
   	ev.target.children[0].appendChild(document.getElementById(data));
-  
-  } else if (ev.target.tagName == "UL" && ev.target.className == "tierlist") {
+  }
+  else if (ev.target.tagName == "UL" && ev.target.className == "tierlist") {
   	ev.target.appendChild(document.getElementById(data));
   }
 }
@@ -32,10 +32,9 @@ function addRow(text, color) {
 
 	if(tableBody.children.length == 1) {
 		tier = 1;
-
-	} else {
+	}
+	else {
 		tier = tableBody.children[tableBody.children.length - 1].id.slice(4) - 0 + 1;
-	
 	}
 	row.id = "tier" + tier;
 
@@ -82,8 +81,8 @@ function setCurrentTier(tier) {
 		tier = document.getElementById("tier" + tier);
 		tier.children[1].style.backgroundColor = "#555";
 		document.getElementById("colorselector").value = "#" + colourToHex(tier.children[0].style.backgroundColor);
-
-	} else {
+	}
+	else {
 		document.getElementById("currenttier").value = "0";
 		document.getElementById("edittiertext").innerHTML = "Edit tier (click a tier to select it)"
 	}
@@ -94,7 +93,8 @@ function setColour(color) {
 	hex = colourToHex(color);
 	if(hex.startsWith("#")){
 		document.getElementById("colorselector").value = hex;
-	} else{
+	}
+	else{
 		document.getElementById("colorselector").value = "#" + hex;
 	}
 }
@@ -126,11 +126,11 @@ function addImage(tier, tag, char) {
 
 		if(tag.length < 8) {
 			textClass = "smalltag";
-		
-		} else if(tag.length < 10) {
+		}
+		else if(tag.length < 10) {
 			textClass = "mediumtag";
-		
-		} else {
+		}
+		else {
 			textClass = "largetag";
 		}
 
@@ -141,10 +141,9 @@ function addImage(tier, tag, char) {
 
 		if(tier == 0){
 			document.getElementById("createdimagelist").children[0].appendChild(img);
-
-		} else {
+		}
+		else {
 			document.getElementById("tier" + tier).children[1].children[0].appendChild(img);
-
 		}
 	}
 }
@@ -152,7 +151,8 @@ function addImage(tier, tag, char) {
 function setDeleteButtonVisibility(img, visible) {
 	if(visible) {
 		img.parentElement.children[1].style.visibility = "visible";
-	} else {
+	}
+	else {
 		img.parentElement.children[1].style.visibility = "hidden";
 	}
 }
@@ -167,8 +167,8 @@ function colourToHex(rgb) {
 
 	if(split.length == 1){
 		return split[0];
-
-	} else{
+	}
+	else {
 		
 		r = parseInt(split[0].split("(")[1]).toString(16);
 		g = parseInt(split[1]).toString(16);
@@ -199,8 +199,8 @@ function loadParams() {
 		if(i == document.getElementById("tiertable").children.length) {
 			addRow(rowTitle, color);
 			tierRow = document.getElementById("tiertable").children[i];
-
-		} else {
+		}
+		else {
 			tierRow = document.getElementById("tiertable").children[i];
 			tierRow.children[0].style.backgroundColor = color;
 			tierRow.children[0].style.backgroundColor = "#" + color;
