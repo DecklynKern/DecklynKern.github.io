@@ -1,5 +1,4 @@
-const VERTEX_SHADER = `
-#version 300 es
+const VERTEX_SHADER = `#version 300 es
 in vec2 position;
 out vec2 frag_position;
 
