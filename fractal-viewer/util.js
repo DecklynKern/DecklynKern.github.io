@@ -11,8 +11,12 @@ function formatComplex(real, imag) {
     real = real.toPrecision(6);
     imag = imag.toPrecision(6);
 
-    return `${real} ` + (imag > 0 ? "-" : "+") + ` ${imag}i`;
+    return `${real} ` + (imag > 0 ? "-" : "+") + ` ${Math.abs(imag)}i`;
     
+}
+
+function show(do_show) {
+    return do_show ? "block" : "none";
 }
 
 function paramSet(param) {
@@ -70,71 +74,76 @@ class ComplexPickerHandler {
 
     constructor(canvas, real_param, imag_param, scale, offset_real, offset_imag, info_div, template) {
 
+        this.real_param = real_param;
+        this.imag_param = imag_param;
+
         this.real = real_param.value;
         this.imag = imag_param.value;
+        
+        this.scale = scale;
+        this.unit_px = 100 / scale;
+        
+        this.offset_real = offset_real;
+        this.offset_imag = offset_imag;
+        
+        this.info_div = info_div;
+        this.template = template;
 
         var canvas_ref = document.getElementById(canvas);
         
-        var canvas_context = canvas_ref.getContext("2d");
-        canvas_ref.onmousemove = this.updateComplex(real_param, imag_param, canvas_context, scale, offset_real, offset_imag, info_div, template);
+        this.canvas_context = canvas_ref.getContext("2d");
+        var t = this;
+        canvas_ref.onmousemove = function(event) {
+            t.updateComplex(event);
+        };
         
-        canvas_context.strokeStyle = "black";
-        canvas_context.beginPath();
-        canvas_context.moveTo(0, 100);
-        canvas_context.lineTo(200, 100);
-        canvas_context.moveTo(100, 0);
-        canvas_context.lineTo(100, 200);
-        canvas_context.stroke();
-        canvas_context.beginPath();
+        var x = (offset_real - offset_real + scale) * this.unit_px;
+        var y = (offset_imag - offset_imag + scale) * this.unit_px;
         
-        var unit_px = 100 / scale;
-
-        var x = (this.real - offset_real + scale) * unit_px;
-        var y = (this.imag - offset_imag + scale) * unit_px;
-
-        canvas_context.arc(x, y, 4, 0, 2 * Math.PI);
-        canvas_context.stroke();
+        this.redraw(x, y);
 
     }
-
-    updateComplex = function(real_param, imag_param, canvas_context, scale, offset_real, offset_imag, info_div, template) {
-
-        var unit_px = 100 / scale;
-
-        function onMove(event) {
     
-            if (!mouse_down) {
-                return;
-            }
+    redraw(x, y) {
+    
+        this.canvas_context.clearRect(0, 0, 200, 200);
+    
+        this.canvas_context.beginPath();
+        this.canvas_context.moveTo(0, 100);
+        this.canvas_context.lineTo(200, 100);
+        this.canvas_context.moveTo(100, 0);
+        this.canvas_context.lineTo(100, 200);
+        this.canvas_context.stroke();
         
-            real_param.value = event.offsetX / unit_px - scale + offset_real;
-            imag_param.value = event.offsetY / unit_px - scale + offset_imag;
-
-            this.real = real_param.value;
-            this.imag = imag_param.value;
-
-            if (info_div) {
-                document.getElementById(info_div).innerHTML = template.replace("$", formatComplex(real_param.value, imag_param.value));
-            }
-
+        this.canvas_context.beginPath();
+        this.canvas_context.arc(x, y, 4, 0, 2 * Math.PI);
+        this.canvas_context.stroke();
         
-            canvas_context.clearRect(0, 0, 200, 200);
-        
-            canvas_context.beginPath();
-            canvas_context.moveTo(0, 100);
-            canvas_context.lineTo(200, 100);
-            canvas_context.moveTo(100, 0);
-            canvas_context.lineTo(100, 200);
-            canvas_context.stroke();
-            canvas_context.beginPath();
-            canvas_context.arc(event.offsetX, event.offsetY, 4, 0, 2 * Math.PI);
-            canvas_context.stroke();
-            
-            redraw();
+    }
+    
+    loadValues = function() {
+        this.real_param.value = this.real;
+        this.imag_param.value = this.imag;
+    }
 
+    updateComplex = function(event) {
+    
+        if (!mouse_down) {
+            return;
         }
+    
+        this.real_param.value = event.offsetX / this.unit_px - this.scale + this.offset_real;
+        this.imag_param.value = event.offsetY / this.unit_px - this.scale + this.offset_imag;
 
-        return onMove
+        this.real = this.real_param.value;
+        this.imag = this.imag_param.value;
 
+        if (this.info_div) {
+            document.getElementById(this.info_div).innerHTML = this.template.replace("$", formatComplex(this.real_param.value, this.imag_param.value));
+        }
+    
+        this.redraw(event.offsetX, event.offsetY);
+        redraw();
+        
     }
 }

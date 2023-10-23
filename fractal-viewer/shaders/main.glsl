@@ -18,6 +18,15 @@ uniform float magnitude;
 uniform float centre_x;
 uniform float centre_y;
 
+uniform float transform_param1;
+uniform float transform_param2;
+uniform float transform_param3;
+uniform float transform_param4;
+uniform float transform_param5;
+uniform float transform_param6;
+uniform float transform_param7;
+uniform float transform_param8;
+
 in vec2 frag_position;
 out vec4 colour;
 
@@ -173,8 +182,34 @@ void main() {
 
         float x_offset = fract(0.1234 * float(s));
         float y_offset = fract(0.7654 * float(s));
+        
+        vec2 pos = vec2(x + x_offset * pixel_size, y + y_offset * pixel_size);
+        
+        #if TRANSFORMATION == 1
+            pos = reciprocal(pos) - vec2(transform_param1, transform_param2);
+            
+        #elif TRANSFORMATION == 2
+            pos = div(
+                add(
+                    prod(
+                        pos,
+                        vec2(transform_param1, transform_param2)),
+                    vec2(transform_param3, transform_param4)),
+                add(
+                    prod(
+                        pos,
+                        vec2(transform_param5, transform_param6)),
+                    vec2(transform_param7, transform_param8)));
+                    
+        #elif TRANSFORMATION == 3
+            pos = add(
+                prod(
+                    exponent(pos),
+                    vec2(transform_param1, transform_param2)),
+                vec2(transform_param3, transform_param4));
+        #endif
 
-        vec3 pixel_sample = getColour(x + x_offset * pixel_size, y + y_offset * pixel_size);
+        vec3 pixel_sample = getColour(pos.real, pos.imag);
 
         #if MULTISAMPLING_ALGORITHM == 1
             pixel_sample *= pixel_sample;

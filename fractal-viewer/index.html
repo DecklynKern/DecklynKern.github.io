@@ -80,6 +80,8 @@
                                 <option value=9>Dog Skull</option>
                                 <option value=30>Mandelbruh</option>
                                 <option value=35>Tricorn Sine</option>
+                                <option value=37>Fracktail</option>
+                                <option value=38>Sauron</option>
                             </optgroup>
                         </select>
                         <hr>
@@ -143,13 +145,16 @@
                         </div>
                         <div id="zubieta_div" style="display: none">
                             <div id="zubieta_a_text" class="complex-text">
-                                p = 1 + 0i
+                                a = 1 + 0i
                             </div>
                             <canvas id="zubieta_a_selector" class="selector" width=200px height=200px></canvas>
                         </div>
-                        <hr>
-                        Invert: 
-                        <input type=checkbox id="esc_invert">
+                        <div id="sauron_div" style="display: none">
+                            <div id="sauron_a_text" class="complex-text">
+                                a = 0 + 0i
+                            </div>
+                            <canvas id="sauron_a_selector" class="selector" width=200px height=200px></canvas>
+                        </div>
                     </details>
                     <details id="julia_div" open=true>
                         <summary>
@@ -178,12 +183,11 @@
                         <summary>
                             Orbit traps
                         </summary>
-                        (Enable an orbit trap colouring to see)
+                        Enable orbit trap colouring to see.
                         <br>
                         <button id="orbit_trap_add">
                             Add new
                         </button>
-                        <hr>
                         <div id="orbit_traps" style="display: grid">
                         </div>
                     </details>
@@ -212,7 +216,7 @@
                             Easing Function:
                             <select id="monotonic_easing_function">
                                 <optgroup label="Polynomial">
-                                    <option value=8>Quntic Root</option>
+                                    <option value=8>Quintic Root</option>
                                     <option value=6>Quartic Root</option>
                                     <option value=4>Cube Root</option>
                                     <option value=2>Square Root</option>
@@ -466,9 +470,6 @@
                             <option value=2>Nova Julia</option>
                             <option value=3>Meta Convergence</option>
                         </select>
-                        <br>
-                        Invert: 
-                        <input type=checkbox id="rtf_invert">
                     </details>
                     <details open=true>
                         <summary>
@@ -521,7 +522,7 @@
                             <option value=1 id="rtf_shaded_root_colouring" >Shaded Root</option>
 							<option value=5 id="rtf_auto_root_colouring">Auto Root</option>
                             <option value=2 id="rtf_convergence_colouring">Convergence</option>
-                            <option value=3id="rtf_max_orbit_dist_colouring">Max Orbit Distance</option>
+                            <option value=3 id="rtf_max_orbit_dist_colouring">Max Orbit Distance</option>
                             <option value=4 id="rtf_closest_root_dist_colouring">Closest Root Distance</option>
                         </select>
                         <div id="rtf_dist_options" style="display: none">
@@ -630,6 +631,54 @@
                         <input id="rc_iterations" type=number value=8 min=0 max=20>
                     </details>
                 </div>
+            </div>
+            <div class="sidebar">
+                <details>
+                    <summary>
+                        Transformations
+                    </summary>
+                    Transformation:
+                    <select id="transformation">
+                        <option value=0>None</option>
+                        <option value=1>Invert</option>
+                        <option value=2>Möbius</option>
+                        <option value=3>Exponent</option>
+                    </select>
+                    <div id="invert_div" style="display: none">
+                        <div id="invert_text" class="complex-text">
+                            0 + 0i
+                        </div>
+                        <canvas id="invert_selector" class="selector" width=200px height=200px></canvas>
+                    </div>
+                    <div id="moebius_div" style="display: none">
+                        <div id="moebius_a_text" class="complex-text">
+                            a = 0 + 0i
+                        </div>
+                        <canvas id="moebius_a_selector" class="selector" width=200px height=200px></canvas>
+                        <div id="moebius_b_text" class="complex-text">
+                            b = 0 + 0i
+                        </div>
+                        <canvas id="moebius_b_selector" class="selector" width=200px height=200px></canvas>
+                        <div id="moebius_c_text" class="complex-text">
+                            c = 0 + 0i
+                        </div>
+                        <canvas id="moebius_c_selector" class="selector" width=200px height=200px></canvas>
+                        <div id="moebius_d_text" class="complex-text">
+                            d = 0 + 0i
+                        </div>
+                        <canvas id="moebius_d_selector" class="selector" width=200px height=200px></canvas>
+                    </div>
+                    <div id="trans_exponent_div" style="display: none">
+                        <div id="trans_exponent_a_text" class="complex-text">
+                            a = 1 + 0i
+                        </div>
+                        <canvas id="trans_exponent_a_selector" class="selector" width=200px height=200px></canvas>
+                        <div id="trans_exponent_b_text" class="complex-text">
+                            b = 0 + 0i
+                        </div>
+                        <canvas id="trans_exponent_b_selector" class="selector" width=200px height=200px></canvas>
+                    </div>
+                </details>
                 <details>
                     <summary>
                         Animations
@@ -664,7 +713,7 @@
                     Samples:
                     <input id="samples" type=number value=1 min=1>
                     <br>
-                    Multisampling algorithm
+                    Multisampling:
                     <select id="multisampling_algorithm" value=1>
                         <option value=0>RGB Mean</option>
                         <option value=1 selected>RGB Square Mean</option>

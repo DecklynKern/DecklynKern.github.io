@@ -25,6 +25,23 @@ var centre_x = new Param(0.0);
 var centre_y = new Param(0.0);
 var canvas_size = new Param(1000);
 
+var transformation = 0;
+var invert_handler;
+var moebius_a_handler;
+var moebius_b_handler;
+var moebius_c_handler;
+var moebius_d_handler;
+var exponent_a_handler;
+var exponent_b_handler;
+var transform_param1 = new Param(0.0);
+var transform_param2 = new Param(0.0);
+var transform_param3 = new Param(0.0);
+var transform_param4 = new Param(0.0);
+var transform_param5 = new Param(0.0);
+var transform_param6 = new Param(0.0);
+var transform_param7 = new Param(0.0);
+var transform_param8 = new Param(0.0);
+
 var samples = 1;
 var multisampling_algorithm = 1;
 
@@ -47,6 +64,17 @@ function main() {
 
     document.onmousedown = function(_ev) {mouse_down = true};
     document.onmouseup = function(_ev) {mouse_down = false};
+    
+    document.getElementById("transformation").onchange = updateTransformation;
+    invert_handler = new ComplexPickerHandler("invert_selector", transform_param1, transform_param2, 2.5, 0, 0, "invert_text", "$");
+    
+    moebius_a_handler = new ComplexPickerHandler("moebius_a_selector", transform_param1, transform_param2, 2.5, 0, 0, "moebius_a_text", "a = $");
+    moebius_b_handler = new ComplexPickerHandler("moebius_b_selector", transform_param3, transform_param4, 2.5, 0, 0, "moebius_b_text", "b = $");
+    moebius_c_handler = new ComplexPickerHandler("moebius_c_selector", transform_param5, transform_param6, 2.5, 0, 0, "moebius_c_text", "c = $");
+    moebius_d_handler = new ComplexPickerHandler("moebius_d_selector", transform_param7, transform_param8, 2.5, 0, 0, "moebius_d_text", "d = $");
+    
+    exponent_a_handler = new ComplexPickerHandler("trans_exponent_a_selector", transform_param1, transform_param2, 2.5, 1, 0, "trans_exponent_a_text", "a = $");
+    exponent_b_handler = new ComplexPickerHandler("trans_exponent_b_selector", transform_param3, transform_param4, 2.5, 0, 0, "trans_exponent_b_text", "b = $");
 
     document.getElementById("samples").onchange = updateSamples;
     document.getElementById("canvas_size").onchange = updateCanvasSize;
@@ -97,6 +125,7 @@ function receiveShader() {
 function setupShader() {
 
     const global_settings = `
+    #define TRANSFORMATION ${transformation}
     #define SAMPLES ${samples}
     #define MULTISAMPLING_ALGORITHM ${multisampling_algorithm}`;
 
@@ -111,8 +140,16 @@ function setupShader() {
     magnitude.getAttr("magnitude");
     centre_x.getAttr("centre_x");
     centre_y.getAttr("centre_y");
-
     canvas_size.getAttr("canvas_size");
+    
+    transform_param1.getAttr("transform_param1");
+    transform_param2.getAttr("transform_param2");
+    transform_param3.getAttr("transform_param3");
+    transform_param4.getAttr("transform_param4");
+    transform_param5.getAttr("transform_param5");
+    transform_param6.getAttr("transform_param6");
+    transform_param7.getAttr("transform_param7");
+    transform_param8.getAttr("transform_param8");
 
     program.setupAttrs();
 
@@ -152,8 +189,16 @@ function tryRedraw(force) {
     magnitude.loadFloat();
     centre_x.loadFloat();
     centre_y.loadFloat();
-
     canvas_size.loadInt();
+    
+    transform_param1.loadFloat();
+    transform_param2.loadFloat();
+    transform_param3.loadFloat();
+    transform_param4.loadFloat();
+    transform_param5.loadFloat();
+    transform_param6.loadFloat();
+    transform_param7.loadFloat();
+    transform_param8.loadFloat();
 
     program.loadAttrs();
 
@@ -188,6 +233,40 @@ function updateProgram() {
             loadProgram(RECURSIVE);
 
     }
+}
+
+function updateTransformation(event) {
+    
+    transformation = event.target.value;
+    
+    var invert_style = document.getElementById("invert_div").style;
+    var moebius_style = document.getElementById("moebius_div").style;
+    var exponent_style = document.getElementById("trans_exponent_div").style;
+    
+    invert_style.display = "none";
+    moebius_style.display = "none";
+    exponent_style.display = "none";
+    
+    if (transformation == 1) {
+        invert_style.display = "block";
+        invert_handler.loadValues();
+    }
+    else if (transformation == 2) {
+        moebius_style.display = "block";
+        moebius_a_handler.loadValues();
+        moebius_b_handler.loadValues();
+        moebius_c_handler.loadValues();
+        moebius_d_handler.loadValues();
+    }
+    else if (transformation == 3) {
+        exponent_style.display = "block";
+        exponent_a_handler.loadValues();
+        exponent_b_handler.loadValues();
+    }
+    
+    setupShader();
+    redraw();
+    
 }
 
 function updateSamples(event) {

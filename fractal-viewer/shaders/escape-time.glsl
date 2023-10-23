@@ -34,13 +34,17 @@
 #define CUBIC                  33
 #define LOGISTIC               34
 #define TRICORN_SINE           35
-#define TWIN_MANDELBROT 36
+#define TWIN_MANDELBROT        36
+#define FRACKTAIL              37
+#define SAURON                 38
 
 uniform float fractal_param1;
 uniform float fractal_param2;
 uniform float fractal_param3;
 
 uniform int is_inverted;
+uniform float invert_real;
+uniform float invert_imag;
 
 uniform int max_iterations;
 
@@ -112,14 +116,13 @@ float gaussianIntegerOrbitTaxicabDist(Complex z, float scale) {
     return (axis_dists.real + axis_dists.imag * 3.0);
 }
 
+float lineOrbitDist(vec2 z, float angle) {
+    return abs(-cos(angle) * z.y - sin(angle) * z.x);
+}
+
 vec3 getColour(float real, float imag) {
 
     Complex z = Complex(real, imag);
-
-    if (bool(is_inverted)) {
-        z = reciprocal(z);
-    }
-
     Complex c;
     
     #if FRACTAL == LOGISTIC
@@ -540,7 +543,14 @@ vec3 getColour(float real, float imag) {
                     div(
                         square(c),
                         z)));
-			
+                        
+        #elif FRACTAL == FRACKTAIL
+            
+            z = prod(z, z) * argument(z);
+            z += c;
+                        
+        #elif FRACTAL == SAURON
+            z = div(c, prod(z, z)) + c + Complex(fractal_param1, fractal_param2);
         #endif
         
         z_real_sq = z.real * z.real;

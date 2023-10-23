@@ -1,8 +1,6 @@
 uniform int max_iterations;
 uniform float threshold;
 
-uniform int is_inverted;
-
 uniform float root1_real;
 uniform float root1_imag;
 uniform float root2_real;
@@ -29,11 +27,6 @@ const float MAX = 9999999999999.9;
 vec3 getColour(float real, float imag) {
 
     Complex z = Complex(real, imag);
-
-	if (bool(is_inverted)) {
-		z = reciprocal(z);
-	}
-
     Complex z_prev;
 
     #if FUNCTION == 0
