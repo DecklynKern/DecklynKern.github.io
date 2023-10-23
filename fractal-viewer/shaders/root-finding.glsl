@@ -26,94 +26,6 @@ uniform vec3 base_colour;
 const int TRUE_ITER_CAP = 10000;
 const float MAX = 9999999999999.9;
 
-struct Complex {
-    float real;
-    float imag;
-};
-
-const Complex ZERO = Complex(0.0, 0.0);
-
-Complex add(Complex x, Complex y) {
-    return Complex(
-        x.real + y.real,
-        x.imag + y.imag
-    );
-}
-
-void iadd(inout Complex x, Complex y) {
-    x.real += y.real;
-    x.imag += y.imag;
-}
-
-Complex sub(Complex x, Complex y) {
-    return Complex(
-        x.real - y.real,
-        x.imag - y.imag
-    );
-}
-
-Complex reciprocal(Complex z) {
-    float denom = z.real * z.real + z.imag * z.imag;
-    return Complex(z.real / denom, -z.imag / denom);
-}
-
-Complex square(Complex z) {
-    return Complex(z.real * z.real - z.imag * z.imag, (z.real + z.real) * z.imag);
-}
-
-Complex scale(Complex z, float d) {
-    return Complex(
-        z.real * d,
-        z.imag * d
-    );
-}
-
-Complex prod(Complex x, Complex y) {
-    return Complex(
-        x.real * y.real - x.imag * y.imag,
-        x.real * y.imag + y.real * x.imag
-    );
-}
-
-Complex neg(Complex z) {
-    return Complex(
-        -z.real,
-        -z.imag
-    );
-}
-
-Complex conj(Complex z) {
-    return Complex(
-        z.real,
-        -z.imag
-    );
-}
-
-float argument(Complex z) {
-    return atan(z.imag, z.real);
-}
-
-Complex exponent(Complex z, Complex d) {
-
-    float z_norm_sq = z.real * z.real + z.imag * z.imag;
-    float arg = argument(z);
-    float r = pow(z_norm_sq, 0.5 * d.real) * exp(-d.imag * arg);
-    float angle = d.real * arg + 0.5 * d.imag * log(z_norm_sq);
-
-    return Complex(
-        r * cos(angle),
-        r * sin(angle)
-    );
-}
-
-float root_dist_sq(Complex z, Complex root) {
-    Complex diff = sub(z, root);
-    return diff.real * diff.real + diff.imag * diff.imag;
-}
-
-#define div(x, y) prod(x, reciprocal(y))
-#define ADD3(a, b, c) add(add(a, b), c)
-
 vec3 getColour(float real, float imag) {
 
     Complex z = Complex(real, imag);
@@ -135,7 +47,7 @@ vec3 getColour(float real, float imag) {
         #else
             Complex root3 = z;
             z = scale(
-                ADD3(root1, root2, root3),
+                add3(root1, root2, root3),
                 0.3333333333);
 
         #endif
@@ -143,8 +55,8 @@ vec3 getColour(float real, float imag) {
 
         Complex r1r2 = prod(root1, root2);
         
-        Complex d = neg(ADD3(root1, root2, root3));
-        Complex e = ADD3(r1r2, prod(root1, root3), prod(root2, root3));
+        Complex d = neg(add3(root1, root2, root3));
+        Complex e = add3(r1r2, prod(root1, root3), prod(root2, root3));
         Complex f = neg(prod(r1r2, root3));
 
     #elif FUNCTION == 2
@@ -238,7 +150,7 @@ vec3 getColour(float real, float imag) {
 
         #if FUNCTION == 0
 
-            func_prev = ADD3(
+            func_prev = add3(
                 prod(
                     add(d, z_prev),
                     square(z_prev)),
@@ -277,7 +189,7 @@ vec3 getColour(float real, float imag) {
 
             Complex z2 = square(z);
 
-            func = ADD3(
+            func = add3(
                 prod(
                     add(d, z),
                     z2),
@@ -288,7 +200,7 @@ vec3 getColour(float real, float imag) {
 
                 Complex dd = scale(d, 2.0);
 
-                der = ADD3(
+                der = add3(
                     scale(z2, 3.0),
                     prod(dd, z),
                     e);
@@ -307,7 +219,7 @@ vec3 getColour(float real, float imag) {
 
                 Complex func_z = add(func, z);
 
-                func_step = ADD3(
+                func_step = add3(
                     prod(
                         add(func_z, d),
                         square(func_z)),
@@ -441,7 +353,7 @@ vec3 getColour(float real, float imag) {
 
         #if FRACTAL_TYPE == 0 || FRACTAL_TYPE == 3 // normal
         
-            if (func.real * func.real + func.imag * func.imag <= threshold || iteration == max_iterations) {
+            if (magnitude_sq(func) <= threshold || iteration == max_iterations) {
                 iters = iteration;
                 break;
             }
@@ -450,7 +362,7 @@ vec3 getColour(float real, float imag) {
 
             dz = sub(z, z_prev);
             
-            if (dz.real * dz.real + dz.imag * dz.imag <= threshold || iteration == max_iterations) {
+            if (magnitude_sq(dz) <= threshold || iteration == max_iterations) {
                 iters = iteration;
                 break;
             }
@@ -549,7 +461,7 @@ vec3 getColour(float real, float imag) {
         z = sub(z, prod(a, diff));
 
         #if FRACTAL_TYPE == 1 || FRACTAL_TYPE == 2
-            iadd(z, c);
+            z += c;
         #endif
         
     }
@@ -570,12 +482,9 @@ vec3 getColour(float real, float imag) {
             return base_colour;
         }
 	
+        // fix 
 		float thresh = (threshold + 0.000000000000001) * 2.0;
-	
-		float real = thresh * round(z.real / thresh);
-		float imag = thresh * round(z.imag / thresh);
-	
-		return vec3(fract(real * 99.9), fract(imag * 99.9), 1.0);
+		return vec3((thresh * round(z * (1.0 / thresh)).xy), 1.0);
 
     #else
 
@@ -600,13 +509,13 @@ vec3 getColour(float real, float imag) {
         }
 
         if (root_dist_1 < root_dist_2 && root_dist_1 < root_dist_3) {
-            return root1_colour * (1.0 - amount) + base_colour * amount;
+            return mix(root1_colour, base_colour, amount);
         }
         else if (root_dist_2 < root_dist_3) {
-            return root2_colour * (1.0 - amount) + base_colour * amount;
+            return mix(root2_colour, base_colour, amount);
         }
         else {
-            return root3_colour * (1.0 - amount) + base_colour * amount;
+            return mix(root3_colour, base_colour, amount);
         }
 
     #endif

@@ -123,11 +123,13 @@ vec3 getColour(float a, float b) {
     lambda /= float(iterations) * 3.0;
 
     if (lambda < 0.0) {
-        float amount = min(sqrt(-lambda), 1.0);
-        return stable_colour * (1.0 - amount) + infinity_colour * amount;
+        return mix(stable_colour, infinity_colour, min(sqrt(-lambda), 1.0));
     }
     else {
         float amount = sqrt(lambda);
         return chaotic_colour * (1.0 - amount) + infinity_colour * amount;
+
+        // return mix(chaotic_colour, infinity_colour, sqrt(lambda));
+        // fsr this doesn't work right
     }
 }

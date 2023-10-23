@@ -11,12 +11,8 @@ function formatComplex(real, imag) {
     real = real.toPrecision(6);
     imag = imag.toPrecision(6);
 
-    if (imag < 0) {
-        return `${real} - ${-imag}i`;
-    }
-    else {
-        return `${real} + ${imag}i`;
-    }
+    return `${real} ` + (imag > 0 ? "-" : "+") + ` ${imag}i`;
+    
 }
 
 function paramSet(param) {

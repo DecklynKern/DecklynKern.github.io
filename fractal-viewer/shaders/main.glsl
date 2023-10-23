@@ -1,6 +1,17 @@
 #version 300 es
 precision highp float;
 
+#define Complex vec2
+#define real x
+#define imag y
+#define add(a, b) ((a) + (b))
+#define add3(a, b, c) ((a) + (b) + (c))
+#define sub(a, b) ((a) - (b))
+#define div(a, b) prod(a, reciprocal(b))
+#define scale(a, b) ((a) * (b))
+#define neg(a) (-(a))
+#define magnitude_sq(a) dot(a, a)
+
 //%
 
 uniform float magnitude;
@@ -10,8 +21,74 @@ uniform float centre_y;
 in vec2 frag_position;
 out vec4 colour;
 
+const float E = 2.7182818285;
 const float PI = 3.1415926535;
 const float TAU = 2.0 * PI;
+
+const Complex ZERO = Complex(0.0, 0.0);
+
+Complex reciprocal(Complex z) {
+    float denom = 1.0 / dot(z, z);
+    return Complex(z.real * denom, -z.imag * denom);
+}
+
+Complex square(Complex z) {
+    return Complex(z.real * z.real - z.imag * z.imag, 2.0 * z.real * z.imag);
+}
+
+Complex prod(Complex x, Complex y) {
+    return Complex(
+        x.real * y.real - x.imag * y.imag,
+        x.real * y.imag + y.real * x.imag
+    );
+}
+
+Complex conj(Complex z) {
+    return Complex(
+        z.real,
+        -z.imag
+    );
+}
+
+float argument(Complex z) {
+    return atan(z.imag, z.real);
+}
+
+Complex exponent(Complex z) {
+    float mag = exp(z.real);
+    return Complex(
+        mag * cos(z.imag),
+        mag * sin(z.imag)
+    );
+}
+
+Complex exponent(Complex z, float d) {
+
+    float r = pow(z.real * z.real + z.imag * z.imag, 0.5 * d);
+    float theta = atan(z.imag, z.real) * d;
+
+    return Complex(
+        r * cos(theta),
+        r * sin(theta)
+    );
+}
+Complex exponent(Complex z, Complex d) {
+
+    float z_norm_sq = dot(z, z);
+    float arg = argument(z);
+    float r = pow(z_norm_sq, 0.5 * d.real) * exp(-d.imag * arg);
+    float angle = d.real * arg + 0.5 * d.imag * log(z_norm_sq);
+
+    return Complex(
+        r * cos(angle),
+        r * sin(angle)
+    );
+}
+
+float root_dist_sq(Complex z, Complex root) {
+    Complex diff = sub(z, root);
+    return diff.real * diff.real + diff.imag * diff.imag;
+}
 
 vec3 getColour(float x, float y);
 

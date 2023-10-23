@@ -33,7 +33,8 @@ const ESCAPE_TIME_FUNCTIONS = [
     "",
     "",
     "",
-    "z ← cz(1 - z) [z<sub>0</sub> = 0.5]"
+    "z ← cz(1 - z) [z<sub>0</sub> = 0.5]",
+    ""
 ];
 
 const ESCAPE_TIME_ANIMATIONS = [
@@ -70,7 +71,9 @@ class EscapeTime extends Program {
 
     exterior_colouring_style = 0;
 
-    monotonic_function = 0;
+    monotonic_function = 1;
+    monotonic_easing_function = 0;
+    monotonic_ease_out = false;
     cyclic_cycle_function = 0;
     cyclic_waveform = 0;
     radial_angle = 0;
@@ -124,14 +127,17 @@ class EscapeTime extends Program {
 
         var monitor_orbit_traps = document.getElementById("orbit_traps").childElementCount != 0;
 
-        def += `\n#define MONITOR_ORBIT_TRAPS ${+monitor_orbit_traps}`;
-
         var monotonic_function = this.monotonic_function;
         if (this.exterior_colouring_style != 0) {
             monotonic_function = -1;
         }
 
         def += `\n#define MONOTONIC_FUNCTION ${monotonic_function}`;
+        def += `\n#define MONOTONIC_EASING_FUNCTION ${this.monotonic_easing_function}`
+
+        if (this.monotonic_ease_out) {
+            def += "\n#define MONOTONIC_EASE_OUT";
+        }
 
         var cycle_function = this.cyclic_cycle_function;
         var cyclic_waveform = this.cyclic_waveform;
@@ -152,8 +158,18 @@ class EscapeTime extends Program {
         def += `\n#define RADIAL_DECOMPOSITION ${radial_decomposition}`;
 
         if (monitor_orbit_traps) {
-	
-            def += "\nfloat monitorOrbitTraps(Complex z, float min_dist, float mag_sq) {\n";
+
+            def += `
+            #define MONITOR_ORBIT_TRAPS
+            float centrePointOrbitDist(float mag_sq);
+            float centrePointOrbitTaxicabDist(Complex z);
+            float circleOrbitDist(float mag_sq, float radius);
+            float crossOrbitDist(Complex z, float size);
+            float gaussianIntegerOrbitDist(Complex z, float scale);
+            float gaussianIntegerOrbitTaxicabDist(Complex z, float scale);
+
+            float monitorOrbitTraps(Complex z, float min_dist, float mag_sq) {
+            float orbit_dist;`
 
             const orbit_traps = document.getElementById("orbit_traps").children;
 
@@ -164,11 +180,11 @@ class EscapeTime extends Program {
                 switch (+orbit_traps[i].children[0].value) {
 
                     case 0:
-                        def += "min_dist = min(min_dist, sqrt(mag_sq));\n";
+                        def += "orbit_dist = centrePointOrbitDist(mag_sq);\n";
                         break;
 
                     case 1:
-                        def += `min_dist = min(min_dist, abs(sqrt(mag_sq) - ${param}));\n`;
+                        def += `orbit_dist = circleOrbitDist(mag_sq, ${param});\n`;
                         break;
 
                     /*
@@ -196,10 +212,25 @@ class EscapeTime extends Program {
                         break;*/
 
                     case 3:
-                        def += `min_dist = min(min_dist, min(abs(z.real - ${param}), abs(z.imag - ${param})));\n`;
+                        def += `orbit_dist = crossOrbitDist(z, ${param});\n`;
+                        break;
+
+                    case 4:
+                        def += `orbit_dist = gaussianIntegerOrbitDist(z, ${param});\n`;
+                        break;
+
+                    case 5:
+                        def += `orbit_dist = gaussianIntegerOrbitTaxicabDist(z, ${param});\n`;
+                        break;
+
+                    case 6:
+                        def += "orbit_dist = centrePointOrbitTaxicabDist(z);\n";
                         break;
 
                 }
+
+                def += "min_dist = min(min_dist, orbit_dist);"
+
             }
 
             def += "return min_dist;\n}";
@@ -256,6 +287,8 @@ class EscapeTime extends Program {
         document.getElementById("exterior_colouring_style").onchange = this.updateExteriorColouringStyle;
 
         document.getElementById("monotonic_function").onchange = this.updateMonotonicFunction;
+        document.getElementById("monotonic_easing_function").onchange = this.updateMonotonicEasingFunction;
+        document.getElementById("monotonic_ease_out").onchange = this.updateMonotonicEaseOut;
 		
         document.getElementById("cyclic_cycle_function").onchange = this.updateCyclicFunction;
         document.getElementById("cyclic_waveform").onchange = this.updateCyclicWaveform;
@@ -462,18 +495,20 @@ class EscapeTime extends Program {
         new_orbit_trap.className = "grid-entry";
         new_orbit_trap.innerHTML = `
         <select onchange="ESCAPE_TIME.updateOrbitTrap(event)">
-            <option value="0">Centre Point</option>
-            <option value="1">Circle</option>
-            <!-- <option value="2">Square</option> -->
-            <option value="3">Cross</option>
+            <option value=0>Centre Point</option>
+            <option value=6>Centre Point (Taxicab distance)</option>
+            <option value=1>Circle</option>
+            <!-- <option value=2>Square</option> -->
+            <option value=3>Cross</option>
+            <option value=4>Gaussian Integers</option>
+            <option value=5>Gaussian Integers (Taxicab distance)</option>
         </select>
         <div style="display: none">
-            <input type="number" value="2" min="0" step="0.1" onchange="setupShader();redraw()">
+            <input type="number" value=2 min=0 step=0.1 onchange="setupShader();redraw()">
         </div>
         <button onclick="ESCAPE_TIME.deleteOrbitTrap(event)">
             X
-        </button>
-        `;
+        </button>`;
 
         document.getElementById("orbit_traps").appendChild(new_orbit_trap);
 
@@ -502,6 +537,10 @@ class EscapeTime extends Program {
         else if (event.target.value == 2 || event.target.value == 3) {
             settings_style.display = "block";
             event.target.parentElement.childNodes[3].firstChild.nodeValue = "Size:";
+        }
+        else if (event.target.value == 4 || event.target.value == 5) {
+            settings_style.display = "block";
+            event.target.parentElement.childNodes[3].firstChild.nodeValue = "Scale:";
         }
 
         setupShader();
@@ -577,6 +616,18 @@ class EscapeTime extends Program {
         setupShader();
         redraw();
 
+    }
+
+    updateMonotonicEasingFunction = function(event) {
+        ESCAPE_TIME.monotonic_easing_function = event.target.value;
+        setupShader();
+        redraw();
+    }
+
+    updateMonotonicEaseOut = function(event) {
+        ESCAPE_TIME.monotonic_ease_out = event.target.checked;
+        setupShader();
+        redraw();
     }
 
     updateCyclicFunction = function(event) {
