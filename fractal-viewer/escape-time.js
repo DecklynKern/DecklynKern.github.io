@@ -59,9 +59,10 @@ class EscapeTime extends Program {
     fractal_param2 = new Param(0);
     fractal_param3 = new Param(0);
     
+    escape_algorithm = 0;
+    
+    escape_param = new Param(4.0);
     max_iterations = new Param(30);
-
-    escape_radius = new Param(2.0);
     
     is_julia = new Param(0);
     julia_c_real = new Param(0.0);
@@ -98,6 +99,7 @@ class EscapeTime extends Program {
         var def = `
         //%
         #define FRACTAL ${this.fractal}
+        #define ESCAPE_ALGORITHM ${this.escape_algorithm}
         #define EXTERIOR_COLOURING_STYLE ${this.exterior_colouring_style}
         #define EXTERIOR_COLOURING ${this.exterior_colouring}
         #define INTERIOR_COLOURING ${this.interior_colouring}`;
@@ -285,7 +287,9 @@ class EscapeTime extends Program {
 
         document.getElementById("esc_max_iterations").onchange = paramSet(this.max_iterations);
         
-        document.getElementById("escape_radius").onchange = paramSet(this.escape_radius);
+        document.getElementById("escape_algorithm").onchange = this.updateEscapeAlgorithm;
+        document.getElementById("escape_radius").onchange = this.updateEscapeParamSquared;
+        document.getElementById("escape_derivative").onchange = this.updateEscapeParamSquared;
         
         document.getElementById("orbit_trap_add").onclick = this.addOrbitTrap;
 
@@ -331,7 +335,7 @@ class EscapeTime extends Program {
         
         this.max_iterations.getAttr("max_iterations");
 
-        this.escape_radius.getAttr("escape_radius_sq");
+        this.escape_param.getAttr("escape_param");
             
         this.is_julia.getAttr("is_julia");
         this.julia_c_real.getAttr("julia_c_real");
@@ -356,9 +360,8 @@ class EscapeTime extends Program {
         this.fractal_param2.loadFloat();
         this.fractal_param3.loadFloat();
 
+        this.escape_param.loadFloat();
         this.max_iterations.loadInt();
-
-        gl.uniform1f(this.escape_radius.attr, this.escape_radius.value * this.escape_radius.value);
 
         this.is_julia.loadInt();
         this.julia_c_real.loadFloat();
@@ -414,7 +417,7 @@ class EscapeTime extends Program {
             scaling_style.display = "block";
             ESCAPE_TIME.fractal_param1.value = document.getElementById("scaling").value;
         }
-        else if (ESCAPE_TIME.fractal == 5) {
+        else if (ESCAPE_TIME.fractal == 5 || ESCAPE_TIME.fractal == 40) {
             exponent_style.display = "block";
             ESCAPE_TIME.fractal_param1.value = document.getElementById("exponent").value;
         }
@@ -463,6 +466,35 @@ class EscapeTime extends Program {
         setupShader();
         redraw();
     
+    }
+    
+    updateEscapeAlgorithm = function(event) {
+        
+        ESCAPE_TIME.escape_algorithm = event.target.value;
+        
+        var mag_style = document.getElementById("esc_mag_div").style;
+        var der_style = document.getElementById("esc_der_div").style;
+        
+        mag_style.display = "none";
+        der_style.display = "none";
+        
+        if (ESCAPE_TIME.escape_algorithm == 0) {
+            mag_style.display = "block";
+            ESCAPE_TIME.escape_param.value = Math.pow(document.getElementById("escape_radius").value, 2.0);
+        }
+        else if (ESCAPE_TIME.escape_algorithm == 1) {
+            der_style.display = "block";
+            ESCAPE_TIME.escape_param.value = Math.pow(document.getElementById("escape_derivative").value, 2.0);
+        }
+        
+        setupShader();
+        redraw();
+        
+    }
+    
+    updateEscapeParamSquared = function(event) {
+        ESCAPE_TIME.escape_param.value = event.target.value * event.target.value;
+        redraw();
     }
     
     updateIsJulia = function(event) {

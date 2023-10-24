@@ -44,6 +44,7 @@
                                 <option value=17>Simonbrot</option>
                                 <option value=26>Buffalo</option>
                                 <option value=5>Multibrot</option>
+                                <option value=40>Multi-Burning Ship</option>
                                 <option value=23>Complex Multibrot</option>
                                 <option value=15>Rational Map</option>
                                 <option value=16>Phoenix</option>
@@ -82,6 +83,7 @@
                                 <option value=35>Tricorn Sine</option>
                                 <option value=37>Fracktail</option>
                                 <option value=38>Sauron</option>
+                                <option value=39>Partial Burning Ship</option>
                             </optgroup>
                         </select>
                         <hr>
@@ -173,11 +175,21 @@
                         <summary>
                             Iteration parameters
                         </summary>
+                        Escape Algorithm:
+                        <select id="escape_algorithm">
+                            <option value=0>Magnitude</option>
+                            <option value=1>Derivative Bailout</option>
+                        </select>
+                        <div id="esc_mag_div">
+                            Escape Magnitude:
+                            <input id="escape_radius" type=number value=2 step=0.1 min=0>
+                        </div>
+                        <div id="esc_der_div" style="display: none">
+                            Derivative Bailout Magnitude:
+                            <input id="escape_derivative" type=number value=1000 step=25 min=0>
+                        </div>
                         Max Iterations:
-                        <input id="esc_max_iterations" type=number value=30 min=0>
-                        <br>
-                        Escape Radius:
-                        <input id="escape_radius" type=number value=2 step=0.1 min=0>
+                        <input id="esc_max_iterations" type=number value=30 step=5 min=0>
                     </details>
                     <details>
                         <summary>
@@ -206,11 +218,16 @@
                         <div id="monotonic_rendering_div">
                             Function:
                             <select id="monotonic_function">
-                                <option value=0>Discrete Escape Time</option>
-                                <option value=1 selected>Smooth Escape Time</option>
-                                <option value=2>Normal Map</option>
-                                <option value=3>Stripe Average</option>
-                                <option value=4>Orbit Trap</option>
+                                <optgroup label="Escape Time">
+                                    <option value=0>Discrete</option>
+                                    <option value=1 selected>Smooth</option>
+                                    <option value=5>Derivative Smooth</option>
+                                </optgroup>
+                                <optgroup label="Other">
+                                    <option value=2>Normal Map</option>
+                                    <option value=3>Stripe Average</option>
+                                    <option value=4>Orbit Trap</option>
+                                </optgroup>
                             </select>
                             <hr>
                             Easing Function:

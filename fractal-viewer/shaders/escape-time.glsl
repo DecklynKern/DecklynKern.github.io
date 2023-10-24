@@ -37,6 +37,8 @@
 #define TWIN_MANDELBROT        36
 #define FRACKTAIL              37
 #define SAURON                 38
+#define PARTIAL_BURNING_SHIP   39
+#define MULTI_BURNING_SHIP     40
 
 uniform float fractal_param1;
 uniform float fractal_param2;
@@ -46,13 +48,12 @@ uniform int is_inverted;
 uniform float invert_real;
 uniform float invert_imag;
 
+uniform float escape_param;
 uniform int max_iterations;
 
 uniform int is_julia;
 uniform float julia_c_real;
 uniform float julia_c_imag;
-
-uniform float escape_radius_sq;
 
 uniform vec3 exterior_colour1;
 uniform vec3 exterior_colour2;
@@ -67,12 +68,12 @@ uniform float interior_colouring_param1;
 
 const int TRUE_ITER_CAP = 10000;
 
-float getSmoothIter(float mag_sq, Complex z) {
+float getSmoothIter(float mag_sq) {
 
     float exp;
 
-    #if FRACTAL == MULTIBROT
-        exp = fractal_param1;
+    #if FRACTAL == MULTIBROT || FRACTAL == MULTI_BURNING_SHIP
+        exp = max(1.0, fractal_param1);
 
     #elif FRACTAL == RATIONAL_MAP
         exp = max(fractal_param1, fractal_param2);
@@ -84,7 +85,28 @@ float getSmoothIter(float mag_sq, Complex z) {
         exp = 2.0;
     #endif
     
-    return 1.0 + log(log(escape_radius_sq) / log(mag_sq)) / log(exp);
+    return 1.0 + log(log(escape_param) / log(mag_sq)) / log(exp);
+    
+}
+
+float getSmoothDerIter(Complex der) {
+
+    float exp;
+
+    #if FRACTAL == MULTIBROT || FRACTAL == MULTI_BURNING_SHIP
+        exp = max(1.0, fractal_param1);
+
+    #elif FRACTAL == RATIONAL_MAP
+        exp = max(fractal_param1, fractal_param2);
+
+    #elif FRACTAL == SIMONBROT || FRACTAL == META_MANDELBROT
+        exp = 4.0;
+
+    #else
+        exp = 2.0;
+    #endif
+    
+    return 1.0 + log(log(escape_param) / log(dot(der, der))) / log(exp);
     
 }
 
@@ -165,12 +187,11 @@ vec3 getColour(float real, float imag) {
         float orbit_min_dist = monitorOrbitTraps(z, 99999999.9, mag_sq);
     #endif
 
-    #if EXTERIOR_COLOURING_STYLE == 0
-        #if MONOTONIC_FUNCTION == 2
-            Complex der = Complex(1.0, 0.0);
-        #endif
+    #if (EXTERIOR_COLOURING_STYLE == 0 && MONOTONIC_FUNCTION == 2) || ESCAPE_ALGORITHM == 1
+        Complex der = Complex(1.0, 0.0);
+    #endif
 
-    #elif EXTERIOR_COLOURING_STYLE == 1
+    #if EXTERIOR_COLOURING_STYLE == 1
         #if CYCLE_FUNCTION == 1
             Complex exp_diff;
             float exponential = 0.0;
@@ -551,6 +572,14 @@ vec3 getColour(float real, float imag) {
                         
         #elif FRACTAL == SAURON
             z = div(c, prod(z, z)) + c + Complex(fractal_param1, fractal_param2);
+        
+        #elif FRACTAL == PARTIAL_BURNING_SHIP
+            z.imag = 2.0 * z.real * abs(z.imag);
+            z.real = z_real_sq - z_imag_sq;
+            z += c;
+            
+        #elif FRACTAL == MULTI_BURNING_SHIP
+            z = exponent(Complex(abs(z.real), abs(z.imag)), fractal_param1) + c;
         #endif
         
         z_real_sq = z.real * z.real;
@@ -562,34 +591,45 @@ vec3 getColour(float real, float imag) {
             orbit_min_dist = monitorOrbitTraps(z, orbit_min_dist, mag_sq);
         #endif
 
-        #if EXTERIOR_COLOURING_STYLE == 0
-            #if MONOTONIC_FUNCTION == 2
-                #if FRACTAL == MANDELBROT
+        #if (EXTERIOR_COLOURING_STYLE == 0 && MONOTONIC_FUNCTION == 2) || ESCAPE_ALGORITHM == 1
+            #if FRACTAL == MANDELBROT
 
-                    der = add(
-                        scale(
+                der = add(
+                    scale(
+                        prod(
+                            z_prev,
+                            der),
+                        2.0),
+                    Complex(
+                        1.0,
+                        0.0));
+                        
+            #elif FRACTAL == BURNING_SHIP
+                der = add(
+                    scale(
+                        div(
                             prod(
                                 z_prev,
                                 der),
-                            2.0),
-                        Complex(
-                            1.0,
-                            0.0));
+                            sign(z_prev)),
+                        2.0),
+                    Complex(
+                        1.0,
+                        0.0));
+    
+            #elif FRACTAL == MULTIBROT
 
-                #elif FRACTAL == MULTIBROT
-
-                    der = add(
-                        scale(
-                            prod(
-                                exponent(
-                                    z_prev,
-                                    fractal_param1 - 1.0),
-                                der),
-                            2.0 * fractal_param1),
-                        Complex(
-                            1.0,
-                            0.0));
-                #endif
+                der = add(
+                    scale(
+                        prod(
+                            exponent(
+                                z_prev,
+                                fractal_param1 - 1.0),
+                            der),
+                        2.0 * fractal_param1),
+                    Complex(
+                        1.0,
+                        0.0));
             #endif
         #endif
         
@@ -601,7 +641,7 @@ vec3 getColour(float real, float imag) {
         #if EXTERIOR_COLOURING_STYLE == 1
             #if CYCLE_FUNCTION == 1
                 exp_diff = sub(z, z_prev);
-                exponential += exp(-(sqrt(mag_sq) + 0.5 / sqrt(exp_diff.real * exp_diff.real + exp_diff.imag * exp_diff.imag)));
+                exponential += exp(-(sqrt(mag_sq) + 0.5 * inversesqrt(exp_diff.real * exp_diff.real + exp_diff.imag * exp_diff.imag)));
             #endif
 			
 		#elif EXTERIOR_COLOURING_STYLE == 2
@@ -614,7 +654,7 @@ vec3 getColour(float real, float imag) {
             mag_sum += mag_sq;
 
         #elif INTERIOR_COLOURING == 2
-            min_dist_sq = min(min_dist_sq, 1.0 - mag_sq / escape_radius_sq);
+            min_dist_sq = min(min_dist_sq, 1.0 - mag_sq / escape_param);
 
         #elif INTERIOR_COLOURING == 3
             diff = sub(z, z_prev);
@@ -624,10 +664,18 @@ vec3 getColour(float real, float imag) {
             interior_stripe_total += 0.5 + 0.5 * sin(interior_colouring_param1 * argument(z));
         #endif
         
-        if (mag_sq >= escape_radius_sq) {
-            iterations = iteration + 1;
-            break;
-        }
+        #if ESCAPE_ALGORITHM == 0
+            if (mag_sq >= escape_param) {
+                iterations = iteration + 1;
+                break;
+            }
+        
+        #elif ESCAPE_ALGORITHM == 1
+            if (dot(der, der) >= escape_param) {
+                iterations = iteration + 1;
+                break;
+            }
+        #endif
     }
 
     if (iterations == TRUE_ITER_CAP) {
@@ -636,7 +684,7 @@ vec3 getColour(float real, float imag) {
             return interior_colour1;
 
         #elif INTERIOR_COLOURING == 1
-            return mix(interior_colour1, interior_colour2, mag_sum / sqrt(float(iterations)));
+            return mix(interior_colour1, interior_colour2, mag_sum * inversesqrt(float(iterations)));
 
         #elif INTERIOR_COLOURING == 2
             return mix(interior_colour2, interior_colour1, min_dist_sq);
@@ -662,12 +710,15 @@ vec3 getColour(float real, float imag) {
 
         #if EXTERIOR_COLOURING_STYLE == 0
 
-            #if MONOTONIC_FUNCTION == 0 || MONOTONIC_FUNCTION == 1
+            #if MONOTONIC_FUNCTION == 0 || MONOTONIC_FUNCTION == 1 || MONOTONIC_FUNCTION == 5
             
                 float f_iterations = float(iterations);
 
                 #if MONOTONIC_FUNCTION == 1
-                    f_iterations += getSmoothIter(mag_sq, z);
+                    f_iterations += getSmoothIter(mag_sq);
+                    
+                #elif MONOTONIC_FUNCTION == 5
+                    f_iterations += getSmoothDerIter(der);
                 #endif
 
                 colour_val = f_iterations / float(max_iterations);
@@ -677,13 +728,12 @@ vec3 getColour(float real, float imag) {
                 z = normalize(div(z, der));
 
                 colour_val = max(0.0, 
-                    exterior_colouring_param1 * z.real +
-                    exterior_colouring_param2 * z.imag +
+                    dot(z, Complex(exterior_colouring_param1, exterior_colouring_param2)) +
                     sqrt(1.0 - exterior_colouring_param1 * exterior_colouring_param1 - exterior_colouring_param2 * exterior_colouring_param2)
                 );
 
             #elif MONOTONIC_FUNCTION == 3
-                float interp = getSmoothIter(mag_sq, z);
+                float interp = getSmoothIter(mag_sq);
                 colour_val = mix(exterior_stripe_total_prev, exterior_stripe_total, interp) / (float(iterations) + interp);
                 colour_val = max(colour_val, 0.0);
 
@@ -739,7 +789,7 @@ vec3 getColour(float real, float imag) {
             float val;
 
             #if CYCLE_FUNCTION == 0
-                val = float(iterations) + getSmoothIter(mag_sq, z);
+                val = float(iterations) + getSmoothIter(mag_sq);
 
             #elif CYCLE_FUNCTION == 1
                 val = log(exponential);
