@@ -65,6 +65,7 @@ uniform vec3 interior_colour1;
 uniform vec3 interior_colour2;
 
 uniform float interior_colouring_param1;
+uniform float interior_colouring_param2;
 
 const int TRUE_ITER_CAP = 10000;
 
@@ -224,6 +225,15 @@ vec3 getColour(float real, float imag) {
 		
 	#elif INTERIOR_COLOURING == 4
         float interior_stripe_total = 0.0;
+
+    #elif INTERIOR_COLOURING == 6
+
+        Complex period_check = Complex(99999.9, 999999.9);
+
+        int max_period_length = int(interior_colouring_param1);
+        int period_count = max_period_length - 1;
+        int known_period = 0;
+
     #endif
 
     for (int iteration = 0; iteration < TRUE_ITER_CAP; iteration++) {
@@ -662,6 +672,23 @@ vec3 getColour(float real, float imag) {
 		
         #elif INTERIOR_COLOURING == 4
             interior_stripe_total += 0.5 + 0.5 * sin(interior_colouring_param1 * argument(z));
+        
+        #elif INTERIOR_COLOURING == 6
+
+            Complex offset = z - period_check;
+
+            period_count++;
+
+            if (dot(offset, offset) < interior_colouring_param2 && (known_period == 0 || period_count < known_period)) {
+                known_period = period_count;
+                iterations = TRUE_ITER_CAP;
+            }
+
+            if (period_count == max_period_length) {
+                period_count = 0;
+                period_check = z;
+            }
+
         #endif
         
         #if ESCAPE_ALGORITHM == 0
@@ -701,6 +728,16 @@ vec3 getColour(float real, float imag) {
             #else
                 return interior_colour1;
             #endif
+
+        #elif INTERIOR_COLOURING == 6
+
+            if (known_period == 0) {
+                return vec3(0.0, 0.0, 0.0);
+            }
+            else {
+            return hsv2rgb(vec3(sin(float(known_period)) * 0.5 + 0.5, 1.0, 1.0));
+            }
+
         #endif
 
     }

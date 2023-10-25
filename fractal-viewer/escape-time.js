@@ -88,6 +88,7 @@ class EscapeTime extends Program {
 
     interior_colouring = 0;
     interior_colouring_param1 = new Param(0.0);
+    interior_colouring_param2 = new Param(0.0);
 
     interior_colour1 = new Param([0.0, 0.0, 0.0]);
     interior_colour2 = new Param([0.0, 0.0, 0.0]);
@@ -319,6 +320,9 @@ class EscapeTime extends Program {
 		
         document.getElementById("interior_stripe_density").onchange = paramSet(this.interior_colouring_param1);
 
+        document.getElementById("interior_period_length").onchange = paramSet(this.interior_colouring_param1);
+        document.getElementById("interior_period_threshold").onchange = paramSet(this.interior_colouring_param2);
+
         document.getElementById("interior_solid_colour").onchange = paramSetColour(this.interior_colour1);
         document.getElementById("interior_close_colour").onchange = paramSetColour(this.interior_colour1);
         document.getElementById("interior_far_colour").onchange = paramSetColour(this.interior_colour2);
@@ -348,6 +352,7 @@ class EscapeTime extends Program {
         this.exterior_colour2.getAttr("exterior_colour2");
 		
         this.interior_colouring_param1.getAttr("interior_colouring_param1");
+        this.interior_colouring_param2.getAttr("interior_colouring_param2");
         
         this.interior_colour1.getAttr("interior_colour1");
         this.interior_colour2.getAttr("interior_colour2");
@@ -374,6 +379,7 @@ class EscapeTime extends Program {
         this.exterior_colour2.loadFloat3();
 
         this.interior_colouring_param1.loadFloat();
+        this.interior_colouring_param2.loadFloat();
 
         this.interior_colour1.loadFloat3();
         this.interior_colour2.loadFloat3();
@@ -713,12 +719,16 @@ class EscapeTime extends Program {
         var solid_style = document.getElementById("interior_solid_div").style;
         var dist_style = document.getElementById("interior_dist_div").style;
         var stripe_style = document.getElementById("interior_stripe_div").style;
+        var period_style = document.getElementById("interior_period_div").style;
 
         solid_style.display = "none";
         dist_style.display = "none";
         stripe_style.display = "none";
+        period_style.display = "none";
 
-        if (ESCAPE_TIME.interior_colouring == 0) {
+        if (ESCAPE_TIME.interior_colouring == 6) {
+        }
+        else if (ESCAPE_TIME.interior_colouring == 0) {
             solid_style.display = "block";
             ESCAPE_TIME.interior_colour1.value = hexToRGB(document.getElementById("interior_solid_colour").value);
         
@@ -732,6 +742,11 @@ class EscapeTime extends Program {
         if (ESCAPE_TIME.interior_colouring == 4) {
             ESCAPE_TIME.interior_colouring_param1.value = document.getElementById("interior_stripe_density").value;
             stripe_style.display = "block";
+        }
+        else if (ESCAPE_TIME.interior_colouring == 6) {
+            ESCAPE_TIME.interior_colouring_param1.value = document.getElementById("interior_period_length").value;
+            ESCAPE_TIME.interior_colouring_param2.value = document.getElementById("interior_period_threshold").value;
+            period_style.display = "block";
         }
 
         setupShader();
