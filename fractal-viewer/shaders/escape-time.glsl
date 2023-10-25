@@ -160,7 +160,7 @@ vec3 getColour(float real, float imag) {
         }
     #endif
 
-    Complex z_prev;
+    Complex z_prev = ZERO;
     float z_real_sq = z.real * z.real;
     float z_imag_sq = z.imag * z.imag;
     float mag_sq = z_real_sq + z_imag_sq;
@@ -234,6 +234,9 @@ vec3 getColour(float real, float imag) {
         int period_count = max_period_length - 1;
         int known_period = 0;
 
+    #elif INTERIOR_COLOURING == 7
+        Complex z_prev_prev;
+        vec3 sum = vec3(0.0, 0.0, 0.0);
     #endif
 
     for (int iteration = 0; iteration < TRUE_ITER_CAP; iteration++) {
@@ -242,6 +245,10 @@ vec3 getColour(float real, float imag) {
             iterations = TRUE_ITER_CAP;
             break;
         }
+        
+        #if INTERIOR_COLOURING == 7
+            z_prev_prev = z_prev;
+        #endif
         
         z_prev = z;
 
@@ -688,6 +695,16 @@ vec3 getColour(float real, float imag) {
                 period_count = 0;
                 period_check = z;
             }
+        
+        #elif INTERIOR_COLOURING == 7
+        
+            Complex dz = z - z_prev;
+            Complex dzz = z_prev - z_prev_prev;
+            Complex ddz = z - z_prev_prev;
+            
+            sum.x += dot(dz, ddz);
+            sum.y += dot(dz, dz);
+            sum.z += dot(ddz, ddz);
 
         #endif
         
@@ -735,9 +752,11 @@ vec3 getColour(float real, float imag) {
                 return vec3(0.0, 0.0, 0.0);
             }
             else {
-            return hsv2rgb(vec3(sin(float(known_period)) * 0.5 + 0.5, 1.0, 1.0));
+                return hsv2rgb(vec3(sin(float(known_period)) * 0.5 + 0.5, 1.0, 1.0));
             }
 
+        #elif INTERIOR_COLOURING == 7
+            return sin(abs(sum) / float(max_iterations) * 5.0) * 0.45 + 0.5;
         #endif
 
     }
