@@ -726,7 +726,7 @@ class EscapeTime extends Program {
         stripe_style.display = "none";
         period_style.display = "none";
 
-        if (ESCAPE_TIME.interior_colouring == 6) {
+        if (ESCAPE_TIME.interior_colouring == 6 || ESCAPE_TIME.interior_colouring == 7) {
         }
         else if (ESCAPE_TIME.interior_colouring == 0) {
             solid_style.display = "block";
