@@ -111,14 +111,9 @@ class EscapeTime extends Program {
 
             for (var i = 1; i < 6; i++) {
 
-                def += "\n#define G_" + i;
-
                 if (document.getElementById("gangopadhyay" + i).checked) {
-                    def += " 1";
-                    total++;
-                }
-                else {
-                    def += " 0";
+                    def += "\n#define G_" + i;
+                    total += 1;
                 }
             }
 
@@ -283,6 +278,8 @@ class EscapeTime extends Program {
     
         this.sauron_a_handler = new ComplexPickerHandler("sauron_a_selector", this.fractal_param1, this.fractal_param2, 2, 0, 0, "sauron_a_text", "a = $");
     
+        this.foam_q_handler = new ComplexPickerHandler("foam_q_selector", this.fractal_param1, this.fractal_param2, 2, 0, 0, "sauron_a_text", "q = $");
+    
         document.getElementById("is_julia").onchange = this.updateIsJulia;
         this.julia_c_handler = new ComplexPickerHandler("julia_selector", this.julia_c_real, this.julia_c_imag, 2.5, 0, 0, "esc_julia_text", "c = $");
 
@@ -402,6 +399,7 @@ class EscapeTime extends Program {
         var hyperbolic_sine_style = document.getElementById("hyperbolic_sine_div").style;
         var zubieta_style = document.getElementById("zubieta_div").style;
         var sauron_style = document.getElementById("sauron_div").style;
+        var foam_style = document.getElementById("foam_div").style;
         var function_text = document.getElementById("esc_function_text");
     
         julia_style.display = "block";
@@ -416,6 +414,7 @@ class EscapeTime extends Program {
         hyperbolic_sine_style.display = "none";
         zubieta_style.display = "none";
         sauron_style.display = "none";
+        foam_style.display = "none";
 
         function_text.innerHTML = ESCAPE_TIME_FUNCTIONS[ESCAPE_TIME.fractal];
 
@@ -467,6 +466,10 @@ class EscapeTime extends Program {
         else if (ESCAPE_TIME.fractal == 38) {
             sauron_style.display = "block";
             ESCAPE_TIME.sauron_a_handler.loadValues();
+        }
+        else if (ESCAPE_TIME.fractal == 41) {
+            foam_style.display = "block";
+            ESCAPE_TIME.foam_q_handler.loadValues();
         }
         
         setupShader();

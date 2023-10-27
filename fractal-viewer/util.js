@@ -68,6 +68,8 @@ class Program {
     getShader = function() {
         return this.baseShader;
     }
+    
+    drawPath = function() {}
 }
 
 class ComplexPickerHandler {

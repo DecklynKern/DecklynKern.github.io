@@ -4,13 +4,6 @@ precision highp float;
 #define Complex vec2
 #define real x
 #define imag y
-#define add(a, b) ((a) + (b))
-#define add3(a, b, c) ((a) + (b) + (c))
-#define sub(a, b) ((a) - (b))
-#define div(a, b) prod(a, reciprocal(b))
-#define scale(a, b) ((a) * (b))
-#define neg(a) (-(a))
-#define magnitude_sq(a) dot(a, a)
 
 //%
 
@@ -40,7 +33,7 @@ const Complex ZERO = Complex(0.0, 0.0);
 
 Complex reciprocal(Complex z) {
     float denom = 1.0 / dot(z, z);
-    return Complex(z.real * denom, -z.imag * denom);
+    return Complex(z.real, -z.imag) * denom;
 }
 
 Complex square(Complex z) {
@@ -54,6 +47,10 @@ Complex prod(Complex x, Complex y) {
     );
 }
 
+Complex div(Complex x, Complex y) {
+    return prod(x, reciprocal(y));
+}
+
 Complex conj(Complex z) {
     return Complex(
         z.real,
@@ -65,11 +62,20 @@ float argument(Complex z) {
     return atan(z.imag, z.real);
 }
 
+Complex square_root(Complex z) {
+    
+    float l = length(z);
+    Complex zr = Complex(z.real + l, z.imag);
+    
+    return zr * sqrt(l) * inversesqrt(dot(zr, zr));
+    
+}
+
 Complex exponent(Complex z) {
     float mag = exp(z.real);
-    return Complex(
-        mag * cos(z.imag),
-        mag * sin(z.imag)
+    return mag * Complex(
+        cos(z.imag),
+        sin(z.imag)
     );
 }
 
@@ -78,9 +84,9 @@ Complex exponent(Complex z, float d) {
     float r = pow(z.real * z.real + z.imag * z.imag, 0.5 * d);
     float theta = atan(z.imag, z.real) * d;
 
-    return Complex(
-        r * cos(theta),
-        r * sin(theta)
+    return r * Complex(
+        cos(theta),
+        sin(theta)
     );
 }
 Complex exponent(Complex z, Complex d) {
@@ -90,15 +96,10 @@ Complex exponent(Complex z, Complex d) {
     float r = pow(z_norm_sq, 0.5 * d.real) * exp(-d.imag * arg);
     float angle = d.real * arg + 0.5 * d.imag * log(z_norm_sq);
 
-    return Complex(
-        r * cos(angle),
-        r * sin(angle)
+    return r * Complex(
+        cos(angle),
+        sin(angle)
     );
-}
-
-float root_dist_sq(Complex z, Complex root) {
-    Complex diff = sub(z, root);
-    return diff.real * diff.real + diff.imag * diff.imag;
 }
 
 vec3 getColour(float x, float y);
@@ -192,23 +193,16 @@ void main() {
             
         #elif TRANSFORMATION == 2
             pos = div(
-                add(
-                    prod(
-                        pos,
-                        vec2(transform_param1, transform_param2)),
-                    vec2(transform_param3, transform_param4)),
-                add(
-                    prod(
-                        pos,
-                        vec2(transform_param5, transform_param6)),
-                    vec2(transform_param7, transform_param8)));
+                prod(pos, vec2(transform_param1, transform_param2))
+                + vec2(transform_param3, transform_param4),
+                prod(pos, vec2(transform_param5, transform_param6))
+                + vec2(transform_param7, transform_param8));
                     
         #elif TRANSFORMATION == 3
-            pos = add(
-                prod(
-                    exponent(pos),
-                    vec2(transform_param1, transform_param2)),
-                vec2(transform_param3, transform_param4));
+            pos = prod(
+                exponent(pos),
+                vec2(transform_param1, transform_param2)
+                + vec2(transform_param3, transform_param4));
         #endif
 
         vec3 pixel_sample = getColour(pos.real, pos.imag);

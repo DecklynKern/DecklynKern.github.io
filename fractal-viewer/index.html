@@ -12,12 +12,12 @@
         <script src="root-finding.js"></script>
         <script src="pendulum.js"></script>
         <script src="recursive.js"></script>
-        <script src="webgl.js"></script>
+        <script src="main.js"></script>
     </head>
     <body onload="main()">
         <div class="main">
             <canvas id="fractal_canvas" width=1000px height=1000px style="max-height: 1000px"></canvas>
-            <canvas id="magnet_canvas" width=1000px height=1000px></canvas>
+            <canvas id="path_canvas" width=1000px height=1000px></canvas>
             <div class="sidebar">
                 <details open=true>
                     <summary>
@@ -54,6 +54,7 @@
                                 <option value=32>Zubieta</option>
                                 <option value=33>Cubic</option>
                                 <option value=36>Twin Mandelbrot</option>
+                                <option value=41>Mandelbrot Foam</option>
                             </optgroup>
                             <optgroup label="Other Fractals">
                                 <option value=3>Heart</option>
@@ -157,6 +158,12 @@
                                 a = 0 + 0i
                             </div>
                             <canvas id="sauron_a_selector" class="selector" width=200px height=200px></canvas>
+                        </div>
+                        <div id="foam_div" style="display: none">
+                            <div id="foam_q_text" class="complex-text">
+                                q = 0 + 0i
+                            </div>
+                            <canvas id="foam_q_selector" class="selector" width=200px height=200px></canvas>
                         </div>
                     </details>
                     <details id="julia_div" open=true>
@@ -593,29 +600,32 @@
                             Iteration parameters
                         </summary>
                         Iterations:
-                        <input id="pend_iterations" type=number value=250 min=0 step=10>
+                        <input id="pend_iterations" type=number value=400 min=0 step=10>
                         <br>
                         Friction:
-                        <input id="pend_friction" type=number value=0.01 min=0 step=0.01>
+                        <input id="pend_friction" type=number value=0.01 min=0 step=0.001>
                         <br>
                         Tension:
-                        <input id="pend_tension" type=number value=0.72 min=0 step=0.01>
+                        <input id="pend_tension" type=number value=0.75 min=0 step=0.01>
+                        <br>
+                        Pendulum Mass:
+                        <input id="pend_mass" type=number value=1.0 min=0 step=0.01>
                         <br>
                         dt:
-                        <input id="pend_dt" type=number value=0.02 min=0 max=4 step=0.01>
+                        <input id="pend_dt" type=number value=0.02 min=0 step=0.001>
                     </details>
                     <details open=true>
                         <summary>
                             Magnet stength
                         </summary>
                         Magnet 1 Strength:
-                        <input id="magnet1_strength" type=number value=9 min=0 step=0.1>
+                        <input id="magnet1_strength" type=number value=9.0 min=0 step=0.1>
                         <br>
                         Magnet 2 Strength:
-                        <input id="magnet2_strength" type=number value=9 min=0 step=0.1>
+                        <input id="magnet2_strength" type=number value=9.0 min=0 step=0.1>
                         <br>
                         Magnet 3 Strength:
-                        <input id="magnet3_strength" type=number value=9 min=0 step=0.1>
+                        <input id="magnet3_strength" type=number value=9.0 min=0 step=0.1>
                     </details>
                     <details style="display: grid" open=true>
                         <summary>

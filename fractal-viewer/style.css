@@ -56,7 +56,7 @@ summary {
     border-bottom: 1px black solid;
 }
 
-#magnet_canvas {
+#path_canvas {
     position: absolute;
     left: 0;
     top: 0;
