@@ -17,6 +17,7 @@
     <body onload="main()">
         <div class="main">
             <canvas id="fractal_canvas" width=1000px height=1000px style="max-height: 1000px"></canvas>
+            <canvas id="magnet_canvas" width=1000px height=1000px></canvas>
             <div class="sidebar">
                 <details open=true>
                     <summary>
@@ -27,7 +28,7 @@
                         <option value="lyapunov">Lyapunov</option>
                         <option value="root-finding">Root Finding</option>
                         <option value="recursive">Recursive</option>
-                        <!-- <option value=9><option value=pendulum">Pendulum</option></option> -->
+                        <option value="pendulum">Pendulum</option>
                     </select>
                 </details>
                 <div id="escape_time_options">
@@ -592,29 +593,29 @@
                             Iteration parameters
                         </summary>
                         Iterations:
-                        <input id="pend_iterations" type=number value=40 min=0>
+                        <input id="pend_iterations" type=number value=250 min=0 step=10>
                         <br>
                         Friction:
-                        <input id="pend_friction" type=number value=1.0 min=0 step=0.01>
+                        <input id="pend_friction" type=number value=0.01 min=0 step=0.01>
                         <br>
                         Tension:
-                        <input id="pend_tension" type=number value=1.0 min=0 step=0.01>
+                        <input id="pend_tension" type=number value=0.72 min=0 step=0.01>
                         <br>
                         dt:
-                        <input id="pend_dt" type=number value=0.25 min=0 max=4 step=0.01>
+                        <input id="pend_dt" type=number value=0.02 min=0 max=4 step=0.01>
                     </details>
                     <details open=true>
                         <summary>
                             Magnet stength
                         </summary>
                         Magnet 1 Strength:
-                        <input id="magnet1_strength" type=number value=1.0 min=0 step=0.01>
+                        <input id="magnet1_strength" type=number value=9 min=0 step=0.1>
                         <br>
                         Magnet 2 Strength:
-                        <input id="magnet2_strength" type=number value=1.0 min=0 step=0.01>
+                        <input id="magnet2_strength" type=number value=9 min=0 step=0.1>
                         <br>
                         Magnet 3 Strength:
-                        <input id="magnet3_strength" type=number value=1.0 min=0 step=0.01>
+                        <input id="magnet3_strength" type=number value=9 min=0 step=0.1>
                     </details>
                     <details style="display: grid" open=true>
                         <summary>

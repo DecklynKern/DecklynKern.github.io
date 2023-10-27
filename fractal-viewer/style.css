@@ -55,3 +55,10 @@ summary {
     user-select: none;
     border-bottom: 1px black solid;
 }
+
+#magnet_canvas {
+    position: absolute;
+    left: 0;
+    top: 0;
+    z-index: 10;
+}

@@ -22,7 +22,6 @@ uniform vec3 root3_colour;
 uniform vec3 base_colour;
 
 const int TRUE_ITER_CAP = 10000;
-const float MAX = 9999999999999.9;
 
 vec3 getColour(float real, float imag) {
 

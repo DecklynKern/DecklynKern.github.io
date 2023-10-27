@@ -34,6 +34,8 @@ const float E = 2.7182818285;
 const float PI = 3.1415926535;
 const float TAU = 2.0 * PI;
 
+const float MAX = 9999999999999.9;
+
 const Complex ZERO = Complex(0.0, 0.0);
 
 Complex reciprocal(Complex z) {

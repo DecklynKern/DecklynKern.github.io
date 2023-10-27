@@ -3,36 +3,106 @@ class Pendulum extends Program {
     shader = "shaders/pendulum.glsl";
     options_panel = "pendulum_options";
 
-    iterations = new Param(40);
+    iterations = new Param(250);
 
-    friction = new Param(1.0);
-    tension = new Param(1.0);
-    dt = new Param(0.25);
+    friction = new Param(0.01);
+    tension = new Param(0.75);
+    dt = new Param(0.02);
 
-    magnet1_strength = new Param(1.0);
-    magnet2_strength = new Param(1.0);
-    magnet3_strength = new Param(1.0);
+    magnet1_strength = new Param(9.0);
+    magnet2_strength = new Param(9.0);
+    magnet3_strength = new Param(9.0);
 
     magnet1_colour = new Param([1.0, 0.0, 0.0]);
     magnet2_colour = new Param([0.0, 1.0, 0.0]);
     magnet3_colour = new Param([0.0, 0.0, 1.0]);
 
+    
     setupGUI = function() {
-
+        
         document.getElementById("pend_iterations").onchange = paramSet(this.iterations);
         
         document.getElementById("pend_friction").onchange = paramSet(this.friction);
         document.getElementById("pend_tension").onchange = paramSet(this.tension);
         document.getElementById("pend_dt").onchange = paramSet(this.dt);
-
+        
         document.getElementById("magnet1_strength").onchange = paramSet(this.magnet1_strength);
         document.getElementById("magnet2_strength").onchange = paramSet(this.magnet2_strength);
         document.getElementById("magnet3_strength").onchange = paramSet(this.magnet3_strength);
-
+        
         document.getElementById("magnet1_colour").onchange = paramSetColour(this.magnet1_colour);
         document.getElementById("magnet2_colour").onchange = paramSetColour(this.magnet2_colour);
         document.getElementById("magnet3_colour").onchange = paramSetColour(this.magnet3_colour);
+        
+        this.canvas_context = document.getElementById("magnet_canvas").getContext("2d");
+        document.getElementById("magnet_canvas").onmouseleave = this.clearPath;
+        document.getElementById("magnet_canvas").onmousemove = this.drawPath;
 
+    }
+
+    clearPath = function() {
+        PENDULUM.canvas_context.clearRect(0, 0, 1000, 1000);
+    }
+
+    drawPath = function(event) {
+
+        PENDULUM.canvas_context.clearRect(0, 0, 1000, 1000);
+
+        if (program != PENDULUM) {
+            return;
+        }
+        
+        var pos = [(event.layerX - 500) / 250, (event.layerY - 500) / 250];
+
+        const magnet1_pos = [0.5, 0];
+        const magnet2_pos = [-0.5, -0.5];
+        const magnet3_pos = [-0.5, 0.5];
+
+        var velocity = [0, 0];
+        var accel_prev = [0, 0];
+
+        PENDULUM.canvas_context.beginPath();
+        PENDULUM.canvas_context.moveTo(pos[0] * 250 + 500, pos[1] * 250 + 500);
+
+        for (var iteration = 0; iteration < PENDULUM.iterations.value; iteration++) {
+
+            const magnet1_offset = [magnet1_pos[0] - pos[0], magnet1_pos[1] - pos[1]];
+            const magnet1_dist_sq = magnet1_offset[0] * magnet1_offset[0] + magnet1_offset[1] * magnet1_offset[1] + 0.1;
+
+            const magnet2_offset = [magnet2_pos[0] - pos[0], magnet2_pos[1] - pos[1]];
+            const magnet2_dist_sq = magnet2_offset[0] * magnet2_offset[0] + magnet2_offset[1] * magnet2_offset[1] + 0.1;
+
+            const magnet3_offset = [magnet3_pos[0] - pos[0], magnet3_pos[1] - pos[1]];
+            const magnet3_dist_sq = magnet3_offset[0] * magnet3_offset[0] + magnet3_offset[1] * magnet3_offset[1] + 0.1;
+
+            const magnet1_str = PENDULUM.magnet1_strength.value * Math.pow(magnet1_dist_sq, -1.5);
+            const magnet2_str = PENDULUM.magnet2_strength.value * Math.pow(magnet2_dist_sq, -1.5);
+            const magnet3_str = PENDULUM.magnet3_strength.value * Math.pow(magnet3_dist_sq, -1.5);
+
+            var accel = [
+                magnet1_str * magnet1_offset[0] + magnet2_str * magnet2_offset[0] + magnet3_str * magnet3_offset[0],
+                magnet1_str * magnet1_offset[1] + magnet2_str * magnet2_offset[1] + magnet3_str * magnet3_offset[1]
+            ];
+
+            accel[0] -= PENDULUM.tension.value * pos[0];
+            accel[1] -= PENDULUM.tension.value * pos[1];
+            
+            accel[0] -= PENDULUM.friction.value * velocity[0];
+            accel[1] -= PENDULUM.friction.value * velocity[1];
+
+            velocity[0] += accel[0] * PENDULUM.dt.value;
+            velocity[1] += accel[1] * PENDULUM.dt.value;
+
+            pos[0] += velocity[0] * PENDULUM.dt.value + (4 * accel[0] - accel_prev[0]) / 6 * PENDULUM.dt.value * PENDULUM.dt.value;
+            pos[1] += velocity[1] * PENDULUM.dt.value + (4 * accel[1] - accel_prev[1]) / 6 * PENDULUM.dt.value * PENDULUM.dt.value;
+
+            accel_prev = accel;
+
+            PENDULUM.canvas_context.lineTo(pos[0] * 250 + 500, pos[1] * 250 + 500);
+
+        }
+
+        PENDULUM.canvas_context.stroke();
 
     }
 
