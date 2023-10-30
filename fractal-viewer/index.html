@@ -636,6 +636,25 @@
             <summary>
               Magnets
             </summary>
+            <canvas id="magnet_selector" class=selector width=200px height=200px></canvas>
+            <button onclick="PENDULUM.addMagnet(true)">
+              Add
+            </button>
+            <button onclick="PENDULUM.deleteMagnet()">
+              Delete
+            </button>
+          </details>
+          <details open=true>
+            <summary>
+              Colouring Options
+            </summary>
+            Colouring Style:
+            <select id="pend_colouring_style">
+              <option value=0>Closest Magnet</option>
+              <option value=1>Shaded Closest</option>
+            </select>
+            Base Colour:
+            <input id="pend_base_colour" type=color value=#000000>
           </details>
         </div>
         <div id="recursive_options" style="display: none">

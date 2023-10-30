@@ -18,10 +18,10 @@ bool rectBound(vec2 pos, float min_x, float max_x, float min_y, float max_y) {
 mat2 rotMat(float angle) {
 
     float sin_a = sin(angle);
-    float cos_a = cos(angle)
+    float cos_a = cos(angle);
 
     return mat2(
-        cos_a, sin_a,
+         cos_a, sin_a,
         -sin_a, cos_a
     );
 }

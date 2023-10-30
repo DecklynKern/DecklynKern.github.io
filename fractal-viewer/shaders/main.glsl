@@ -209,11 +209,11 @@ void main() {
     vec3 colour_sum;
 
     for (int s = 0; s < SAMPLES; s++) {
-
-        float x_offset = fract(0.1234 * float(s));
-        float y_offset = fract(0.7654 * float(s));
+    
+        float fs = float(s);
+        vec2 offset = vec2(sin(fs), cos(fs)) * 0.5 + 0.5;
         
-        vec2 pos = vec2(x + x_offset * pixel_size, y + y_offset * pixel_size);
+        vec2 pos = vec2(x, y) + offset * pixel_size;
         
         #if TRANSFORMATION == 1
             pos = reciprocal(pos) - vec2(transform_param1, transform_param2);

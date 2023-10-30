@@ -7,6 +7,8 @@ uniform float magnet_strengths[MAGNET_COUNT];
 uniform vec2 magnet_positions[MAGNET_COUNT];
 uniform vec3 magnet_colours[MAGNET_COUNT];
 
+uniform vec3 base_colour;
+
 vec3 getColour(float x, float y) {
 
     vec2 pos = vec2(x, y);
@@ -41,10 +43,14 @@ vec3 getColour(float x, float y) {
         
         vec2 diff = pos - pos_prev;
 
-        if (dot(diff, diff) < 0.0000001) {
-            iters_taken = iteration;
-            break;
-        }
+        #if COLOURING_STYLE == 1
+        
+            if (dot(diff, diff) < 0.0000001) {
+                iters_taken = iteration;
+                break;
+            }
+            
+        #endif
 
         accel_prev = accel;
         pos_prev = pos;
@@ -64,13 +70,18 @@ vec3 getColour(float x, float y) {
             closest_idx = i;
         }
     }
-        
-    for (int i = 0; i < MAGNET_COUNT; i++) {
-        if (i == closest_idx) {
-            return magnet_colours[i] * (1.0 - float(iters_taken) / float(ITERATIONS));
+    
+    #if COLOURING_STYLE == 0
+    
+        if (closest_dist < 0.1) {
+            return magnet_colours[closest_idx];
         }
-    }
-
-    return vec3(0.0, 0.0, 0.0);
+        else {
+            return base_colour;
+        }
+    
+    #elif COLOURING_STYLE == 1
+        return mix(magnet_colours[closest_idx], base_colour, float(iters_taken) / float(ITERATIONS));
+    #endif
     
 }

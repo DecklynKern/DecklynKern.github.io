@@ -2,9 +2,9 @@ const BASIC_COLOURS = [
     "#FF0000",
     "#00FF00",
     "#0000FF",
-    "#FFFF00",
     "#FF00FF",
-    "#00FFFF"
+    "#00FFFF",
+    "#FFFF00"
 ];
 
 function hexToRGB(hex) {
@@ -13,6 +13,26 @@ function hexToRGB(hex) {
         parseInt(hex.slice(3, 5), 16) / 256,
         parseInt(hex.slice(5, 7), 16) / 256
     ];
+}
+
+function rgbToHex(r, g, b) {
+    
+    var r_str = r.toString(16);
+    if (r_str.length == 1) {
+        r_str = "0" + r_str;
+    }
+    
+    var g_str = g.toString(16);
+    if (g_str.length == 1) {
+        g_str = "0" + g_str;
+    }
+    
+    var b_str = b.toString(16);
+    if (b_str.length == 1) {
+        b_str = "0" + b_str;
+    }
+    
+    return "#" + r_str + g_str + b_str;
 }
 
 function formatComplex(real, imag) {

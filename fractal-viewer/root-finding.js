@@ -205,7 +205,6 @@ class RootFinding extends Program {
             this.root_canvas_context.arc(100 + 50 * ROOT_FINDING.root3.real, 100 + 50 * ROOT_FINDING.root3.imag, 4, 0, 2 * Math.PI);
             this.root_canvas_context.stroke();
         }
-
     }
 
     clickRoot(event) {
