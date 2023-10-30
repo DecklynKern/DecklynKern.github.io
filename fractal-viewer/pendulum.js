@@ -3,79 +3,119 @@ class Pendulum extends Program {
     shader = "shaders/pendulum.glsl";
     options_panel = "pendulum_options";
 
-    iterations = new Param(400);
+    iterations = 400;
 
-    friction = new Param(0.01);
-    tension = new Param(0.75);
-    mass = new Param(1.0);
-    dt = new Param(0.02);
+    friction = new ParamFloat(0.01, "friction");
+    tension = new ParamFloat(0.75, "tension");
+    mass = new ParamFloat(1.0, "mass");
+    dt = new ParamFloat(0.02, "dt");
 
-    magnet1_strength = new Param(9.0);
-    magnet2_strength = new Param(9.0);
-    magnet3_strength = new Param(9.0);
+    params = [
+        this.friction,
+        this.tension,
+        this.mass,
+        this.dt,
+    ];
 
-    magnet1_colour = new Param([1.0, 0.0, 0.0]);
-    magnet2_colour = new Param([0.0, 1.0, 0.0]);
-    magnet3_colour = new Param([0.0, 0.0, 1.0]);
+    magnet_strengths = [];
+    magnet_strengths_attr = null;
+    
+    magnet_positions = [];
+    magnet_positions_attr = null;
 
-    setupGUI = function() {
+    magnet_colours = [];
+    magnet_colours_attr = null;
 
-        document.getElementById("pend_iterations").onchange = paramSet(this.iterations);
+    getShader() {
+
+        var def = `//%
+        #define ITERATIONS ${this.iterations}
+        #define MAGNET_COUNT ${this.magnet_strengths.length}`;
+
+        return this.baseShader.replace("//%", def);
+
+    }
+
+    setupGUI() {
+
+        document.getElementById("pend_iterations").onchange = paramSetWithRecompile(this, "iterations");
         
         document.getElementById("pend_friction").onchange = paramSet(this.friction);
         document.getElementById("pend_tension").onchange = paramSet(this.tension);
         document.getElementById("pend_mass").onchange = paramSet(this.mass);
         document.getElementById("pend_dt").onchange = paramSet(this.dt);
 
-        document.getElementById("magnet1_strength").onchange = paramSet(this.magnet1_strength);
-        document.getElementById("magnet2_strength").onchange = paramSet(this.magnet2_strength);
-        document.getElementById("magnet3_strength").onchange = paramSet(this.magnet3_strength);
+        this.addMagnet();
+        this.addMagnet();
+        this.addMagnet();
 
-        document.getElementById("magnet1_colour").onchange = paramSetColour(this.magnet1_colour);
-        document.getElementById("magnet2_colour").onchange = paramSetColour(this.magnet2_colour);
-        document.getElementById("magnet3_colour").onchange = paramSetColour(this.magnet3_colour);
+        this.magnet_positions = [
+             1.0,  0,
+            -0.5, -0.866025404,
+            -0.5,  0.866025404
+        ];
+    }
+
+    setupAttrs() {
+
+        super.setupAttrs();
+
+        this.magnet_strengths_attr = gl.getUniformLocation(gl.program, "magnet_strengths");
+        this.magnet_positions_attr = gl.getUniformLocation(gl.program, "magnet_positions");
+        this.magnet_colours_attr = gl.getUniformLocation(gl.program, "magnet_colours");
 
     }
 
-    setupAttrs = function() {
+    loadAttrs() {
 
-        this.iterations.getAttr("iterations");
+        super.loadAttrs();
 
-        this.friction.getAttr("friction");
-        this.tension.getAttr("tension");
-        this.mass.getAttr("mass");
-        this.dt.getAttr("dt");
-
-        this.magnet1_strength.getAttr("magnet1_strength");
-        this.magnet2_strength.getAttr("magnet2_strength");
-        this.magnet3_strength.getAttr("magnet3_strength");
-
-        this.magnet1_colour.getAttr("magnet1_colour");
-        this.magnet2_colour.getAttr("magnet2_colour");
-        this.magnet3_colour.getAttr("magnet3_colour");
+        gl.uniform1fv(this.magnet_strengths_attr, this.magnet_strengths);
+        gl.uniform2fv(this.magnet_positions_attr, this.magnet_positions);
+        gl.uniform3fv(this.magnet_colours_attr, this.magnet_colours);
 
     }
 
-    loadAttrs = function() {
+    addMagnet() {
 
-        this.iterations.loadInt();
+        var magnetNum = PENDULUM.magnet_strengths.length;
+        var colour = BASIC_COLOURS[magnetNum % BASIC_COLOURS.length];
 
-        this.friction.loadFloat();
-        this.tension.loadFloat();
-        this.mass.loadFloat();
-        this.dt.loadFloat();
+        var new_magnet_div1 = document.createElement("div");
+        var new_magnet_div2 = document.createElement("div");
+        new_magnet_div1.className = new_magnet_div2.className = "grid-entry";
 
-        this.magnet1_strength.loadFloat();
-        this.magnet2_strength.loadFloat();
-        this.magnet3_strength.loadFloat();
+        if (magnetNum != 0) {
+            document.getElementById("magnets").appendChild(document.createElement("hr"));
+        }
 
-        this.magnet1_colour.loadFloat3();
-        this.magnet2_colour.loadFloat3();
-        this.magnet3_colour.loadFloat3();
+        new_magnet_div1.innerHTML = `Colour:
+        <input type=color value=${colour} onchange="PENDULUM.setMagnetColour(event, ${magnetNum})">`
+
+        new_magnet_div2.innerHTML = `Strength:
+        <input type=number value=9.0 min=0 step=0.1 onchange="PENDULUM.setMagnetStrength(event, ${magnetNum})">`;
+
+        document.getElementById("magnets").appendChild(new_magnet_div1);
+        document.getElementById("magnets").appendChild(new_magnet_div2);
+
+        PENDULUM.magnet_strengths.push(9);
+        PENDULUM.magnet_positions.push(Math.random() * 2 - 1, Math.random() * 2 - 1);
+        PENDULUM.magnet_colours.push(...hexToRGB(colour));
 
     }
 
-    drawPath = function(event) {
+    setMagnetColour(event, idx) {
+        [PENDULUM.magnet_colours[3 * idx], PENDULUM.magnet_colours[3 * idx + 1], PENDULUM.magnet_colours[3 * idx + 2]] = hexToRGB(event.target.value);
+        redraw();
+    }
+
+    setMagnetStrength(event, idx) {
+        PENDULUM.magnet_strengths[idx] = hexToRGB(event.target.value);
+        redraw();
+    }
+
+
+    drawPath(event) {
 
         if (program != PENDULUM) {
             return;
@@ -87,40 +127,31 @@ class Pendulum extends Program {
             (event.layerX / canvas_size.value * 2 - 1) * magnitude.value + centre_x.value,
             (event.layerY / canvas_size.value * 2 - 1) * magnitude.value + centre_y.value
         ];
-        
-        const magnet1_pos = [ 0.75,   0.0     ];
-        const magnet2_pos = [-0.375, -0.649519];
-        const magnet3_pos = [-0.375,  0.649519];
 
         var velocity = [0, 0];
         var accel_prev = [0, 0];
 
         path_context.beginPath();
 
-        for (var iteration = 0; iteration < PENDULUM.iterations.value; iteration++) {
+        for (var iteration = 0; iteration < PENDULUM.iterations; iteration++) {
         
             path_context.lineTo(
                 ((pos[0] - centre_x.value) / magnitude.value + 1) * canvas_size.value / 2,
                 ((pos[1] - centre_y.value) / magnitude.value + 1) * canvas_size.value / 2
             );
 
-            const magnet1_offset = [magnet1_pos[0] - pos[0], magnet1_pos[1] - pos[1]];
-            const magnet1_dist_sq = magnet1_offset[0] * magnet1_offset[0] + magnet1_offset[1] * magnet1_offset[1] + 0.1;
+            var accel = [0, 0];
 
-            const magnet2_offset = [magnet2_pos[0] - pos[0], magnet2_pos[1] - pos[1]];
-            const magnet2_dist_sq = magnet2_offset[0] * magnet2_offset[0] + magnet2_offset[1] * magnet2_offset[1] + 0.1;
+            for (var i = 0; i < PENDULUM.magnet_strengths.length; i++) {
 
-            const magnet3_offset = [magnet3_pos[0] - pos[0], magnet3_pos[1] - pos[1]];
-            const magnet3_dist_sq = magnet3_offset[0] * magnet3_offset[0] + magnet3_offset[1] * magnet3_offset[1] + 0.1;
+                const offset = [PENDULUM.magnet_positions[2 * i] - pos[0], PENDULUM.magnet_positions[2 * i + 1] - pos[1]];
+                const dist_sq = offset[0] * offset[0] + offset[1] * offset[1] + 0.1;
+                const str = PENDULUM.magnet_strengths[i] * Math.pow(dist_sq, -1.5);
 
-            const magnet1_str = PENDULUM.magnet1_strength.value * Math.pow(magnet1_dist_sq, -1.5);
-            const magnet2_str = PENDULUM.magnet2_strength.value * Math.pow(magnet2_dist_sq, -1.5);
-            const magnet3_str = PENDULUM.magnet3_strength.value * Math.pow(magnet3_dist_sq, -1.5);
+                accel[0] += str * offset[0];
+                accel[1] += str * offset[1];
 
-            var accel = [
-                magnet1_str * magnet1_offset[0] + magnet2_str * magnet2_offset[0] + magnet3_str * magnet3_offset[0],
-                magnet1_str * magnet1_offset[1] + magnet2_str * magnet2_offset[1] + magnet3_str * magnet3_offset[1]
-            ];
+            }
 
             accel[0] -= PENDULUM.tension.value * pos[0];
             accel[1] -= PENDULUM.tension.value * pos[1];

@@ -1,18 +1,11 @@
-uniform int max_iterations;
 uniform float threshold;
 
-uniform float root1_real;
-uniform float root1_imag;
-uniform float root2_real;
-uniform float root2_imag;
-uniform float root3_real;
-uniform float root3_imag;
+uniform Complex root1;
+uniform Complex root2;
+uniform Complex root3;
 
-uniform float a_real;
-uniform float a_imag;
-
-uniform float c_real;
-uniform float c_imag;
+uniform Complex a;
+uniform Complex c;
 
 uniform float colouring_param;
 
@@ -20,8 +13,6 @@ uniform vec3 root1_colour;
 uniform vec3 root2_colour;
 uniform vec3 root3_colour;
 uniform vec3 base_colour;
-
-const int TRUE_ITER_CAP = 10000;
 
 float root_dist_sq(Complex z, Complex root) {
     Complex diff = z - root;
@@ -35,15 +26,10 @@ vec3 getColour(float real, float imag) {
 
     #if FUNCTION == 0
 
-        Complex root1 = Complex(root1_real, root1_imag);
-        Complex root2 = Complex(root2_real, root2_imag);
-
         #if FRACTAL_TYPE == 3
-            Complex root3 = z;
+            root3 = z;
             z = (root1 + root2 + root3) * 0.33333333333;
-        
-        #else
-            Complex root3 = Complex(root3_real, root3_imag);
+
         #endif
 
         Complex r1r2 = prod(root1, root2);
@@ -54,7 +40,7 @@ vec3 getColour(float real, float imag) {
 
     #elif FUNCTION == 2
 
-        Complex p = Complex(root1_real, root1_imag);
+        Complex p = root1;
 
         #if ALGORITHM == 0 || ALGORITHM == 1 || ALGORITHM == 2 || ALGORITHM == 5
             Complex p2 = root1 - ONE;
@@ -71,7 +57,7 @@ vec3 getColour(float real, float imag) {
         #endif
     #endif
 
-    int iters = max_iterations;
+    int iters = MAX_ITERATIONS;
 
     #if FRACTAL_TYPE == 1
 
@@ -83,8 +69,6 @@ vec3 getColour(float real, float imag) {
 
     #elif FRACTAL_TYPE == 2
 
-        Complex c = Complex(c_real, c_imag);
-
         z_prev = Complex(MAX, 0.0);
         Complex dz;
 
@@ -92,8 +76,6 @@ vec3 getColour(float real, float imag) {
 
     Complex func;
     Complex diff;
-
-    Complex a = Complex(a_real, a_imag);
 
     #if ALGORITHM == 0
         Complex der = ZERO;
@@ -155,7 +137,7 @@ vec3 getColour(float real, float imag) {
         vec3 min_root_dists_sq = vec3(MAX, MAX, MAX);
     #endif
 
-    for (int iteration = 0; iteration < TRUE_ITER_CAP; iteration++) {
+    for (int iteration = 0; iteration < MAX_ITERATIONS; iteration++) {
 
         #if FUNCTION == 0
         
@@ -259,7 +241,7 @@ vec3 getColour(float real, float imag) {
 
         #if FRACTAL_TYPE == 0 || FRACTAL_TYPE == 3 // normal
         
-            if (dot(func, func) <= threshold || iteration == max_iterations) {
+            if (dot(func, func) <= threshold) {
                 iters = iteration;
                 break;
             }
@@ -268,7 +250,7 @@ vec3 getColour(float real, float imag) {
 
             dz = z - z_prev;
             
-            if (dot(dz, dz) <= threshold || iteration == max_iterations) {
+            if (dot(dz, dz) <= threshold) {
                 iters = iteration;
                 break;
             }
@@ -335,7 +317,7 @@ vec3 getColour(float real, float imag) {
     }
 
     #if COLOURING_TYPE == 2
-        return mix(root1_colour, base_colour, float(iters) / float(max_iterations));
+        return mix(root1_colour, base_colour, float(iters) / float(MAX_ITERATIONS));
 
     #elif COLOURING_TYPE == 4
         return
@@ -344,7 +326,7 @@ vec3 getColour(float real, float imag) {
 			
 	#elif COLOURING_TYPE == 5
 
-        if (iters == max_iterations) {
+        if (iters == MAX_ITERATIONS) {
             return base_colour;
         }
 	
@@ -364,13 +346,13 @@ vec3 getColour(float real, float imag) {
             amount = 0.0;
 
         #elif COLOURING_TYPE == 1
-            amount = float(iters) / float(max_iterations);
+            amount = float(iters) / float(MAX_ITERATIONS);
 
         #else
             amount = fract(max_norm_sq / colouring_param);
         #endif
 
-        if (iters == max_iterations) {
+        if (iters == MAX_ITERATIONS) {
             return base_colour;
         }
 

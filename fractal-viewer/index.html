@@ -572,7 +572,7 @@
             <select id="rtf_colouring_type">
               <option value=0 id="rtf_root_colouring">Root</option>
               <option value=1 id="rtf_shaded_root_colouring" >Shaded Root</option>
-							<option value=5 id="rtf_auto_root_colouring">Auto Root</option>
+              <option value=5 id="rtf_auto_root_colouring">Auto Root</option>
               <option value=2 id="rtf_convergence_colouring">Convergence</option>
               <option value=3 id="rtf_max_orbit_dist_colouring">Max Orbit Distance</option>
               <option value=4 id="rtf_closest_root_dist_colouring">Closest Root Distance</option>
@@ -632,35 +632,10 @@
             dt:
             <input id="pend_dt" type=number value=0.02 min=0 step=0.001>
           </details>
-          <details open=true>
+          <details id="magnets" style="display: grid" open=true>
             <summary>
-              Magnet stength
+              Magnets
             </summary>
-            Magnet 1 Strength:
-            <input id="magnet1_strength" type=number value=9.0 min=0 step=0.1>
-            <br>
-            Magnet 2 Strength:
-            <input id="magnet2_strength" type=number value=9.0 min=0 step=0.1>
-            <br>
-            Magnet 3 Strength:
-            <input id="magnet3_strength" type=number value=9.0 min=0 step=0.1>
-          </details>
-          <details style="display: grid" open=true>
-            <summary>
-              Colouring
-            </summary>
-            <div class="grid-entry">
-              Magnet 1 Colour:
-              <input id="magnet1_colour" type=color value=#FF0000>
-            </div>
-            <div class="grid-entry">
-              Magnet 2 Colour:
-              <input id="magnet2_colour" type=color value=#00FF00>
-            </div>
-            <div class="grid-entry">
-              Magnet 3 Colour:
-              <input id="magnet3_colour" type=color value=#0000FF>
-            </div>
           </details>
         </div>
         <div id="recursive_options" style="display: none">

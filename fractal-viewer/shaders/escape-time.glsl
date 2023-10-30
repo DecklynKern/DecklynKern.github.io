@@ -57,6 +57,19 @@
 #define FRAKTAL2                    56
 #define CACTUS                      57
 
+#if (EXTERIOR_COLOURING_STYLE == 0 && MONOTONIC_FUNCTION == 2) || ESCAPE_ALGORITHM == 1
+    #define MONITOR_DERIVATIVE
+#endif
+
+#if INTERIOR_COLOURING == 7
+    #define MONITOR_PREV
+    #define MONITOR_PREV_PREV
+#endif
+
+#if INTERIOR_COLOURING == 3 || (EXTERIOR_COLOURING_STYLE == 1 && CYCLE_FUNCTION == 1)
+    #define MONITOR_PREV
+#endif
+
 uniform float fractal_param1;
 uniform float fractal_param2;
 uniform float fractal_param3;
@@ -64,8 +77,7 @@ uniform float fractal_param3;
 uniform float escape_param;
 
 uniform float julification;
-uniform float julia_c_real;
-uniform float julia_c_imag;
+uniform Complex julia_c;
 
 uniform vec3 exterior_colour1;
 uniform vec3 exterior_colour2;
@@ -138,19 +150,19 @@ float crossOrbitDist(Complex z, float size) {
     return min(dists.real, dists.imag);
 }
 
-float gaussianIntegerOrbitDist(Complex z, float scale) {
-    Complex scaled = fract(z / scale);
+float gaussianIntegerOrbitDist(Complex z, float inv_scale) {
+    Complex scaled = fract(z * inv_scale);
     return length(min(scaled, 1.0 - scaled)) * 3.0;
 }
 
-float gaussianIntegerOrbitTaxicabDist(Complex z, float scale) {
-    Complex scaled = fract(z / scale);
+float gaussianIntegerOrbitTaxicabDist(Complex z, float inv_scale) {
+    Complex scaled = fract(z * inv_scale);
     Complex axis_dists = min(scaled, 1.0 - scaled);
-    return (axis_dists.real + axis_dists.imag * 3.0);
+    return (axis_dists.real + axis_dists.imag) * 3.0;
 }
 
 float lineOrbitDist(vec2 z, float angle) {
-    return abs(-cos(angle) * z.y - sin(angle) * z.x);
+    return abs(dot(z, Complex(sin(angle), cos(angle))));
 }
 
 vec3 getColour(float real, float imag) {
@@ -162,14 +174,14 @@ vec3 getColour(float real, float imag) {
         c = z;
         z = Complex(0.5, 0.0);
     #else
-        c = mix(z, Complex(julia_c_real, julia_c_imag), julification);
+        c = mix(z, julia_c, julification);
     #endif
 
     #if FRACTAL == EXPONENT2
         z = Complex(1.0, 0.0);
 
     #elif FRACTAL == MAREK_DRAGON
-        float r = PI * 2.0 * fractal_param1;
+        float r = TAU * fractal_param1;
         Complex zc = Complex(
             cos(r),
             sin(r)
@@ -185,17 +197,24 @@ vec3 getColour(float real, float imag) {
         Complex c2 = square(c);
         
     #elif FRACTAL == MANDELBROT_FOAM
-        z = square_root(-Complex(fractal_param1, fractal_param2) * 0.5);
+        // literally have no idea how i got this
+        z = square_root(-0.5 * Complex(fractal_param1, fractal_param2));
         Complex w = square_root(-square(z));
 
     #elif FRACTAL == COLLATZ2
         z = ONE;
     #endif
 
-    Complex z_prev = ZERO;
-    float z_real_sq = z.real * z.real;
-    float z_imag_sq = z.imag * z.imag;
-    float mag_sq = z_real_sq + z_imag_sq;
+    Complex z_comp_sq = z * z;
+    float mag_sq = z_comp_sq.real + z_comp_sq.imag;
+    
+    #ifdef MONITOR_PREV_PREV
+        Complex z_prev_prev;
+    #endif
+
+    #ifdef MONITOR_PREV
+        Complex z_prev = ZERO;
+    #endif
 
     int iterations = MAX_ITERATIONS;
 
@@ -203,8 +222,8 @@ vec3 getColour(float real, float imag) {
         float orbit_min_dist = monitorOrbitTraps(z, 99999999.9, mag_sq);
     #endif
 
-    #if (EXTERIOR_COLOURING_STYLE == 0 && MONOTONIC_FUNCTION == 2) || ESCAPE_ALGORITHM == 1
-        Complex der = Complex(1.0, 0.0);
+    #ifdef MONITOR_DERIVATIVE
+        Complex der = ONE;
     #endif
 
     #if EXTERIOR_COLOURING_STYLE == 1
@@ -250,87 +269,88 @@ vec3 getColour(float real, float imag) {
         int known_period = 0;
 
     #elif INTERIOR_COLOURING == 7
-        Complex z_prev_prev;
         vec3 sum = vec3(0.0, 0.0, 0.0);
     #endif
 
     for (int iteration = 0; iteration < MAX_ITERATIONS; iteration++) {
         
-        #if INTERIOR_COLOURING == 7
+        #ifdef MONITOR_PREV_PREV
             z_prev_prev = z_prev;
         #endif
-        
-        z_prev = z;
+
+        #ifdef MONITOR_PREV
+            z_prev = z;
+        #endif    
 
         #if FRACTAL == MANDELBROT
             z = Complex(
-                z_real_sq - z_imag_sq,
+                z_comp_sq.real - z_comp_sq.imag,
                 2.0 * z.real * z.imag
             ) + c;
 
         #elif FRACTAL == BURNING_SHIP
             z = Complex(
-                z_real_sq - z_imag_sq,
+                z_comp_sq.real - z_comp_sq.imag,
                 2.0 * abs(z.real * z.imag)
             ) + c;
 
         #elif FRACTAL == TRICORN
             z = Complex(
-                z_real_sq - z_imag_sq,
+                z_comp_sq.real - z_comp_sq.imag,
                 -2.0 * z.real * z.imag
             ) + c;
 
         #elif FRACTAL == PERPENDICULAR_MANDELBROT
             z = Complex(
-                z_real_sq - z_imag_sq,
+                z_comp_sq.real - z_comp_sq.imag,
                 -2.0 * abs(z.real) * z.imag
             ) + c;
 
         #elif FRACTAL == CELTIC_MANDELBROT
             z = Complex(
-                abs(z_real_sq - z_imag_sq),
+                abs(z_comp_sq.real - z_comp_sq.imag),
                 2.0 * z.real * z.imag
             ) + c;
 
         #elif FRACTAL == CELTIC_MANDELBAR
             z = Complex(
-                abs(z_real_sq - z_imag_sq),
+                abs(z_comp_sq.real - z_comp_sq.imag),
                 -2.0 * z.real * z.imag
             ) + c;
 
         #elif FRACTAL == PERPENDICULAR_CELTIC
             z = Complex(
-                abs(z_real_sq - z_imag_sq),
+                abs(z_comp_sq.real - z_comp_sq.imag),
                 -2.0 * abs(z.real) * z.imag
             ) + c;
 
         #elif FRACTAL == HEART_MANDELBROT
             z = Complex(
-                z_real_sq - z_imag_sq,
+                z_comp_sq.real - z_comp_sq.imag,
                 2.0 * abs(z.real) * z.imag
             ) + c;
         
         #elif FRACTAL == PERPENDICULAR_BURNING_SHIP
             z = Complex(
-                z_real_sq - z_imag_sq,
+                z_comp_sq.real - z_comp_sq.imag,
                 -2.0 * z.real * abs(z.imag)
             ) + c;
 
         #elif FRACTAL == BUFFALO
             z = Complex(
-                abs(z_real_sq - z_imag_sq),
+                abs(z_comp_sq.real - z_comp_sq.imag),
                 2.0 * abs(z.real * z.imag)
             ) + c;
 
         #elif FRACTAL == CELTIC_HEART
             z = Complex(
-                abs(z_real_sq - z_imag_sq),
+                abs(z_comp_sq.real - z_comp_sq.imag),
                 2.0 * abs(z.real) * z.imag
             ) + c;
 
         #elif FRACTAL == PERPENDICULAR_BUFFALO
             z = Complex(
-                abs(z_real_sq - z_imag_sq),
+                abs(z_comp_sq.real - z_comp_sq.imag),
                 -2.0 * z.real * abs(z.imag)
             ) + c;
 
@@ -354,7 +374,7 @@ vec3 getColour(float real, float imag) {
             
         #elif FRACTAL == OTHER_BUFFALO
             z = Complex(
-                z_real_sq - z_imag_sq,
+                z_comp_sq.real - z_comp_sq.imag,
                 2.0 * abs(z.real * z.imag)
             ) - abs(z) + c;
 
@@ -392,12 +412,12 @@ vec3 getColour(float real, float imag) {
         #elif FRACTAL == FEATHER
             z = div(
                 z * Complex(
-                    z_real_sq - 3.0 * z_imag_sq,
-                    3.0 * z_real_sq - z_imag_sq
+                    z_comp_sq.real - 3.0 * z_comp_sq.imag,
+                    3.0 * z_comp_sq.real - z_comp_sq.imag
                 ),
                 Complex(
-                    z_real_sq,
-                    z_imag_sq) + 1.0) + c;
+                    z_comp_sq.real,
+                    z_comp_sq.imag) + 1.0) + c;
 
         #elif FRACTAL == CHIRIKOV
             z += c * Complex(z.imag, sin(z.real));
@@ -405,14 +425,14 @@ vec3 getColour(float real, float imag) {
         #elif FRACTAL == SMELLY_SHOE
 
             z = Complex(
-                z_real_sq - z_imag_sq,
+                z_comp_sq.real - z_comp_sq.imag,
                 2.0 * sin(z.imag * z.real) * z.imag
             ) + c;
 
         #elif FRACTAL == DOG_SKULL
             z = Complex(
-                z_real_sq + tan(z.imag),
-                z.imag * z_imag_sq - z.real
+                z_comp_sq.real + tan(z.imag),
+                z.imag * z_comp_sq.imag - z.real
             ) + c;
 
         #elif FRACTAL == EXPONENT2
@@ -439,18 +459,18 @@ vec3 getColour(float real, float imag) {
 
         #elif FRACTAL == PHOENIX
             z = Complex(
-                z_real_sq - z_imag_sq + fractal_param1 * z.real - fractal_param2 * z.imag,
+                z_comp_sq.real - z_comp_sq.imag + fractal_param1 * z.real - fractal_param2 * z.imag,
                 2.0 * z.real * z.imag + fractal_param1 * z.imag + fractal_param2 * z.real
             ) + c;
 
         #elif FRACTAL == SIMONBROT
             z = Complex(
-                z_real_sq - z_imag_sq,
+                z_comp_sq.real - z_comp_sq.imag,
                 2.0 * z.real * z.imag
             ) * mag_sq + c;
 
         #elif FRACTAL == TIPPETTS
-            z.real = z_real_sq - z_imag_sq + c.real;
+            z.real = z_comp_sq.real - z_comp_sq.imag + c.real;
             z.imag = 2.0 * z.real * z.imag + c.imag;
 
         #elif FRACTAL == MAREK_DRAGON
@@ -502,7 +522,7 @@ vec3 getColour(float real, float imag) {
         #elif FRACTAL == META_MANDELBROT
 
             Complex meta_z = Complex(
-                z_real_sq - z_imag_sq,
+                z_comp_sq.real - z_comp_sq.imag,
                 2.0 * z.real * z.imag
             ) + c;
             Complex meta_c = c2 + z;
@@ -516,7 +536,7 @@ vec3 getColour(float real, float imag) {
             z = square(
                 div(
                     Complex(
-                        z_real_sq - z_imag_sq - 1.0,
+                        z_comp_sq.real - z_comp_sq.imag - 1.0,
                         dzr * z.imag) + c,
                     Complex(
                         dzr - 2.0,
@@ -527,7 +547,7 @@ vec3 getColour(float real, float imag) {
             Complex z3 = prod(
                 z,
                 Complex(
-                    z_real_sq - z_imag_sq,
+                    z_comp_sq.real - z_comp_sq.imag,
                     2.0 * z.real * z.imag));
 
             z = div(z3, z3 + ONE) + c;
@@ -535,7 +555,7 @@ vec3 getColour(float real, float imag) {
         #elif FRACTAL == SPIRAL
 
             Complex dz2c = Complex(
-                2.0 * (z_real_sq - z_imag_sq + c.real),
+                2.0 * (z_comp_sq.real - z_comp_sq.imag + c.real),
                 4.0 * z.real * z.imag + c.imag
             );
 
@@ -548,7 +568,7 @@ vec3 getColour(float real, float imag) {
 		
 		#elif FRACTAL == MANDELBRUH
             z = Complex(
-                z_real_sq - z_imag_sq,
+                z_comp_sq.real - z_comp_sq.imag,
                 fractal_param1 * z.real * z.imag
             ) + c;
 				
@@ -561,7 +581,7 @@ vec3 getColour(float real, float imag) {
                 z);
 
             z = Complex(
-                z_real_sq - z_imag_sq,
+                z_comp_sq.real - z_comp_sq.imag,
                 2.0 * z.real * z.imag
             ) + recip;
 			
@@ -571,7 +591,7 @@ vec3 getColour(float real, float imag) {
         #elif FRACTAL == DUFFING
             z = Complex(
                 z.imag,
-                dot(z, Complex(z.imag, c.real - z_imag_sq))
+                dot(z, Complex(z.imag, c.real - z_comp_sq.imag))
             );
 
         #elif FRACTAL == GINGERBREAD
@@ -580,7 +600,7 @@ vec3 getColour(float real, float imag) {
             z += c;
 
         #elif FRACTAL == HENON
-            z.real = 1.0 - c.real * z_real_sq + z.imag;
+            z.real = 1.0 - c.real * z_comp_sq.real + z.imag;
             z.imag = c.imag * z.real;
 
         #elif FRACTAL == LOGISTIC
@@ -600,7 +620,7 @@ vec3 getColour(float real, float imag) {
                         
         #elif FRACTAL == FRACKTAIL
             z = Complex(
-                z_real_sq - z_imag_sq,
+                z_comp_sq.real - z_comp_sq.imag,
                 2.0 * z.real * z.imag
             ) * argument(z) + c;
                         
@@ -618,7 +638,7 @@ vec3 getColour(float real, float imag) {
                 z);
 
             z = Complex(
-                z_real_sq - z_imag_sq + w.real * w.real - w.imag * w.imag,
+                z_comp_sq.real - z_comp_sq.imag + w.real * w.real - w.imag * w.imag,
                 2.0 * (z.real * z.imag + w.real * w.imag)
             ) + c;
 
@@ -638,7 +658,7 @@ vec3 getColour(float real, float imag) {
                 + 0.0625 * prod3(
                     3.0 * z + ONE,
                     ONE - cos_pi_z,
-                    THREE - sqrt(2.0) * cosine(0.4 * PI * (2.0 * z - ONE))
+                    THREE - SQRT_2 * cosine(0.4 * PI * (2.0 * z - ONE))
                 );
 
         #elif FRACTAL == FRAKTAL1
@@ -651,23 +671,21 @@ vec3 getColour(float real, float imag) {
             z = prod(
                 z,
                 Complex(
-                    z_real_sq - z_imag_sq,
+                    z_comp_sq.real - z_comp_sq.imag,
                     2.0 * z.real * z.imag
                 ))
                 + prod(c - ONE, z) - c;
 
         #endif
-        
-        z_real_sq = z.real * z.real;
-        z_imag_sq = z.imag * z.imag;
-        
-        mag_sq = z_real_sq + z_imag_sq;
+
+        z_comp_sq = z * z;
+        mag_sq = z_comp_sq.real + z_comp_sq.imag;
 
         #ifdef MONITOR_ORBIT_TRAPS
             orbit_min_dist = monitorOrbitTraps(z, orbit_min_dist, mag_sq);
         #endif
 
-        #if (EXTERIOR_COLOURING_STYLE == 0 && MONOTONIC_FUNCTION == 2) || ESCAPE_ALGORITHM == 1
+        #ifdef MONITOR_DERIVATIVE
             #if FRACTAL == BURNING_SHIP
                 der = 2.0 * div(
                     prod(
@@ -688,7 +706,6 @@ vec3 getColour(float real, float imag) {
             #else
                 // try mandelbrot der, prob won't work
                 der = 2.0 * prod(z_prev, der) + ONE;
-
             #endif
         #endif
         

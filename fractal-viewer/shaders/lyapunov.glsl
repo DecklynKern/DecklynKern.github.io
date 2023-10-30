@@ -7,8 +7,6 @@ uniform vec3 stable_colour;
 uniform vec3 chaotic_colour;
 uniform vec3 infinity_colour;
 
-const int TRUE_ITER_CAP = 10000;
-
 void doIteration(in float r, inout float x, inout float lambda) {
 
     #if FRACTAL_TYPE == 0 // logistic map

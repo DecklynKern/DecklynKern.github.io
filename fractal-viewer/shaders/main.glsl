@@ -33,6 +33,7 @@ const Complex ZERO = Complex(0.0, 0.0);
 const Complex ONE = Complex(1.0, 0.0);
 const Complex TWO = Complex(2.0, 0.0);
 const Complex THREE = Complex(3.0, 0.0);
+const Complex SQRT_2 = Complex(1.41421356, 0.0);
 const Complex I = Complex(0.0, 1.0);
 
 Complex reciprocal(Complex z) {

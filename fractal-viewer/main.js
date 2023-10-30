@@ -22,10 +22,10 @@ var program = ESCAPE_TIME;
 
 var mouse_down = false;
 
-var magnitude = new Param(2.0);
-var centre_x = new Param(0.0);
-var centre_y = new Param(0.0);
-var canvas_size = new Param(1000);
+var magnitude = new ParamFloat(2, "magnitude");
+var centre_x = new ParamFloat(0, "centre_x");
+var centre_y = new ParamFloat(0, "centre_y");
+var canvas_size = new ParamFloat(1000, "canvas_size");
 
 var transformation = 0;
 var invert_handler;
@@ -35,14 +35,14 @@ var moebius_c_handler;
 var moebius_d_handler;
 var exponent_a_handler;
 var exponent_b_handler;
-var transform_param1 = new Param(0.0);
-var transform_param2 = new Param(0.0);
-var transform_param3 = new Param(0.0);
-var transform_param4 = new Param(0.0);
-var transform_param5 = new Param(0.0);
-var transform_param6 = new Param(0.0);
-var transform_param7 = new Param(0.0);
-var transform_param8 = new Param(0.0);
+var transform_param1 = new ParamFloat(0.0, "transform_param1");
+var transform_param2 = new ParamFloat(0.0, "transform_param2");
+var transform_param3 = new ParamFloat(0.0, "transform_param3");
+var transform_param4 = new ParamFloat(0.0, "transform_param4");
+var transform_param5 = new ParamFloat(0.0, "transform_param5");
+var transform_param6 = new ParamFloat(0.0, "transform_param6");
+var transform_param7 = new ParamFloat(0.0, "transform_param7");
+var transform_param8 = new ParamFloat(0.0, "transform_param8");
 
 var samples = 1;
 var multisampling_algorithm = 1;
@@ -68,15 +68,15 @@ function main() {
     document.onmouseup = function(_ev) {mouse_down = false};
     
     document.getElementById("transformation").onchange = updateTransformation;
-    invert_handler = new ComplexPickerHandler("invert_selector", transform_param1, transform_param2, 2.5, 0, 0, "invert_text", "$");
+    invert_handler = new ComplexPickerHandler("invert_selector", [transform_param1, transform_param2], 2.5, 0, 0, "invert_text", "$");
     
-    moebius_a_handler = new ComplexPickerHandler("moebius_a_selector", transform_param1, transform_param2, 2.5, 0, 0, "moebius_a_text", "a = $");
-    moebius_b_handler = new ComplexPickerHandler("moebius_b_selector", transform_param3, transform_param4, 2.5, 0, 0, "moebius_b_text", "b = $");
-    moebius_c_handler = new ComplexPickerHandler("moebius_c_selector", transform_param5, transform_param6, 2.5, 0, 0, "moebius_c_text", "c = $");
-    moebius_d_handler = new ComplexPickerHandler("moebius_d_selector", transform_param7, transform_param8, 2.5, 0, 0, "moebius_d_text", "d = $");
+    moebius_a_handler = new ComplexPickerHandler("moebius_a_selector", [transform_param1, transform_param2], 2.5, 0, 0, "moebius_a_text", "a = $");
+    moebius_b_handler = new ComplexPickerHandler("moebius_b_selector", [transform_param3, transform_param4], 2.5, 0, 0, "moebius_b_text", "b = $");
+    moebius_c_handler = new ComplexPickerHandler("moebius_c_selector", [transform_param5, transform_param6], 2.5, 0, 0, "moebius_c_text", "c = $");
+    moebius_d_handler = new ComplexPickerHandler("moebius_d_selector", [transform_param7, transform_param8], 2.5, 0, 0, "moebius_d_text", "d = $");
     
-    exponent_a_handler = new ComplexPickerHandler("trans_exponent_a_selector", transform_param1, transform_param2, 2.5, 1, 0, "trans_exponent_a_text", "a = $");
-    exponent_b_handler = new ComplexPickerHandler("trans_exponent_b_selector", transform_param3, transform_param4, 2.5, 0, 0, "trans_exponent_b_text", "b = $");
+    exponent_a_handler = new ComplexPickerHandler("trans_exponent_a_selector", [transform_param1, transform_param2], 2.5, 1, 0, "trans_exponent_a_text", "a = $");
+    exponent_b_handler = new ComplexPickerHandler("trans_exponent_b_selector", [transform_param3, transform_param4], 2.5, 0, 0, "trans_exponent_b_text", "b = $");
 
     document.getElementById("samples").onchange = updateSamples;
     document.getElementById("canvas_size").onchange = updateCanvasSize;
@@ -143,19 +143,19 @@ function setupShader() {
     gl.vertexAttribPointer(position_attr, 2, gl.FLOAT, false, 0, 0);
     gl.enableVertexAttribArray(position_attr);
 
-    magnitude.getAttr("magnitude");
-    centre_x.getAttr("centre_x");
-    centre_y.getAttr("centre_y");
-    canvas_size.getAttr("canvas_size");
+    magnitude.getAttr();
+    centre_x.getAttr();
+    centre_y.getAttr();
+    canvas_size.getAttr();
     
-    transform_param1.getAttr("transform_param1");
-    transform_param2.getAttr("transform_param2");
-    transform_param3.getAttr("transform_param3");
-    transform_param4.getAttr("transform_param4");
-    transform_param5.getAttr("transform_param5");
-    transform_param6.getAttr("transform_param6");
-    transform_param7.getAttr("transform_param7");
-    transform_param8.getAttr("transform_param8");
+    transform_param1.getAttr();
+    transform_param2.getAttr();
+    transform_param3.getAttr();
+    transform_param4.getAttr();
+    transform_param5.getAttr();
+    transform_param6.getAttr();
+    transform_param7.getAttr();
+    transform_param8.getAttr();
 
     program.setupAttrs();
 
@@ -192,19 +192,19 @@ function tryRedraw(force) {
     
     busy = true;
 
-    magnitude.loadFloat();
-    centre_x.loadFloat();
-    centre_y.loadFloat();
-    canvas_size.loadInt();
+    magnitude.load();
+    centre_x.load();
+    centre_y.load();
+    canvas_size.load();
     
-    transform_param1.loadFloat();
-    transform_param2.loadFloat();
-    transform_param3.loadFloat();
-    transform_param4.loadFloat();
-    transform_param5.loadFloat();
-    transform_param6.loadFloat();
-    transform_param7.loadFloat();
-    transform_param8.loadFloat();
+    transform_param1.load();
+    transform_param2.load();
+    transform_param3.load();
+    transform_param4.load();
+    transform_param5.load();
+    transform_param6.load();
+    transform_param7.load();
+    transform_param8.load();
 
     program.loadAttrs();
 

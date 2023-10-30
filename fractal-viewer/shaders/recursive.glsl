@@ -16,9 +16,13 @@ bool rectBound(vec2 pos, float min_x, float max_x, float min_y, float max_y) {
 }
 
 mat2 rotMat(float angle) {
+
+    float sin_a = sin(angle);
+    float cos_a = cos(angle)
+
     return mat2(
-        cos(angle), sin(angle),
-        -sin(angle), cos(angle)
+        cos_a, sin_a,
+        -sin_a, cos_a
     );
 }
 
@@ -67,17 +71,12 @@ void carpetUpdate(inout Iterator iter) {
 }
 
 bool triangleEscape(Iterator iter) {
-    return abs(iter.pos.x - 0.5) > 0.5 - iter.pos.y / 2.0;
+    return abs(iter.pos.x - 0.5) > 0.5 - 0.5 * iter.pos.y;
 }
 
 void triangleUpdate(inout Iterator iter) {
-
-    if (iter.pos.y > 0.5) {
-        iter.pos.x -= 0.25;
-    }
-
+    iter.pos.x -= iter.pos.y > 0.5 ? 0.25 : 0.0;
     iter.pos = fract(iter.pos * 2.0);
-
 }
 
 bool tSquareEscape(Iterator iter) {
@@ -92,7 +91,7 @@ bool pTreeEscape(Iterator iter) {
     return rectBound(iter.pos, 0.4375, 0.5625, 0.0, 0.125);
 }
 
-const float TREE_SCALING = 2.0 / sqrt(2.0);
+const float TREE_SCALING = 2.0 / SQRT_2;
 
 void pTreeUpdate(inout Iterator iter) {
 
@@ -125,7 +124,7 @@ void vicsekUpdate(inout Iterator iter) {
 
     if (!(ONE_THIRD < iter.pos.x && iter.pos.x < TWO_THIRDS ||
          ONE_THIRD < iter.pos.y && iter.pos.y < TWO_THIRDS)) {
-        iter.pos = vec2(0.0, 0.0);
+        iter.pos = ZERO;
         return;
     }
 

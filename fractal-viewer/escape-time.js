@@ -55,20 +55,17 @@ class EscapeTime extends Program {
 
     fractal = 0;
 
-    fractal_param1 = new Param(0);
-    fractal_param2 = new Param(0);
-    fractal_param3 = new Param(0);
+    fractal_param1 = new ParamFloat(0, "fractal_param1");
+    fractal_param2 = new ParamFloat(0, "fractal_param2");
+    fractal_param3 = new ParamFloat(0, "fractal_param3");
 
-    julification = new Param(0);
-    
     escape_algorithm = 0;
     
-    escape_param = new Param(4.0);
+    escape_param = new ParamFloat(4, "escape_param");
     max_iterations = 30;
     
-    is_julia = new Param(0);
-    julia_c_real = new Param(0.0);
-    julia_c_imag = new Param(0.0);
+    julification = new ParamFloat(0, "julification");
+    julia_c = new ParamComplex(0, 0, "julia_c");
 
     exterior_colouring_style = 0;
 
@@ -82,25 +79,39 @@ class EscapeTime extends Program {
 
     exterior_colouring = 0;
 
-    exterior_colouring_param1 = new Param(0.0);
-    exterior_colouring_param2 = new Param(0.0);
+    exterior_colouring_param1 = new ParamFloat(0, "exterior_colouring_param1");
+    exterior_colouring_param2 = new ParamFloat(0, "exterior_colouring_param2");
 
-    exterior_colour1 = new Param([0.0, 0.0, 1.0]);
-    exterior_colour2 = new Param([0.0, 0.0, 0.0]);
+    exterior_colour1 = new ParamVec3([0, 0, 1], "exterior_colour1");
+    exterior_colour2 = new ParamVec3([0, 0, 0], "exterior_colour2");
 
     interior_colouring = 0;
-    interior_colouring_param1 = new Param(0.0);
-    interior_colouring_param2 = new Param(0.0);
+    interior_colouring_param1 = new ParamFloat(0, "interior_colouring_param1");
+    interior_colouring_param2 = new ParamFloat(0, "interior_colouring_param2");
 
-    interior_colour1 = new Param([0.0, 0.0, 0.0]);
-    interior_colour2 = new Param([0.0, 0.0, 0.0]);
+    interior_colour1 = new ParamVec3([0, 0, 0], "interior_colour1");
+    interior_colour2 = new ParamVec3([0, 0, 0], "interior_colour2");
+
+    params = [
+        this.fractal_param1,
+        this.fractal_param2,
+        this.fractal_param3,
+        this.escape_param,
+        this.julification,
+        this.julia_c,
+        this.exterior_colouring_param1,
+        this.exterior_colouring_param2,
+        this.exterior_colour1,
+        this.exterior_colour2,
+        this.interior_colouring_param1,
+        this.interior_colouring_param2,
+        this.interior_colour1,
+        this.interior_colour2
+    ];
 	
-    getShader = function() {
+    getShader() {
 
-        var shader = (' ' + this.baseShader).slice(1);
-
-        var def = `
-        //%
+        var def = `//%
         #define FRACTAL ${this.fractal}
         #define ESCAPE_ALGORITHM ${this.escape_algorithm}
         #define MAX_ITERATIONS ${this.max_iterations}
@@ -216,11 +227,11 @@ class EscapeTime extends Program {
                         break;
 
                     case 4:
-                        def += `orbit_dist = gaussianIntegerOrbitDist(z, ${param});\n`;
+                        def += `orbit_dist = gaussianIntegerOrbitDist(z, ${1 / param});\n`;
                         break;
 
                     case 5:
-                        def += `orbit_dist = gaussianIntegerOrbitTaxicabDist(z, ${param});\n`;
+                        def += `orbit_dist = gaussianIntegerOrbitTaxicabDist(z, ${1 / param});\n`;
                         break;
 
                     case 6:
@@ -241,11 +252,11 @@ class EscapeTime extends Program {
 
         }
         
-        return shader.replace("//%", def);
+        return this.baseShader.replace("//%", def);
 
     }
 
-    setupGUI = function() {
+    setupGUI() {
         
         document.querySelectorAll('[esc_param="1"]').forEach(
             function(fractal_param) {
@@ -273,20 +284,20 @@ class EscapeTime extends Program {
         document.getElementById("gangopadhyay4").onchange = this.updateGangopadhyay;
         document.getElementById("gangopadhyay5").onchange = this.updateGangopadhyay;
 
-        this.cmultibrot_p_handler = new ComplexPickerHandler("cmultibrot_p_selector", this.fractal_param1, this.fractal_param2, 6, 0, 0, "cmultibrot_p_text", "p = $");
+        this.cmultibrot_p_handler = new ComplexPickerHandler("cmultibrot_p_selector", [this.fractal_param1, this.fractal_param2], 6, 0, 0, "cmultibrot_p_text", "p = $");
         
-        this.phoenix_p_handler = new ComplexPickerHandler("phoenix_p_selector", this.fractal_param1, this.fractal_param2, 2, 0, 0, "phoenix_p_text", "p = $");
+        this.phoenix_p_handler = new ComplexPickerHandler("phoenix_p_selector", [this.fractal_param1, this.fractal_param2], 2, 0, 0, "phoenix_p_text", "p = $");
         
-        this.zubieta_a_handler = new ComplexPickerHandler("zubieta_a_selector", this.fractal_param1, this.fractal_param2, 2, 0, 0, "zubieta_a_text", "a = $");
+        this.zubieta_a_handler = new ComplexPickerHandler("zubieta_a_selector", [this.fractal_param1, this.fractal_param2], 2, 0, 0, "zubieta_a_text", "a = $");
     
-        this.sauron_a_handler = new ComplexPickerHandler("sauron_a_selector", this.fractal_param1, this.fractal_param2, 2, 0, 0, "sauron_a_text", "a = $");
+        this.sauron_a_handler = new ComplexPickerHandler("sauron_a_selector", [this.fractal_param1, this.fractal_param2], 2, 0, 0, "sauron_a_text", "a = $");
     
-        this.foam_q_handler = new ComplexPickerHandler("foam_q_selector", this.fractal_param1, this.fractal_param2, 2, 0, 0, "sauron_a_text", "q = $");
+        this.foam_q_handler = new ComplexPickerHandler("foam_q_selector", [this.fractal_param1, this.fractal_param2], 2, 0, 0, "sauron_a_text", "q = $");
     
         document.getElementById("julification").oninput = paramSet(this.julification);
-        this.julia_c_handler = new ComplexPickerHandler("julia_selector", this.julia_c_real, this.julia_c_imag, 2.5, 0, 0, "esc_julia_text", "c = $");
+        this.julia_c_handler = new ComplexPickerHandler("julia_selector", [this.julia_c], 2.5, 0, 0, "esc_julia_text", "c = $");
 
-        document.getElementById("esc_max_iterations").onchange = this.updateMaxIterations;
+        document.getElementById("esc_max_iterations").onchange = paramSetWithRecompile(this, "max_iterations");
         
         document.getElementById("escape_algorithm").onchange = this.updateEscapeAlgorithm;
         document.getElementById("escape_radius").onchange = this.updateEscapeParamSquared;
@@ -297,15 +308,15 @@ class EscapeTime extends Program {
         document.getElementById("exterior_colouring_style").onchange = this.updateExteriorColouringStyle;
 
         document.getElementById("monotonic_function").onchange = this.updateMonotonicFunction;
-        document.getElementById("monotonic_easing_function").onchange = this.updateMonotonicEasingFunction;
-        document.getElementById("monotonic_ease_out").onchange = this.updateMonotonicEaseOut;
+        document.getElementById("monotonic_easing_function").onchange = paramSetWithRecompile(this, "monotonic_easing_function");
+        document.getElementById("monotonic_ease_out").onchange = paramSetWithRecompile(this, "monotonic_ease_out");
 		
-        document.getElementById("cyclic_cycle_function").onchange = this.updateCyclicFunction;
-        document.getElementById("cyclic_waveform").onchange = this.updateCyclicWaveform;
+        document.getElementById("cyclic_cycle_function").onchange = paramSetWithRecompile(this, "cycle_function");
+        document.getElementById("cyclic_waveform").onchange = paramSetWithRecompile(this, "cyclic_waveform");
         document.getElementById("esc_cycle_period").onchange = paramSet(this.exterior_colouring_param1);
 		
-        document.getElementById("radial_angle").onchange = this.updateRadialAngle;
-        document.getElementById("radial_decomposition").onchange = this.updateRadialDecomposition;
+        document.getElementById("radial_angle").onchange = paramSetWithRecompile(this, "radial_angle");
+        document.getElementById("radial_decomposition").onchange = paramSetWithRecompile(this, "radial_decomposition");
 
         document.getElementById("esc_exterior_colouring").onchange = this.updateExteriorColouring;
 
@@ -327,63 +338,11 @@ class EscapeTime extends Program {
         document.getElementById("interior_close_colour").onchange = paramSetColour(this.interior_colour1);
         document.getElementById("interior_far_colour").onchange = paramSetColour(this.interior_colour2);
 
-        this.light_handler = new ComplexPickerHandler("light_selector", this.exterior_colouring_param1, this.exterior_colouring_param2, 1, 0, 0, null, null);
+        this.light_handler = new ComplexPickerHandler("light_selector", [this.exterior_colouring_param1, this.exterior_colouring_param2], 1, 0, 0, null, null);
 		
     }
 
-    setupAttrs = function() {
-
-        this.fractal_param1.getAttr("fractal_param1");
-        this.fractal_param2.getAttr("fractal_param2");
-        this.fractal_param3.getAttr("fractal_param3");
-
-        this.escape_param.getAttr("escape_param");
-            
-        this.julification.getAttr("julification");
-        this.julia_c_real.getAttr("julia_c_real");
-        this.julia_c_imag.getAttr("julia_c_imag");
-
-        this.exterior_colouring_param1.getAttr("exterior_colouring_param1");
-        this.exterior_colouring_param2.getAttr("exterior_colouring_param2");
-
-        this.exterior_colour1.getAttr("exterior_colour1");
-        this.exterior_colour2.getAttr("exterior_colour2");
-		
-        this.interior_colouring_param1.getAttr("interior_colouring_param1");
-        this.interior_colouring_param2.getAttr("interior_colouring_param2");
-        
-        this.interior_colour1.getAttr("interior_colour1");
-        this.interior_colour2.getAttr("interior_colour2");
-    
-    }
-
-    loadAttrs = function() {
-
-        this.fractal_param1.loadFloat();
-        this.fractal_param2.loadFloat();
-        this.fractal_param3.loadFloat();
-
-        this.escape_param.loadFloat();
-
-        this.julification.loadFloat();
-        this.julia_c_real.loadFloat();
-        this.julia_c_imag.loadFloat();
-
-        this.exterior_colouring_param1.loadFloat();
-        this.exterior_colouring_param2.loadFloat();
-
-        this.exterior_colour1.loadFloat3();
-        this.exterior_colour2.loadFloat3();
-
-        this.interior_colouring_param1.loadFloat();
-        this.interior_colouring_param2.loadFloat();
-
-        this.interior_colour1.loadFloat3();
-        this.interior_colour2.loadFloat3();
-
-    }
-
-    updateFractal = function(event) {
+    updateFractal(event) {
 
         ESCAPE_TIME.fractal = +event.target.value;
     
@@ -475,7 +434,7 @@ class EscapeTime extends Program {
     
     }
     
-    updateEscapeAlgorithm = function(event) {
+    updateEscapeAlgorithm(event) {
         
         ESCAPE_TIME.escape_algorithm = event.target.value;
         
@@ -498,24 +457,18 @@ class EscapeTime extends Program {
         redraw();
         
     }
-
-    updateMaxIterations = function(event) {
-        ESCAPE_TIME.max_iterations = event.target.value;
-        setupShader();
-        redraw();
-    }
     
-    updateEscapeParamSquared = function(event) {
+    updateEscapeParamSquared(event) {
         ESCAPE_TIME.escape_param.value = event.target.value * event.target.value;
         redraw();
     }
 
-    updateGangopadhyay = function(_event) {
+    updateGangopadhyay(_event) {
         setupShader();
         redraw();
     }
 
-    addOrbitTrap = function(_event) {
+    addOrbitTrap(_event) {
 
         var new_orbit_trap = document.createElement("div");
         new_orbit_trap.innerHTML = `
@@ -546,7 +499,7 @@ class EscapeTime extends Program {
 
     }
 
-    deleteOrbitTrap = function(event) {
+    deleteOrbitTrap(event) {
 
         event.target.parentElement.parentElement.remove();
 
@@ -554,7 +507,7 @@ class EscapeTime extends Program {
         redraw();
     }
 
-    updateOrbitTrap = function(event) {
+    updateOrbitTrap(event) {
         
         var settings_div = event.target.parentElement.nextSibling.nextSibling;
         settings_div.style.display = "none";
@@ -586,7 +539,7 @@ class EscapeTime extends Program {
 
     }
 
-    synchExteriorColourSettings = function() {
+    synchExteriorColourSettings() {
     
         const monotonic_colour_style = document.getElementById("monotonic_colour_select").style;
         const other_colour_style = document.getElementById("other_colour_select").style;
@@ -608,7 +561,7 @@ class EscapeTime extends Program {
         }
     }
 
-    updateExteriorColouringStyle = function(event) {
+    updateExteriorColouringStyle(event) {
 
         ESCAPE_TIME.exterior_colouring_style = event.target.value;
 
@@ -631,7 +584,7 @@ class EscapeTime extends Program {
 
     }
 
-    updateMonotonicFunction = function(event) {
+    updateMonotonicFunction(event) {
 
         ESCAPE_TIME.monotonic_function = event.target.value;
 
@@ -655,55 +608,7 @@ class EscapeTime extends Program {
 
     }
 
-    updateMonotonicEasingFunction = function(event) {
-        ESCAPE_TIME.monotonic_easing_function = event.target.value;
-        setupShader();
-        redraw();
-    }
-
-    updateMonotonicEaseOut = function(event) {
-        ESCAPE_TIME.monotonic_ease_out = event.target.checked;
-        setupShader();
-        redraw();
-    }
-
-    updateCyclicFunction = function(event) {
-
-        ESCAPE_TIME.cyclic_cycle_function = event.target.value;
-
-        setupShader();
-        redraw();
-
-    }
-
-    updateCyclicWaveform = function(event) {
-
-        ESCAPE_TIME.cyclic_waveform = event.target.value;
-
-        setupShader();
-        redraw();
-
-    }
-	
-    updateRadialAngle = function(event) {
-
-        ESCAPE_TIME.radial_angle = event.target.value;
-
-        setupShader();
-        redraw();
-
-    }
-
-    updateRadialDecomposition = function(event) {
-
-        ESCAPE_TIME.radial_decomposition = event.target.value;
-
-        setupShader();
-        redraw();
-
-    }
-
-    updateExteriorColouring = function(event) {
+    updateExteriorColouring(event) {
     
         ESCAPE_TIME.exterior_colouring = event.target.value;
 
@@ -713,7 +618,7 @@ class EscapeTime extends Program {
     
     }
 
-    updateInteriorColouring = function(event) {
+    updateInteriorColouring(event) {
 
         ESCAPE_TIME.interior_colouring = event.target.value;
 

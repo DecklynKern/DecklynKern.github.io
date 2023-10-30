@@ -1,3 +1,12 @@
+const BASIC_COLOURS = [
+    "#FF0000",
+    "#00FF00",
+    "#0000FF",
+    "#FFFF00",
+    "#FF00FF",
+    "#00FFFF"
+];
+
 function hexToRGB(hex) {
     return [
         parseInt(hex.slice(1, 3), 16) / 256,
@@ -33,30 +42,60 @@ function paramSetColour(param) {
     }
 }
 
+function paramSetWithRecompile(program, parameter) {
+    return function(event) {
+        program[parameter] = event.target.value;
+        setupShader();
+        redraw();
+    }
+}
+
 class Param {
     
-    constructor(value) {
+    constructor(value, name) {
         this.value = value;
+        this.name = name;
         this.attr = null;
     }
 
-    getAttr = function(name) {
-        this.attr = gl.getUniformLocation(gl.program, name);
+    getAttr() {
+        this.attr = gl.getUniformLocation(gl.program, this.name);
     }
+}
 
-    loadInt = function() {
-        gl.uniform1i(this.attr, this.value);
-    }
-
-    loadFloat = function() {
+class ParamFloat extends Param {
+    load() {
         gl.uniform1f(this.attr, this.value);
     }
+}
 
-    loadFloatSq = function() {
-        gl.uniform1f(this.attr, this.value * this.value);
+class ParamInt extends Param {
+    load() {
+        gl.uniform1i(this.attr, this.value);
+    }
+}
+
+class ParamVec2 extends Param {
+    load() {
+        gl.uniform2f(this.attr, ...this.value);
+    }
+}
+
+class ParamComplex extends Param {
+    
+    constructor(real, imag, name) {
+        super(null, name);
+        this.real = real;
+        this.imag = imag;
     }
 
-    loadFloat3 = function() {
+    load() {
+        gl.uniform2f(this.attr, this.real, this.imag);
+    }
+}
+
+class ParamVec3 extends Param {
+    load() {
         gl.uniform3f(this.attr, ...this.value);
     }
 }
@@ -64,23 +103,41 @@ class Param {
 class Program {
     
     baseShader = null;
+    params = [];
 
-    getShader = function() {
+    getShader() {
         return this.baseShader;
     }
     
-    drawPath = function() {}
+    drawPath() {}
+
+    setupAttrs() {
+        for (let param of this.params) {
+            param.getAttr();
+        }
+    }
+
+    loadAttrs() {
+        for (let param of this.params) {
+            param.load();
+        }
+    }
 }
 
 class ComplexPickerHandler {
 
-    constructor(canvas, real_param, imag_param, scale, offset_real, offset_imag, info_div, template) {
+    constructor(canvas, params, scale, offset_real, offset_imag, info_div, template) {
 
-        this.real_param = real_param;
-        this.imag_param = imag_param;
+        this.params = params;
 
-        this.real = real_param.value;
-        this.imag = imag_param.value;
+        if (params.length == 1) {
+            this.real = params[0].real;
+            this.imag = params[0].imag;
+        }
+        else {
+            this.real = params[0].value;
+            this.imag = params[1].value;
+        }
         
         this.scale = scale;
         this.unit_px = 100 / scale;
@@ -123,25 +180,31 @@ class ComplexPickerHandler {
         
     }
     
-    loadValues = function() {
+    loadValues() {
         this.real_param.value = this.real;
         this.imag_param.value = this.imag;
     }
 
-    updateComplex = function(event) {
+    updateComplex(event) {
     
         if (!mouse_down) {
             return;
         }
     
-        this.real_param.value = event.offsetX / this.unit_px - this.scale + this.offset_real;
-        this.imag_param.value = event.offsetY / this.unit_px - this.scale + this.offset_imag;
+        var real = event.offsetX / this.unit_px - this.scale + this.offset_real;
+        var imag = event.offsetY / this.unit_px - this.scale + this.offset_imag;
 
-        this.real = this.real_param.value;
-        this.imag = this.imag_param.value;
+        if (this.params.length == 1) {
+            this.params[0].real = real;
+            this.params[0].imag = imag;
+        }
+        else {
+            this.params[0].value = real;
+            this.params[1].value = imag;
+        }
 
         if (this.info_div) {
-            document.getElementById(this.info_div).innerHTML = this.template.replace("$", formatComplex(this.real_param.value, this.imag_param.value));
+            document.getElementById(this.info_div).innerHTML = this.template.replace("$", formatComplex(real, imag));
         }
     
         this.redraw(event.offsetX, event.offsetY);

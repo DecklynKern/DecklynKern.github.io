@@ -1,24 +1,11 @@
-uniform int iterations;
-
 uniform float friction;
 uniform float tension;
 uniform float mass;
 uniform float dt;
 
-uniform float magnet1_strength;
-uniform float magnet2_strength;
-uniform float magnet3_strength;
-
-uniform vec3 magnet1_colour;
-uniform vec3 magnet2_colour;
-uniform vec3 magnet3_colour;
-
-const vec2 magnet1_pos = vec2( 0.75,   0.0     );
-const vec2 magnet2_pos = vec2(-0.375, -0.649519);
-const vec2 magnet3_pos = vec2(-0.375,  0.649519);
-
-const int TRUE_ITER_CAP = 10000;
-const int TRUE_SAMPLE_CAP = 10;
+uniform float magnet_strengths[MAGNET_COUNT];
+uniform vec2 magnet_positions[MAGNET_COUNT];
+uniform vec3 magnet_colours[MAGNET_COUNT];
 
 vec3 getColour(float x, float y) {
 
@@ -31,30 +18,22 @@ vec3 getColour(float x, float y) {
     
     float inv_mass = 1.0 / mass;
     
-    int iters_taken = iterations;
+    int iters_taken = ITERATIONS;
 
-    for (int iteration = 0; iteration < TRUE_ITER_CAP; iteration++) {
-    
-        if (iteration >= iterations) {
-            break;
+    for (int iteration = 0; iteration < ITERATIONS; iteration++) {
+
+        vec2 accel = ZERO;
+
+        for (int i = 0; i < MAGNET_COUNT; i++) {
+
+            vec2 offset = magnet_positions[i] - pos;
+            float dist_sq = dot(offset, offset) + 0.1;
+
+            accel += magnet_strengths[i] * offset * pow(dist_sq, -1.5);
+
         }
 
-        vec2 magnet1_offset = magnet1_pos - pos; 
-        float magnet1_dist_sq = dot(magnet1_offset, magnet1_offset) + 0.1;
-
-        vec2 magnet2_offset = magnet2_pos - pos; 
-        float magnet2_dist_sq = dot(magnet2_offset, magnet2_offset) + 0.1;
-
-        vec2 magnet3_offset = magnet3_pos - pos; 
-        float magnet3_dist_sq = dot(magnet3_offset, magnet3_offset) + 0.1;
-
-        vec2 accel = 
-            magnet1_strength * magnet1_offset * (pow(magnet1_dist_sq, -1.5)) +
-            magnet2_strength * magnet2_offset * (pow(magnet2_dist_sq, -1.5)) +
-            magnet3_strength * magnet3_offset * (pow(magnet3_dist_sq, -1.5))
-            - tension * pos
-            - friction * velocity;
-            
+        accel -= tension * pos + friction * velocity;
         accel *= inv_mass;
 
         velocity += accel * dt;
@@ -72,27 +51,26 @@ vec3 getColour(float x, float y) {
 
     }
 
-    vec2 magnet1_offset = magnet1_pos - pos; 
-    float magnet1_dist = dot(magnet1_offset, magnet1_offset);
+    int closest_idx = 0;
+    float closest_dist = MAX;
+        
+    for (int i = 0; i < MAGNET_COUNT; i++) {
+        
+        vec2 offset = magnet_positions[i] - pos; 
+        float dist_sq = dot(offset, offset);
 
-    vec2 magnet2_offset = magnet2_pos - pos; 
-    float magnet2_dist = dot(magnet2_offset, magnet2_offset);
-
-    vec2 magnet3_offset = magnet3_pos - pos; 
-    float magnet3_dist = dot(magnet3_offset, magnet3_offset);
-    
-    vec3 magnet_colour;
-
-    if (magnet1_dist < magnet2_dist && magnet1_dist < magnet3_dist) {
-        magnet_colour = magnet1_colour;
+        if (closest_dist > dist_sq) {
+            closest_dist = dist_sq;
+            closest_idx = i;
+        }
     }
-    else if (magnet2_dist < magnet3_dist) {
-        magnet_colour = magnet2_colour;
-    }
-    else {
-        magnet_colour = magnet3_colour;    
+        
+    for (int i = 0; i < MAGNET_COUNT; i++) {
+        if (i == closest_idx) {
+            return magnet_colours[i] * (1.0 - float(iters_taken) / float(ITERATIONS));
+        }
     }
 
-    return magnet_colour * (1.0 - float(iters_taken) / float(iterations));
+    return vec3(0.0, 0.0, 0.0);
     
 }

@@ -18,21 +18,28 @@ class Lyapunov extends Program {
 
     fractal_type = 0;
 
-    fractal_param = new Param(0);
+    fractal_param = new ParamFloat(0, "fractal_param");
 
     sequence = [0, 1];
-
-    z_value = new Param(2);
-
-    initial_value = new Param(0.5);
-
     iterations = 250;
 
-    stable_colour = new Param([1.0, 1.0, 0.0]);
-    chaotic_colour = new Param([0.0, 0.0, 1.0]);
-    infinity_colour = new Param([0.0, 0.0, 0.0]);
+    z_value = new ParamFloat(2, "c");
+    initial_value = new ParamFloat(0.5, "initial_value");
 
-    getShader = function() {
+    stable_colour = new ParamVec3([1.0, 1.0, 0.0], "stable_colour");
+    chaotic_colour = new ParamVec3([0.0, 0.0, 1.0], "chaotic_colour");
+    infinity_colour = new ParamVec3([0.0, 0.0, 0.0], "infinity_colour");
+
+    params = [
+        this.fractal_param,
+        this.z_value,
+        this.initial_value,
+        this.stable_colour,
+        this.chaotic_colour,
+        this.infinity_colour
+    ];
+
+    getShader() {
         
         var shader = (' ' + this.baseShader).slice(1);
         var def = `
@@ -44,15 +51,15 @@ class Lyapunov extends Program {
 
         var sequence_iter = "";
 
-        for (var i = 0; i < this.sequence.length; i++) {
+        for (val of this.sequence) {
 
-            if (this.sequence[i] == 0) {
+            if (val == 0) {
                 sequence_iter += "r = a;\n";
             }
-            else if (this.sequence[i] == 1) {
+            else if (val == 1) {
                 sequence_iter += "r = b;\n";
             }
-            else if (this.sequence[i] == 2) {
+            else if (val == 2) {
                 sequence_iter += "r = c;\n";
             }
 
@@ -64,7 +71,7 @@ class Lyapunov extends Program {
 
     }
 
-    setupGUI = function() {
+    setupGUI() {
 
         document.getElementById("lya_fractal_type").onchange = this.updateFractalType;
         document.getElementById("lya_gauss_alpha").onchange = this.updateGaussAlpha;
@@ -79,7 +86,7 @@ class Lyapunov extends Program {
         document.getElementById("lya_initial").onchange = paramSet(this.initial_value);
         document.getElementById("z_value").oninput = this.updateZValue;
         
-        document.getElementById("lya_iterations").onchange = this.updateIterations;
+        document.getElementById("lya_iterations").onchange = paramSetWithRecompile(this, "iterations");
 
         document.getElementById("stable_colour").onchange = paramSetColour(this.stable_colour);
         document.getElementById("chaotic_colour").onchange = paramSetColour(this.chaotic_colour);
@@ -87,33 +94,7 @@ class Lyapunov extends Program {
     
     }
 
-    setupAttrs = function() {
-
-        this.fractal_param.getAttr("fractal_param");
-
-        this.initial_value.getAttr("initial_value");
-        this.z_value.getAttr("c");
-
-        this.stable_colour.getAttr("stable_colour");
-        this.chaotic_colour.getAttr("chaotic_colour");
-        this.infinity_colour.getAttr("infinity_colour");
-
-    }
-
-    loadAttrs = function() {
-
-        this.fractal_param.loadFloat();
-
-        this.initial_value.loadFloat();
-        this.z_value.loadFloat();
-        
-        this.stable_colour.loadFloat3();
-        this.chaotic_colour.loadFloat3();
-        this.infinity_colour.loadFloat3();
-
-    }
-
-    updateFractalType = function(event) {
+    updateFractalType(event) {
 
         LYAPUNOV.fractal_type = event.target.value;
 
@@ -164,7 +145,7 @@ class Lyapunov extends Program {
 
     }
 
-    processSequenceEvent = function(event) {
+    processSequenceEvent(event) {
 
         var key = event.key.toLowerCase();
 
@@ -173,13 +154,13 @@ class Lyapunov extends Program {
         }
     }
 
-    updateSequence = function(event) {
+    updateSequence(event) {
 
         LYAPUNOV.sequence = [];
         
-        for (var idx = 0; idx < event.target.value.length; idx++) {
+        for (let val of event.target.value) {
             
-            switch (event.target.value[idx]) {
+            switch (val) {
                 case "X":
                 case "x":
                     LYAPUNOV.sequence.push(0);
@@ -203,13 +184,7 @@ class Lyapunov extends Program {
 
     }
 
-    updateIterations = function(event) {
-        LYAPUNOV.iterations = event.target.value;
-        setupShader();
-        redraw();
-    }
-
-    updateZValue = function(event) {
+    updateZValue(event) {
 
         LYAPUNOV.z_value.value = event.target.value;
 
@@ -218,7 +193,7 @@ class Lyapunov extends Program {
         }
     }
 
-    updateGaussAlpha = function(event) {
+    updateGaussAlpha(event) {
         // negate for performance reasons
         LYAPUNOV.fractal_param.value = -event.target.value;
         redraw();
