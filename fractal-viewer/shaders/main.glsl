@@ -30,10 +30,13 @@ const float TAU = 2.0 * PI;
 const float MAX = 9999999999999.9;
 
 const Complex ZERO = Complex(0.0, 0.0);
+const Complex ONE = Complex(1.0, 0.0);
+const Complex TWO = Complex(2.0, 0.0);
+const Complex THREE = Complex(3.0, 0.0);
+const Complex I = Complex(0.0, 1.0);
 
 Complex reciprocal(Complex z) {
-    float denom = 1.0 / dot(z, z);
-    return Complex(z.real, -z.imag) * denom;
+    return Complex(z.real, -z.imag) * (1.0 / dot(z, z));
 }
 
 Complex square(Complex z) {
@@ -47,15 +50,16 @@ Complex prod(Complex x, Complex y) {
     );
 }
 
+Complex prod3(Complex x, Complex y, Complex z) {
+    return prod(prod(x, y), z);
+}
+
 Complex div(Complex x, Complex y) {
     return prod(x, reciprocal(y));
 }
 
 Complex conj(Complex z) {
-    return Complex(
-        z.real,
-        -z.imag
-    );
+    return Complex(z.real, -z.imag);
 }
 
 float argument(Complex z) {
@@ -72,8 +76,7 @@ Complex square_root(Complex z) {
 }
 
 Complex exponent(Complex z) {
-    float mag = exp(z.real);
-    return mag * Complex(
+    return exp(z.real) * Complex(
         cos(z.imag),
         sin(z.imag)
     );
@@ -81,8 +84,8 @@ Complex exponent(Complex z) {
 
 Complex exponent(Complex z, float d) {
 
-    float r = pow(z.real * z.real + z.imag * z.imag, 0.5 * d);
-    float theta = atan(z.imag, z.real) * d;
+    float r = pow(dot(z, z), 0.5 * d);
+    float theta = argument(z) * d;
 
     return r * Complex(
         cos(theta),
@@ -93,8 +96,8 @@ Complex exponent(Complex z, Complex d) {
 
     float z_norm_sq = dot(z, z);
     float arg = argument(z);
-    float r = pow(z_norm_sq, 0.5 * d.real) * exp(-d.imag * arg);
-    float angle = d.real * arg + 0.5 * d.imag * log(z_norm_sq);
+    float r = pow(z_norm_sq, 0.5 * d.real) * exp(-d.imag * arg);    
+    float angle = dot(d, Complex(arg, 0.5 * log(z_norm_sq)));
 
     return r * Complex(
         cos(angle),
@@ -102,7 +105,19 @@ Complex exponent(Complex z, Complex d) {
     );
 }
 
-vec3 getColour(float x, float y);
+Complex sine(Complex z) {
+    return Complex(
+        sin(z.real) * cosh(z.imag),
+        cos(z.real) * sinh(z.imag)
+    );
+}
+
+Complex cosine(Complex z) {
+    return Complex(
+        cos(z.real) * cosh(z.imag),
+        -sin(z.real) * sinh(z.imag)
+    );
+}
 
 /*
 Conversions from: https://www.shadertoy.com/view/4syfRc
@@ -176,6 +191,8 @@ vec3 hsv2rgb(vec3 c) {
     return c.z * mix(K.xxx, clamp(p - K.xxx, 0.0, 1.0), c.y);
 }
 
+vec3 getColour(float x, float y);
+
 void main() {
 
     float pixel_size = 2.0 * magnitude / 1000.0;
@@ -212,9 +229,12 @@ void main() {
                 exponent(pos),
                 vec2(transform_param1, transform_param2)
                 + vec2(transform_param3, transform_param4));
+
+        #elif TRANSFORMATION == 4
+            pos = pos.x * Complex(cos(pos.y), sin(pos.y));
         #endif
 
-        vec3 pixel_sample = getColour(pos.real, pos.imag);
+        vec3 pixel_sample = getColour(pos.x, pos.y);
 
         #if MULTISAMPLING_ALGORITHM == 1
             pixel_sample *= pixel_sample;

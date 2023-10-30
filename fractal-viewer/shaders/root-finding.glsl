@@ -57,26 +57,17 @@ vec3 getColour(float real, float imag) {
         Complex p = Complex(root1_real, root1_imag);
 
         #if ALGORITHM == 0 || ALGORITHM == 1 || ALGORITHM == 2 || ALGORITHM == 5
-            Complex p2 = Complex(
-                root1_real - 1.0,
-                root1_imag
-            );
+            Complex p2 = root1 - ONE;
         #endif
 
         #if ALGORITHM == 1 || ALGORITHM == 2 || ALGORITHM == 5
             Complex pp2 = prod(p, p2);
-            Complex p3 = Complex(
-                root1_real - 2.0,
-                root1_imag
-            );
+            Complex p3 = root1 - TWO;
         #endif
 
         #if ALGORITHM == 5
             Complex pp2p3 = prod(pp2, p3);
-            Complex p4 = Complex(
-                root1_real - 3.0,
-                root1_imag
-            );
+            Complex p4 = root1 - THREE;
         #endif
     #endif
 
@@ -220,13 +211,7 @@ vec3 getColour(float real, float imag) {
             #endif
 
             #if ALGORITHM == 3
-
-                Complex func_z = func + z;
-
-                func_step = Complex(
-                    sin(func_z.real) * cosh(func_z.imag),
-                    cos(func_z.real) * sinh(func_z.imag)
-                );
+                func_step = sine(func + z);
 
             #elif ALGORITHM == 5
                 der3 = -der;
@@ -234,30 +219,18 @@ vec3 getColour(float real, float imag) {
 
         #elif FUNCTION == 2
 
-            Complex exp = exponent(z, p);
-            func = Complex(
-                exp.real - 1.0,
-                exp.imag
-            );
+            func = exponent(z, p) - ONE;
 
             #if ALGORITHM == 0 || ALGORITHM == 1 || ALGORITHM == 2 || ALGORITHM == 5
                 der = prod(p, exponent(z, p2));
-
             #endif
 
             #if ALGORITHM == 1 || ALGORITHM == 2 || ALGORITHM == 5
                 der2 = prod(pp2, exponent(z, p3));
-
             #endif
 
             #if ALGORITHM == 3
-            
-                Complex exp2 = exponent(func + z, p);
-
-                func_step = Complex(
-                    exp2.real - 1.0,
-                    exp2.imag
-                );
+                func_step = exponent(func + z, p) - ONE;
 
             #elif ALGORITHM == 5
                 der3 = prod(pp2p3, exponent(z, p4));

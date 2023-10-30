@@ -82,7 +82,7 @@ function main() {
     document.getElementById("canvas_size").onchange = updateCanvasSize;
     document.getElementById("multisampling_algorithm").onchange = updateMultisamplingAlgorithm;
 
-    document.getElementById("fractal_canvas").onclick = onFractalClick;
+    document.getElementById("path_canvas").onclick = onFractalClick;
     
     document.querySelectorAll('[anim_param="1"]').forEach(
         function(anim_param) {

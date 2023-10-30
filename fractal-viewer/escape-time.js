@@ -58,11 +58,13 @@ class EscapeTime extends Program {
     fractal_param1 = new Param(0);
     fractal_param2 = new Param(0);
     fractal_param3 = new Param(0);
+
+    julification = new Param(0);
     
     escape_algorithm = 0;
     
     escape_param = new Param(4.0);
-    max_iterations = new Param(30);
+    max_iterations = 30;
     
     is_julia = new Param(0);
     julia_c_real = new Param(0.0);
@@ -101,6 +103,7 @@ class EscapeTime extends Program {
         //%
         #define FRACTAL ${this.fractal}
         #define ESCAPE_ALGORITHM ${this.escape_algorithm}
+        #define MAX_ITERATIONS ${this.max_iterations}
         #define EXTERIOR_COLOURING_STYLE ${this.exterior_colouring_style}
         #define EXTERIOR_COLOURING ${this.exterior_colouring}
         #define INTERIOR_COLOURING ${this.interior_colouring}`;
@@ -280,10 +283,10 @@ class EscapeTime extends Program {
     
         this.foam_q_handler = new ComplexPickerHandler("foam_q_selector", this.fractal_param1, this.fractal_param2, 2, 0, 0, "sauron_a_text", "q = $");
     
-        document.getElementById("is_julia").onchange = this.updateIsJulia;
+        document.getElementById("julification").oninput = paramSet(this.julification);
         this.julia_c_handler = new ComplexPickerHandler("julia_selector", this.julia_c_real, this.julia_c_imag, 2.5, 0, 0, "esc_julia_text", "c = $");
 
-        document.getElementById("esc_max_iterations").onchange = paramSet(this.max_iterations);
+        document.getElementById("esc_max_iterations").onchange = this.updateMaxIterations;
         
         document.getElementById("escape_algorithm").onchange = this.updateEscapeAlgorithm;
         document.getElementById("escape_radius").onchange = this.updateEscapeParamSquared;
@@ -333,12 +336,10 @@ class EscapeTime extends Program {
         this.fractal_param1.getAttr("fractal_param1");
         this.fractal_param2.getAttr("fractal_param2");
         this.fractal_param3.getAttr("fractal_param3");
-        
-        this.max_iterations.getAttr("max_iterations");
 
         this.escape_param.getAttr("escape_param");
             
-        this.is_julia.getAttr("is_julia");
+        this.julification.getAttr("julification");
         this.julia_c_real.getAttr("julia_c_real");
         this.julia_c_imag.getAttr("julia_c_imag");
 
@@ -363,9 +364,8 @@ class EscapeTime extends Program {
         this.fractal_param3.loadFloat();
 
         this.escape_param.loadFloat();
-        this.max_iterations.loadInt();
 
-        this.is_julia.loadInt();
+        this.julification.loadFloat();
         this.julia_c_real.loadFloat();
         this.julia_c_imag.loadFloat();
 
@@ -385,9 +385,8 @@ class EscapeTime extends Program {
 
     updateFractal = function(event) {
 
-        ESCAPE_TIME.fractal = event.target.value;
+        ESCAPE_TIME.fractal = +event.target.value;
     
-        var julia_style = document.getElementById("julia_div").style;
         var scaling_style = document.getElementById("scaling_div").style;
         var exponent_style = document.getElementById("exponent_div").style;
         var cmultibrot_style = document.getElementById("cmultibrot_div").style;
@@ -402,7 +401,6 @@ class EscapeTime extends Program {
         var foam_style = document.getElementById("foam_div").style;
         var function_text = document.getElementById("esc_function_text");
     
-        julia_style.display = "block";
         scaling_style.display = "none";
         exponent_style.display = "none";
         cmultibrot_style.display = "none";
@@ -418,13 +416,22 @@ class EscapeTime extends Program {
 
         function_text.innerHTML = ESCAPE_TIME_FUNCTIONS[ESCAPE_TIME.fractal];
 
+        document.getElementById("julia_div").style.display = show(
+            ![19, 34, 42, 43].includes(ESCAPE_TIME.fractal)
+        );
+
+        if ([5, 40, 52].includes(ESCAPE_TIME.fractal)) {
+            exponent_style.display = "block";
+            ESCAPE_TIME.fractal_param1.value = document.getElementById("exponent").value;
+        }
+        else if ([23, 53, 54].includes(ESCAPE_TIME.fractal)) {
+            cmultibrot_style.display = "block";
+            ESCAPE_TIME.cmultibrot_p_handler.loadValues();
+        }
+
         if (ESCAPE_TIME.fractal == 4) {
             scaling_style.display = "block";
             ESCAPE_TIME.fractal_param1.value = document.getElementById("scaling").value;
-        }
-        else if (ESCAPE_TIME.fractal == 5 || ESCAPE_TIME.fractal == 40) {
-            exponent_style.display = "block";
-            ESCAPE_TIME.fractal_param1.value = document.getElementById("exponent").value;
         }
         else if (ESCAPE_TIME.fractal == 15) {
             rational_style.display = "block";
@@ -434,19 +441,13 @@ class EscapeTime extends Program {
         }
         else if (ESCAPE_TIME.fractal == 16) {
             phoenix_style.display = "block";
-            ESCAPE_TIME.fractal_param1.value = ESCAPE_TIME.phoenix_p_handler.real;
-            ESCAPE_TIME.fractal_param2.value = ESCAPE_TIME.phoenix_p_handler.imag;
+            ESCAPE_TIME.phoenix_p_handler.loadValues();
         }
         else if (ESCAPE_TIME.fractal == 19) {
-            julia_style.display = "none";
             dragon_style.display = "block";
         }
         else if (ESCAPE_TIME.fractal == 20) {
             gangopadhyay_style.display = "block";
-        }
-        else if (ESCAPE_TIME.fractal == 23) {
-            cmultibrot_style.display = "block";
-            ESCAPE_TIME.cmultibrot_p_handler.loadValues();
         }
         else if (ESCAPE_TIME.fractal == 30) {
             mandelbruh_style.display = "block";
@@ -459,9 +460,6 @@ class EscapeTime extends Program {
         else if (ESCAPE_TIME.fractal == 32) {
             zubieta_style.display = "block";
             ESCAPE_TIME.zubieta_a_handler.loadValues();
-        }
-        else if (ESCAPE_TIME.fractal == 34) {
-            julia_style.display = "none"
         }
         else if (ESCAPE_TIME.fractal == 38) {
             sauron_style.display = "block";
@@ -500,15 +498,15 @@ class EscapeTime extends Program {
         redraw();
         
     }
-    
-    updateEscapeParamSquared = function(event) {
-        ESCAPE_TIME.escape_param.value = event.target.value * event.target.value;
+
+    updateMaxIterations = function(event) {
+        ESCAPE_TIME.max_iterations = event.target.value;
+        setupShader();
         redraw();
     }
     
-    updateIsJulia = function(event) {
-        ESCAPE_TIME.is_julia.value = +event.target.checked;
-        document.getElementById("julia_options").style.display = ESCAPE_TIME.is_julia.value ? "block" : "none";
+    updateEscapeParamSquared = function(event) {
+        ESCAPE_TIME.escape_param.value = event.target.value * event.target.value;
         redraw();
     }
 
