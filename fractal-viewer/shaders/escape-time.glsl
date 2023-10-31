@@ -56,6 +56,22 @@
 #define FRAKTAL1                    55
 #define FRAKTAL2                    56
 #define CACTUS                      57
+#define AIRSHIP                     58
+#define TAIL                        59
+#define QUILL                       60
+#define SHARK_FIN                   61
+#define POWER_DRILL                 62
+#define BIG_AND_LITTLE              63
+#define HALO                        64
+#define GENIE_LAMP                  65
+#define HOOK                        66
+#define COW                         67
+#define SIDEWAYS_SHIP               68
+#define SOCK_PUPPET                 69
+#define SPEEDY_BUFFALO              70
+#define AUSTRALIA                   71
+#define SMART_BUFFALO               72
+#define CUSTOM                      73
 
 #if (EXTERIOR_COLOURING_STYLE == 0 && MONOTONIC_FUNCTION == 2) || ESCAPE_ALGORITHM == 1
     #define MONITOR_DERIVATIVE
@@ -351,7 +367,7 @@ vec3 getColour(float real, float imag) {
         #elif FRACTAL == PERPENDICULAR_BUFFALO
             z = Complex(
                 abs(z_comp_sq.real - z_comp_sq.imag),
-                -2.0 * z.real * abs(z.imag)
+                2.0 * z.real * abs(z.imag)
             ) + c;
 
         #elif FRACTAL == MULTIBROT
@@ -371,7 +387,100 @@ vec3 getColour(float real, float imag) {
 
         #elif FRACTAL == COMPLEX_MULTI_MANDELBAR
             z = exponent(conj(z), Complex(fractal_param1, fractal_param2)) + c;
+
+        #elif FRACTAL == AIRSHIP
+
+            float abs_zi = abs(z.imag);
+
+            z = Complex(
+                z_comp_sq.real - abs_zi * z.imag,
+                2.0 * z.real * abs_zi
+            ) + c;
+
+        #elif FRACTAL == TAIL
+            z = Complex(
+                -dot(abs(z), z),
+                2.0 * z.real * z.imag
+            ) + c;
             
+        #elif FRACTAL == QUILL
+            z = Complex(
+                dot(abs(z), conj(z)),
+                2.0 * z.real * z.imag
+            ) + c;
+        
+        #elif FRACTAL == SHARK_FIN
+            z = Complex(
+                z_comp_sq.real - abs(z.imag) * z.imag,
+                2.0 * z.real * z.imag
+            ) + c;
+
+        #elif FRACTAL == POWER_DRILL
+            z = Complex(
+                z_comp_sq.real - abs(z.imag) * z.imag,
+                -2.0 * z.real * z.imag
+            ) + c;
+
+        #elif FRACTAL == BIG_AND_LITTLE
+            z = -Complex(
+                abs(z.real) * z.real + z_comp_sq.imag,
+                2.0 * abs(z.real * z.imag)
+            ) + c;
+
+        #elif FRACTAL == HALO
+            z = Complex(
+                -dot(abs(z), z),
+                2.0 * abs(z.real * z.imag)
+            ) + c;
+
+        #elif FRACTAL == GENIE_LAMP
+            z = Complex(
+                z_comp_sq.real + abs(z.imag) * z.imag,
+                2.0 * abs(z.real) * z.imag
+            ) + c;
+
+        #elif FRACTAL == HOOK
+            z = Complex(
+                abs(z.real) * z.real - z_comp_sq.imag,
+                2.0 * z.real * abs(z.imag)
+            ) + c;
+
+        #elif FRACTAL == COW
+            z = Complex(
+                abs(z_comp_sq.real + abs(z.imag) * z.imag),
+                -2.0 * abs(z.real * z.imag)
+            ) + c;
+
+        #elif FRACTAL == SIDEWAYS_SHIP
+            z = Complex(
+                abs(dot(abs(z), z)),
+                2.0 * z.real * z.imag
+            ) + c;
+
+        #elif FRACTAL == SOCK_PUPPET
+            z = Complex(
+                abs(z.real * abs(z.real) + z_comp_sq.imag),
+                -2.0 * z.real * z.imag
+            ) + c;
+
+        #elif FRACTAL == SPEEDY_BUFFALO
+            z = Complex(
+                abs(z.real * abs(z.real) - abs(z.imag) * z.imag),
+                -2.0 * abs(z.real * z.imag)
+            ) + c;
+
+        #elif FRACTAL == AUSTRALIA
+            z = Complex(
+                abs(z.real * abs(z.real) + z_comp_sq.imag),
+                -2.0 * abs(z.real * z.imag)
+            ) + c;
+
+        #elif FRACTAL == SMART_BUFFALO
+            z = Complex(
+                abs(z.real * abs(z.real) - z_comp_sq.imag),
+                -2.0 * abs(z.real * z.imag)
+            ) + c;
+
         #elif FRACTAL == OTHER_BUFFALO
             z = Complex(
                 z_comp_sq.real - z_comp_sq.imag,
@@ -675,6 +784,9 @@ vec3 getColour(float real, float imag) {
                     2.0 * z.real * z.imag
                 ))
                 + prod(c - ONE, z) - c;
+
+        #elif FRACTAL == CUSTOM
+            z = z_comp_sq + prod(z, z) + c;
 
         #endif
 
