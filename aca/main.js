@@ -11,8 +11,8 @@ var drag_start_y;
 
 function setup() {
     
-	canvas = document.getElementById("main_canvas");
-	context = canvas.getContext("2d"); 
+    canvas = document.getElementById("main_canvas");
+    context = canvas.getContext("2d"); 
     
     canvas.onmousedown = mouseClick;
     canvas.onmousemove = mouseMove;
@@ -68,7 +68,7 @@ function redraw() {
     canvas.width = document.body.clientWidth;
     canvas.height = document.body.clientHeight;
 	
-	var full_depth = document.getElementById("rows").value;
+    var full_depth = document.getElementById("rows").value;
     
     var rule = document.getElementById("rule").value;    
     var rule_bits = [];
@@ -88,7 +88,7 @@ function redraw() {
             
             row_cells = new Int8Array(pattern.length + 4);
             
-            for (var1 i = 0; i < pattern.length; i++) {
+            for (var i = 0; i < pattern.length; i++) {
                 row_cells[i + 2] = pattern[i];
             }
         }
