@@ -4,110 +4,8 @@
         <link rel="stylesheet" href="../main.css">
     </head>
     <body>
-<<<<<<< HEAD
-        <a href="index.html">
-            Home
-        </a>
-        <a href="fractal1.html">
-            Prev
-        </a>
-        <a href="fractal3.html">
-            Next
-        </a>
-        <h1>
-            Fractal rendering part 2: Plenty of math
-        </h1>
-        <p>
-            In this part I am going to explain some more of the math behind the Mandelbrot fractal we made last time. This can be skipped if this isn't necessarily your thing but I think understanding the theory can help aid the programming and exploring processes a lot. This section might get added to in the future if I decide there is anything else I should explain.
-        </p>
-        <h2>
-            Motivation for Mandelbrot fractal images
-        </h2>
-        <p>
-            The idea behind rendering Mandelbrot fractals is the Mandelbrot set, the distinction of which I will explain. The Mandelbrot set is actually the black region in the renders you have seen so far. It is defined as the set of all points <code>c</code> in the complex plane for which the update <code>z ← z<sup>2</sup> + c (z<sub>0</sub> = 0)</code> stays bounded and never escapes to infinity. All the colouring is actually just fanciness added on for looks (although it can have its own properties).
-        </p>
-        <img src="images/2-mandelbrot-set.png" width="300px">
-        <p>
-            To get comfortable with this I will show some examples along the real line:
-            For <code>c = -2</code> we have:
-        </p>
-        <code>
-            z<sub>0</sub> = 0<br>
-            z<sub>1</sub> = z<sub>0</sub><sup>2</sup> - 2 = -2<br>
-            z<sub>2</sub> = z<sub>1</sub><sup>2</sup> - 2 = 2<br>
-            z<sub>3</sub> = z<sub>2</sub><sup>2</sup> - 2 = 2
-        </code>
-        <p>
-            And it is pretty easy to see that this sequence has converged on the number 2 and will stay there as many times as we iterate. Therefore -2 is in the Mandelbrot set. Next let's try <code>c = -1</code>:
-        </p>
-        <code>
-            z<sub>0</sub> = 0<br>
-            z<sub>1</sub> = z<sub>0</sub><sup>2</sup> - 1 = -1<br>
-            z<sub>2</sub> = z<sub>1</sub><sup>2</sup> - 1 = 0<br>
-            z<sub>3</sub> = z<sub>2</sub><sup>2</sup> - 1 = -1
-        </code>
-        <p>
-            This is also caught in an obvious cycle between -1 and 0 and therefore -1 is also part of the Mandelbrot set. Now for an example of a blowup to infinity, try <code>c = 1</code>:
-        </p>
-        <code class="math">
-            z<sub>0</sub> = 0</code><br>
-            z<sub>1</sub> = z<sub>0</sub><sup>2</sup> + 1 = 1<br>
-            z<sub>2</sub> = z<sub>1</sub><sup>2</sup> + 1 = 2<br>
-            z<sub>3</sub> = z<sub>2</sub><sup>2</sup> + 1 = 5<br>
-            z<sub>4</sub> = z<sub>3</sub><sup>2</sup> + 1 = 26
-        </code>
-        <p>
-            It should be clear this is never coming near 0 again, therefore 1 is not in the Mandelbrot set. In fact it is provable that the intersection of the Mandelbrot set and the real number line is the interval <code>[-2, 0.25]</code> Obviously when we start talking about complex numbers the situation gets more... complex due to the 2-dimensional nature of how these numbers jump around when iterating and hence why the resulting shape has fascinated millions.
-        </p>
-        <h2>
-            Why stop when <code>|z| > 2</code>?
-        </h2>
-        <p>
-            For performance reasons, it is normal to stop iterating once a point reaches an absolute value greater than two, but what is the justification for doing this? There are probably many ways to prove this, but this is how I intuitively see this. We will assume <code>|c| ≤ 2</code>, which is true for all <code>c</code> in the Mandelbrot set. Since we are looking at what happens when <code>|z| > 2</code> we have <code>|z| > 2 ≥ |c|</code>. Lets look at the absolute value of the update formula.
-        </p>
-        <p>
-            First we use the absolute value rule <code>|a - b| ≥ ||a| - |b||</code>:
-        </p>
-        <code>|z<sup>2</sup> + c| ≥ ||z<sup>2</sup>| - |c|| = ||z|<sup>2</sup> - |c||</code><br>
-        <code>|z<sup>2</sup> + c| > ||z|<sup>2</sup> - |z||</code><br>
-        <p>
-            Now we will use the fact that for any <code>n > 2, n<sup>2</sup> > 2n</code>.
-        </p>
-        <code>|z<sup>2</sup> + c| > |z|</code>
-        <p>
-            And just like that we have proved the sequence only gets larger past this point. Now this is not true in general for escape-time fractals, and some do not even have a perfect escape radius to stop at. So it is usually a good idea to have an input to mess around with that as well.
-        </p>
-        <h2>
-            The fractal looks symmetrical, is it?
-        </h2>
-        <p>
-            Yes, it fairly trivial to show using complex conjugate (<code class="overline">a + bi</code><code> = a - bi</code>) rules that <code class="overline">z<sup>2</sup> + c</code> = <code>(</code><code class="overline">z</code>)<sup>2</sup><code> + </code><code class="overline">c</code>. Therefore the sequence of iterations for a point with a positive imaginary value is mirrored for the equivalent point on the other side of the real line and vice-versa.
-            For example, take the c = i:
-        </p>
-        <code>
-            z<sub>0</sub> = 0</code><br>
-            z<sub>1</sub> = z<sub>0</sub><sup>2</sup> + i = i<br>
-            z<sub>2</sub> = z<sub>1</sub><sup>2</sup> + i = -1 + i<br>
-            z<sub>3</sub> = z<sub>2</sub><sup>2</sup> + i = -i<br>
-            z<sub>4</sub> = z<sub>3</sub><sup>2</sup> + i = -1 + i
-        </code>
-        <p>
-            and c = -i
-        </p>
-        <code>
-            z<sub>0</sub> = 0<br>
-            z<sub>1</sub> = z<sub>0</sub><sup>2</sup> - i = -i<br>
-            z<sub>2</sub> = z<sub>1</sub><sup>2</sup> - i = -1 - i<br>
-            z<sub>3</sub> = z<sub>2</sub><sup>2</sup> - i = i<br>
-            z<sub>4</sub> = z<sub>3</sub><sup>2</sup> - i = -1 - i
-        </code>
-        <p>
-            We can see that the paths are equivalent, just with negated imaginary values from each other.
-        </p>
-=======
         <script src="/main.js"></script>
         <main>
-
             <a href="index.html">
                 Home
             </a>
@@ -117,97 +15,104 @@
             <a href="fractal3.html">
                 Next
             </a>
-            <h1>
-                Fractal rendering part 2: Plenty of math
-            </h1>
-            <p>
-                In this part I am going to explain some more of the math behind the Mandelbrot fractal we made last time. This can be skipped if this isn't necessarily your thing but I think understanding the theory can help aid the programming and exploring processes a lot. This section might get added to in the future if I decide there is anything else I should explain.
-            </p>
-            <h2>
-                Motivation for Mandelbrot fractal images
-            </h2>
-            <p>
-                The idea behind rendering Mandelbrot fractals is the Mandelbrot set, the distinction of which I will explain. The Mandelbrot set is actually the black region in the renders you have seen so far. It is defined as the set of all points <code>c</code> in the complex plane for which the update <code>z ← z<sup>2</sup> + c (z<sub>0</sub> = 0)</code> stays bounded and never escapes to infinity. All the colouring is actually just fanciness added on for looks (although it can have its own properties).
-            </p>
-            <img src="images/2-mandelbrot-set.png" width="300px">
-            <p>
-                To get comfortable with this I will show some examples along the real line:
-                For <code>c = -2</code> we have:z
-            </p>
-            <code>
-                z<sub>0</sub> = 0<br>
-                z<sub>1</sub> = z<sub>0</sub><sup>2</sup> - 2 = -2<br>
-                z<sub>2</sub> = z<sub>1</sub><sup>2</sup> - 2 = 2<br>
-                z<sub>3</sub> = z<sub>2</sub><sup>2</sup> - 2 = 2
-            </code>
-            <p>
-                And it is pretty easy to see that this sequence has converged on the number 2 and will stay there as many times as we iterate. Therefore -2 is in the Mandelbrot set. Next let's try <code>c = -1</code>:
-            </p>
-            <code>
-                z<sub>0</sub> = 0<br>
-                z<sub>1</sub> = z<sub>0</sub><sup>2</sup> - 1 = -1<br>
-                z<sub>2</sub> = z<sub>1</sub><sup>2</sup> - 1 = 0<br>
-                z<sub>3</sub> = z<sub>2</sub><sup>2</sup> - 1 = -1
-            </code>
-            <p>
-                This is also caught in an obvious cycle between -1 and 0 and therefore -1 is also part of the Mandelbrot set. Now for an example of a blowup to infinity, try <code>c = 1</code>:
-            </p>
-            <code class="math">
-                z<sub>0</sub> = 0</code><br>
-                z<sub>1</sub> = z<sub>0</sub><sup>2</sup> + 1 = 1<br>
-                z<sub>2</sub> = z<sub>1</sub><sup>2</sup> + 1 = 2<br>
-                z<sub>3</sub> = z<sub>2</sub><sup>2</sup> + 1 = 5<br>
-                z<sub>4</sub> = z<sub>3</sub><sup>2</sup> + 1 = 26
-            </code>
-            <p>
-                It should be clear this is never coming near 0 again, therefore 1 is not in the Mandelbrot set. In fact it is provable that the intersection of the Mandelbrot set and the real number line is the interval <code>[-2, 0.25]</code> Obviously when we start talking about complex numbers the situation gets more... complex due to the 2-dimensional nature of how these numbers jump around when iterating and hence why the resulting shape has fascinated millions.
-            </p>
-            <h2>
-                Why stop when <code>|z| > 2</code>?
-            </h2>
-            <p>
-                For performance reasons, it is normal to stop iterating once a point reaches an absolute value greater than two, but what is the justification for doing this? There are probably many ways to prove this, but this is how I intuitively see this. We will assume <code>|c| ≤ 2</code>, which is true for all <code>c</code> in the Mandelbrot set. Since we are looking at what happens when <code>|z| > 2</code> we have <code>|z| > 2 ≥ |c|</code>. Lets look at the absolute value of the update formula.
-            </p>
-            <p>
-                First we use the absolute value rule <code>|a - b| ≥ ||a| - |b||</code>:
-            </p>
-            <code>|z<sup>2</sup> + c| ≥ ||z<sup>2</sup>| - |c|| = ||z|<sup>2</sup> - |c||</code><br>
-            <code>|z<sup>2</sup> + c| > ||z|<sup>2</sup> - |z||</code><br>
-            <p>
-                Now we will use the fact that for any <code>n > 2, n<sup>2</sup> > 2n</code>.
-            </p>
-            <code>|z<sup>2</sup> + c| > |z|</code>
-            <p>
-                And just like that we have proved the sequence only gets larger past this point. Now this is not true in general for escape-time fractals, and some do not even have a perfect escape radius to stop at. So it is usually a good idea to have an input to mess around with that as well.
-            </p>
-            <h2>
-                The fractal looks symmetrical, is it?
-            </h2>
-            <p>
-                Yes, it fairly trivial to show using complex conjugate (<code class="overline">a + bi</code><code> = a - bi</code>) rules that <code class="overline">z<sup>2</sup> + c</code> = <code>(</code><code class="overline">z</code>)<sup>2</sup><code> + </code><code class="overline">c</code>. Therefore the sequence of iterations for a point with a positive imaginary value is mirrored for the equivalent point on the other side of the real line and vice-versa.
-                For example, take the c = i:
-            </p>
-            <code>
-                z<sub>0</sub> = 0</code><br>
-                z<sub>1</sub> = z<sub>0</sub><sup>2</sup> + i = i<br>
-                z<sub>2</sub> = z<sub>1</sub><sup>2</sup> + i = -1 + i<br>
-                z<sub>3</sub> = z<sub>2</sub><sup>2</sup> + i = -i<br>
-                z<sub>4</sub> = z<sub>3</sub><sup>2</sup> + i = -1 + i
-            </code>
-            <p>
-                and c = -i
-            </p>
-            <code>
-                z<sub>0</sub> = 0<br>
-                z<sub>1</sub> = z<sub>0</sub><sup>2</sup> - i = -i<br>
-                z<sub>2</sub> = z<sub>1</sub><sup>2</sup> - i = -1 - i<br>
-                z<sub>3</sub> = z<sub>2</sub><sup>2</sup> - i = i<br>
-                z<sub>4</sub> = z<sub>3</sub><sup>2</sup> - i = -1 - i
-            </code>
-            <p>
-                We can see that the paths are equivalent, just with negated imaginary values from each other.
-            </p>
+            <section>
+                <h1>
+                    Fractal rendering part 2: Plenty of math
+                </h1>
+                <p>
+                    In this part I am going to explain some more of the math behind the Mandelbrot fractal we made last time. This can be skipped if this isn't necessarily your thing but I think understanding the theory can help aid the programming and exploring processes a lot. This section might get added to in the future if I decide there is anything else I should explain.
+                </p>
+            </section>
+            <section>
+                <h2>
+                    Motivation for Mandelbrot fractal images
+                </h2>
+                <p>
+                    The idea behind rendering Mandelbrot fractals is the Mandelbrot set, the distinction of which I will explain. The Mandelbrot set is actually the black region in the renders you have seen so far. It is defined as the set of all points <code>c</code> in the complex plane for which the update <code>z ← z<sup>2</sup> + c (z<sub>0</sub> = 0)</code> stays bounded and never escapes to infinity. All the colouring is actually just fanciness added on for looks (although it can have its own properties).
+                </p>
+                <img src="images/2-mandelbrot-set.png" width="300px">
+                <p>
+                    To get comfortable with this I will show some examples along the real line:
+                    For <code>c = -2</code> we have:z
+                </p>
+                <code>
+                    z<sub>0</sub> = 0<br>
+                    z<sub>1</sub> = z<sub>0</sub><sup>2</sup> - 2 = -2<br>
+                    z<sub>2</sub> = z<sub>1</sub><sup>2</sup> - 2 = 2<br>
+                    z<sub>3</sub> = z<sub>2</sub><sup>2</sup> - 2 = 2
+                </code>
+                <p>
+                    And it is pretty easy to see that this sequence has converged on the number 2 and will stay there as many times as we iterate. Therefore -2 is in the Mandelbrot set. Next let's try <code>c = -1</code>:
+                </p>
+                <code>
+                    z<sub>0</sub> = 0<br>
+                    z<sub>1</sub> = z<sub>0</sub><sup>2</sup> - 1 = -1<br>
+                    z<sub>2</sub> = z<sub>1</sub><sup>2</sup> - 1 = 0<br>
+                    z<sub>3</sub> = z<sub>2</sub><sup>2</sup> - 1 = -1
+                </code>
+                <p>
+                    This is also caught in an obvious cycle between -1 and 0 and therefore -1 is also part of the Mandelbrot set. Now for an example of a blowup to infinity, try <code>c = 1</code>:
+                </p>
+                <code class="math">
+                    z<sub>0</sub> = 0</code><br>
+                    z<sub>1</sub> = z<sub>0</sub><sup>2</sup> + 1 = 1<br>
+                    z<sub>2</sub> = z<sub>1</sub><sup>2</sup> + 1 = 2<br>
+                    z<sub>3</sub> = z<sub>2</sub><sup>2</sup> + 1 = 5<br>
+                    z<sub>4</sub> = z<sub>3</sub><sup>2</sup> + 1 = 26
+                </code>
+                <p>
+                    It should be clear this is never coming near 0 again, therefore 1 is not in the Mandelbrot set. In fact it is provable that the intersection of the Mandelbrot set and the real number line is the interval <code>[-2, 0.25]</code> Obviously when we start talking about complex numbers the situation gets more... complex due to the 2-dimensional nature of how these numbers jump around when iterating and hence why the resulting shape has fascinated millions.
+                </p>
+            </section>
+            <section>
+                <h2>
+                    Why stop when <code>|z| > 2</code>?
+                </h2>
+                <p>
+                    For performance reasons, it is normal to stop iterating once a point reaches an absolute value greater than two, but what is the justification for doing this? There are probably many ways to prove this, but this is how I intuitively see this. We will assume <code>|c| ≤ 2</code>, which is true for all <code>c</code> in the Mandelbrot set. Since we are looking at what happens when <code>|z| > 2</code> we have <code>|z| > 2 ≥ |c|</code>. Lets look at the absolute value of the update formula.
+                </p>
+                <p>
+                    First we use the absolute value rule <code>|a - b| ≥ ||a| - |b||</code>:
+                </p>
+                <code>|z<sup>2</sup> + c| ≥ ||z<sup>2</sup>| - |c|| = ||z|<sup>2</sup> - |c||</code><br>
+                <code>|z<sup>2</sup> + c| > ||z|<sup>2</sup> - |z||</code><br>
+                <p>
+                    Now we will use the fact that for any <code>n > 2, n<sup>2</sup> > 2n</code>.
+                </p>
+                <code>|z<sup>2</sup> + c| > |z|</code>
+                <p>
+                    And just like that we have proved the sequence only gets larger past this point. Now this is not true in general for escape-time fractals, and some do not even have a perfect escape radius to stop at. So it is usually a good idea to have an input to mess around with that as well.
+                </p>
+            </section>
+            <section>
+                <h2>
+                    The fractal looks symmetrical, is it?
+                </h2>
+                <p>
+                    Yes, it fairly trivial to show using complex conjugate (<code class="overline">a + bi</code><code> = a - bi</code>) rules that <code class="overline">z<sup>2</sup> + c</code> = <code>(</code><code class="overline">z</code>)<sup>2</sup><code> + </code><code class="overline">c</code>. Therefore the sequence of iterations for a point with a positive imaginary value is mirrored for the equivalent point on the other side of the real line and vice-versa.
+                    For example, take the c = i:
+                </p>
+                <code>
+                    z<sub>0</sub> = 0</code><br>
+                    z<sub>1</sub> = z<sub>0</sub><sup>2</sup> + i = i<br>
+                    z<sub>2</sub> = z<sub>1</sub><sup>2</sup> + i = -1 + i<br>
+                    z<sub>3</sub> = z<sub>2</sub><sup>2</sup> + i = -i<br>
+                    z<sub>4</sub> = z<sub>3</sub><sup>2</sup> + i = -1 + i
+                </code>
+                <p>
+                    and c = -i
+                </p>
+                <code>
+                    z<sub>0</sub> = 0<br>
+                    z<sub>1</sub> = z<sub>0</sub><sup>2</sup> - i = -i<br>
+                    z<sub>2</sub> = z<sub>1</sub><sup>2</sup> - i = -1 - i<br>
+                    z<sub>3</sub> = z<sub>2</sub><sup>2</sup> - i = i<br>
+                    z<sub>4</sub> = z<sub>3</sub><sup>2</sup> - i = -1 - i
+                </code>
+                <p>
+                    We can see that the paths are equivalent, just with negated imaginary values from each other.
+                </p>
+            </section>
         </main>
->>>>>>> 07f0860 (massive overhaul)
     </body>
 </html>

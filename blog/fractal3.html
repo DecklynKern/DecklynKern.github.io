@@ -12,69 +12,75 @@
             <a href="fractal2.html">
                 Prev
             </a>
-            <h1>
-                Fractal rendering part 3: Knobs and dials
-            </h1>
-            <p>
-                Alright, now that we have a basic renderer built, let's try to make it more pretty. The basic idea for this is to collect and use some extra data from the iterations of a given pixel and use that to affect how we colour it. There are a virtually unending number of ways to do this, each one leading to new and unique patterns in the resulting image. Although none of these ideas are my own, they are quite standard and good to understand in order to be able to create your own. 
-            </p>
-            <h2>
-                Smooth iteration count
-            </h2>
-            <p>
-                In the first part, we already saw an example of collecting data to affect the appearance of each pixel, we kept track of the number of iterations needed to escape, and coloured the outside of the fractal accordingly.
-            </p>
-            <img src="images/1-mandelbrot.png" width="400px">
-            <p>
-                Now you may have already noticed the problem we are going to address now. Since there are a discrete number of possible iteration counts that each pixel could take, the neighbouring pixels that require the same number of iterations to escape all have the exact same colour. This is what causes the distinct bands to form around our fractal. If we want to smoothen this out then we need to get creative (by copying what everyone else does to solve this). This is the <strong>smooth iteration count</strong>.
-            </p>
-            <img src="images/3-banding.png" width="400px">
-            <p>
-                The way to fix this is to use the magnitude of the final value of <code>z</code> from the sequence of iterations and use that to interpolate between the two neighbouring bands. For a given escape radius (let's assume the default of 2), there will be pixels in a band which just barely make it to 2 on the last iteration, whereas others which cross the line with room to spare. Taking the Mandelbrot update rule <code>z ← z<sup>2</sup> + c</code>, and ignoring <code>c</code>, we can expect that the largest <code>z</code>'s magnitude can be is roughly 4, which would represent values which were just barely inside the threshold on the previous iteration. This means that roughly <code>2 ≤ |z| < 4</code>. This isn't quite accurate due to the <code>c</code> value being added each iteration, but in practice this works well enough.
-            </p>
-            <p>
-                The general rule for a chosen escape radius <code>r</code> is that the values will lie somewhere in the interval <code>[r, r<sup>2</sup>]</code>. Now simply scaling that interval to <code>[0, 1]</code><sup>1</sup> won't quite do as this will not create a completely smooth gradient. If we imagine the colour gradient we are displaying as a graph, the bands would look something like this:
-            </p>
-            <img src="images/3-steps.png" width="400px">
-            <p>
-                Whereas simply linearly interpolating the escape magnitudes would give us something like this:
-            </p>
-            <img src="images/3-linear.png" width="400px">
-            <p>
-                But what we actually want is something like a <a href="https://en.wikipedia.org/wiki/Spline_interpolation">spline interpolation</a>:
-            </p>
-            <img src="images/3-log.png" width="400px">
-            <p>
-                The problem with that is since we are doing this all pixel-by-pixel in a fragment shader (or in a big loop on a CPU), each pixel can only really know about itself. Therefore we need to try something else.
-            </p>
-            <p>
-                The solution is to use the <code>log</code> function. If we take <code>log(|z|)/log(r)</code>, we get a value somewhere in the range <code>[1, 2]</code>. Take the log again, and normalize, we get <code>log(log(|z|)/log(r))/log(2)</code> in the range <code>[0, 1]</code> which when added to the iteration count finally gives us the nice smoothing effect that we wanted.
-            </p>
-            <img src="images/3-smooth.png" width="400px">
-            <p>
-                Now once we talk about other fractals, this will not work quite the same<sup>2</sup>, or even at all, due to them having different formulas which behave differently around the escape radius.
-            </p>
-            <p>
-                If you look really closely at your renderer, you might still notice very slight bands. This is due to the <code>c</code> value we have been ignoring which causes our assumptions about the ranges the smoothing value will fall into to break slightly. A simple solution is to raise the escape radius until <code>c</code> becomes negligible enough to not cause noticeable issues.
-            </p>
-            <h2>
-                Anti-aliasing
-            </h2>
-            <p>
-                When rendering very complex regions, certain regions of pixels can be very grainy due to the chaotic nature of fractals causing very different outcomes for points close to each other. The fate of an entire pixel is determined by a single point that we choose to represent it. If we want to avoid this and create nicer-looking images, we need to look into anti-aliasing.
-            </p>
-            <p>
-                Anti-aliasing is a process of smoothing jagged regions when rendering to a screen. There are multiple techniques used in the high-end graphics world of 3D games to do this, but I am just going to talk about the simplest one which is used all the time for fractals. We are simply going to take multiple samples for each pixel and combine the results to create a better representation of what is really going on in the region that pixel covers. This is called multipsample anti-aliasing or MSAA.
-            </p>
-            <img src="images/3-grainy.png" width="400px" class="nearest">
-            <img src="images/3-antialiased.png" width="400px" class="nearest">
-            <p>
-                
-            </p>
-            <p class="notes">
-                <sup>1</sup> Actually [1, 0] since the points with smaller escape magnitudes will be closer inwards to the next band.<br>
-                <sup>2</sup> Once we talk about Multibrot fractals which just have a different exponent p instead of 2 in the formula, the log(2) can be switched out for log(p) and things work out just fine.
-            </p>
+            <section>
+                <h1>
+                    Fractal rendering part 3: Knobs and dials
+                </h1>
+                <p>
+                    Alright, now that we have a basic renderer built, let's try to make it more pretty. The basic idea for this is to collect and use some extra data from the iterations of a given pixel and use that to affect how we colour it. There are a virtually unending number of ways to do this, each one leading to new and unique patterns in the resulting image. Although none of these ideas are my own, they are quite standard and good to understand in order to be able to create your own. 
+                </p>
+            </section>
+            <section>
+                <h2>
+                    Smooth iteration count
+                </h2>
+                <p>
+                    In the first part, we already saw an example of collecting data to affect the appearance of each pixel, we kept track of the number of iterations needed to escape, and coloured the outside of the fractal accordingly.
+                </p>
+                <img src="images/1-mandelbrot.png" width="400px">
+                <p>
+                    Now you may have already noticed the problem we are going to address now. Since there are a discrete number of possible iteration counts that each pixel could take, the neighbouring pixels that require the same number of iterations to escape all have the exact same colour. This is what causes the distinct bands to form around our fractal. If we want to smoothen this out then we need to get creative (by copying what everyone else does to solve this). This is the <strong>smooth iteration count</strong>.
+                </p>
+                <img src="images/3-banding.png" width="400px">
+                <p>
+                    The way to fix this is to use the magnitude of the final value of <code>z</code> from the sequence of iterations and use that to interpolate between the two neighbouring bands. For a given escape radius (let's assume the default of 2), there will be pixels in a band which just barely make it to 2 on the last iteration, whereas others which cross the line with room to spare. Taking the Mandelbrot update rule <code>z ← z<sup>2</sup> + c</code>, and ignoring <code>c</code>, we can expect that the largest <code>z</code>'s magnitude can be is roughly 4, which would represent values which were just barely inside the threshold on the previous iteration. This means that roughly <code>2 ≤ |z| < 4</code>. This isn't quite accurate due to the <code>c</code> value being added each iteration, but in practice this works well enough.
+                </p>
+                <p>
+                    The general rule for a chosen escape radius <code>r</code> is that the values will lie somewhere in the interval <code>[r, r<sup>2</sup>]</code>. Now simply scaling that interval to <code>[0, 1]</code><sup>1</sup> won't quite do as this will not create a completely smooth gradient. If we imagine the colour gradient we are displaying as a graph, the bands would look something like this:
+                </p>
+                <img src="images/3-steps.png" width="400px">
+                <p>
+                    Whereas simply linearly interpolating the escape magnitudes would give us something like this:
+                </p>
+                <img src="images/3-linear.png" width="400px">
+                <p>
+                    But what we actually want is something like a <a href="https://en.wikipedia.org/wiki/Spline_interpolation">spline interpolation</a>:
+                </p>
+                <img src="images/3-log.png" width="400px">
+                <p>
+                    The problem with that is since we are doing this all pixel-by-pixel in a fragment shader (or in a big loop on a CPU), each pixel can only really know about itself. Therefore we need to try something else.
+                </p>
+                <p>
+                    The solution is to use the <code>log</code> function. If we take <code>log(|z|)/log(r)</code>, we get a value somewhere in the range <code>[1, 2]</code>. Take the log again, and normalize, we get <code>log(log(|z|)/log(r))/log(2)</code> in the range <code>[0, 1]</code> which when added to the iteration count finally gives us the nice smoothing effect that we wanted.
+                </p>
+                <img src="images/3-smooth.png" width="400px">
+                <p>
+                    Now once we talk about other fractals, this will not work quite the same<sup>2</sup>, or even at all, due to them having different formulas which behave differently around the escape radius.
+                </p>
+                <p>
+                    If you look really closely at your renderer, you might still notice very slight bands. This is due to the <code>c</code> value we have been ignoring which causes our assumptions about the ranges the smoothing value will fall into to break slightly. A simple solution is to raise the escape radius until <code>c</code> becomes negligible enough to not cause noticeable issues.
+                </p>
+            </section>
+            <section>
+                <h2>
+                    Anti-aliasing
+                </h2>
+                <p>
+                    When rendering very complex regions, certain regions of pixels can be very grainy due to the chaotic nature of fractals causing very different outcomes for points close to each other. The fate of an entire pixel is determined by a single point that we choose to represent it. If we want to avoid this and create nicer-looking images, we need to look into anti-aliasing.
+                </p>
+                <p>
+                    Anti-aliasing is a process of smoothing jagged regions when rendering to a screen. There are multiple techniques used in the high-end graphics world of 3D games to do this, but I am just going to talk about the simplest one which is used all the time for fractals. We are simply going to take multiple samples for each pixel and combine the results to create a better representation of what is really going on in the region that pixel covers. This is called multipsample anti-aliasing or MSAA.
+                </p>
+                <img src="images/3-grainy.png" width="400px" class="nearest">
+                <img src="images/3-antialiased.png" width="400px" class="nearest">
+                <p>
+                    
+                </p>
+                <p class="notes">
+                    <sup>1</sup> Actually [1, 0] since the points with smaller escape magnitudes will be closer inwards to the next band.<br>
+                    <sup>2</sup> Once we talk about Multibrot fractals which just have a different exponent p instead of 2 in the formula, the log(2) can be switched out for log(p) and things work out just fine.
+                </p>
+            </section>
         </main>
     </body>
 </html>
