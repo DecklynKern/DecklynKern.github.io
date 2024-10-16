@@ -38,8 +38,11 @@ section {
 }
 
 h1 {
+    text-align: center;
+    padding-bottom: 0.25em;
     text-decoration: underline;
     color: white;
+    font-size: xx-large;
 }
 
 h2 {
@@ -50,11 +53,11 @@ h2 {
 }
 
 p {
-    line-height: 100%;
+    line-height: 135%;
 }
 
 a {
-    color: #3e92cc;
+    color: #3891d1;
     text-decoration: none;
 }
 
@@ -74,7 +77,7 @@ code {
     flex-direction: row;
     border-bottom: 1px solid black;
     font-family: CaveStory;
-    height: 4em;
+    height: 3.5em;
     width: 100%;
     background-color: #010022;
 }
@@ -86,6 +89,7 @@ nav {
 }
 
 nav a {
+    color: white;
     font-size: 4em;
     text-decoration: none;
     padding-left: 0.25em;
@@ -108,7 +112,7 @@ nav a:hover {
 
 .logo {
     image-rendering: pixelated;
-    height: 4em;
+    height: 3.5em;
 }
 
 .logo-hover {
@@ -116,7 +120,7 @@ nav a:hover {
     position: absolute;
     top: 0;
     left: 0;
-    height: 4em;
+    height: 3.5em;
 }
 
 .logo-hover:hover {
@@ -127,4 +131,13 @@ nav a:hover {
     width: 1.5em;
     height: 1.5em;
     border-radius: 12em;
+}
+
+table {
+    width: 100%;
+}
+
+td + td {
+    text-align: right;
+    width: max-content;
 }

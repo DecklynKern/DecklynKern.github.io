@@ -2,14 +2,16 @@
 <html>
     <head>
         <title>Tetrism</title>
+        <link rel="stylesheet" href="../main.css">
     </head>
     <body>
-        <canvas id="canvas" oncontextmenu="event.preventDefault()"></canvas>
+        <script src="/main.js"></script>
+        <canvas id="canvas" oncontextmenu="event.preventDefault()" style="margin: auto; display: block; padding-top: 4em;"></canvas>
         <script type='text/javascript'>
             var Module = {
                 canvas: (function() { return document.getElementById('canvas'); })()
             };
         </script>
-        <script src="main.js"></script>
+        <script src="tetrism.js"></script>
     </body>
 </html>
