@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Decklyn Kern</title>
+        <link rel="stylesheet" href="/main.css">
+    </head>
+    <body>
+        <script src="/main.js"></script>
+        <main>
+            <section>
+                <div style="display: flex; flex-direction: column; width: fit-content;">
+                    <div>
+                        <label for="c">C</label>
+                        <input type="radio" id="c" name="note" value="c" onchange="reload()">
+                    </div>
+                    <div>
+                        <label for="c_sharp">C#/D♭</label>
+                        <input type="radio" id="c_sharp" name="note" value="c_sharp" onchange="reload()">
+                    </div>
+                    <div>
+                        <label for="d">D</label>
+                        <input type="radio" id="d" name="note" value="d" onchange="reload()">
+                    </div>
+                    <div>
+                        <label for="d">D#/E♭</label>
+                        <input type="radio" id="d_sharp" name="note" value="d_sharp" onchange="reload()">
+                    </div>
+                    <div>
+                        <label for="e">E</label>
+                        <input type="radio" id="e" name="note" value="e" onchange="reload()">
+                    </div>
+                    <div>
+                        <label for="f">F</label>
+                        <input type="radio" id="f" name="note" value="f" onchange="reload()">
+                    </div>
+                    <div>
+                        <label for="f_sharp">F#/G♭</label>
+                        <input type="radio" id="f_sharp" name="note" value="f_sharp" onchange="reload()">
+                    </div>
+                    <div>
+                        <label for="g">G</label>
+                        <input type="radio" id="g" name="note" value="g" onchange="reload()">
+                    </div>
+                    <div>
+                        <label for="g_sharp">G#/A♭</label>
+                        <input type="radio" id="g_sharp" name="note" value="g_sharp" onchange="reload()">
+                    </div>
+                    <div>
+                        <label for="a">A</label>
+                        <input type="radio" id="a" name="note" value="a" onchange="reload()" checked="true">
+                    </div>
+                    <div>
+                        <label for="a_sharp">A#/B♭</label>
+                        <input type="radio" id="a_sharp" name="note" value="a_sharp" onchange="reload()">
+                    </div>
+                    <div>
+                        <label for="b">B</label>
+                        <input type="radio" id="b" name="note" value="b" onchange="reload()">
+                    </div>
+                </div>
+                <canvas id="canvas" style="width: 30em; height: 8em;">
+                </canvas>
+            </section>
+        </main>
+        <script src="piano.js"></script>
+    </body>
+</html>
