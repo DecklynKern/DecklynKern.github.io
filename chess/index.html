@@ -2,10 +2,10 @@
 <html>
     <head>
         <title>WASM Chess Engine</title>
-        <link href="images/favicon.ico" rel="icon" type="image/x-icon" />
+        <link href="images/favicon.ico" rel="icon" type="image/x-icon"/>
         <link href="style.css" rel="stylesheet">
         <link href="/main.css" rel="stylesheet">
-        <script src="main.js" ></script>
+        <script src="main.js"></script>
         <script type="module">
             import init, {calc_engine_move, get_possible_moves, play_human_move} from "./chess_web.js";
             init().then(() => {
@@ -20,6 +20,7 @@
         </script>
     </head>
     <body>
+        <script src="/main.js"></script>
         <main>
             <section>
                 <div id="board-container">
@@ -38,5 +39,4 @@
             </section>
         </main>
     </body>
-    <script src="/main.js"></script>
 </html>

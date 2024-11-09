@@ -20,11 +20,56 @@ const KEY_INDEXES = {
     "b_sharp": 12
 };
 
+const QUALITY_OFFSETS = {
+    "major": [0, 4, 7],
+    "minor": [0, 3, 7],
+    "augmented": [0, 4, 8],
+    "diminished": [0, 3, 6],
+    "sus2": [0, 2, 7],
+    "sus4": [0, 5, 7]
+};
+
+const ROOT_NAMES = {
+    "c": "C",
+    "c_sharp": "C#",
+    "d": "D",
+    "d_sharp": "D#",
+    "e": "E",
+    "f": "F",
+    "f_sharp": "F#",
+    "g": "G",
+    "g_sharp": "G#",
+    "a": "A",
+    "a_sharp": "A#",
+    "b": "B",
+    "b_sharp": "B#"
+};
+
+const QUALITY_NAMES = {
+    "major": "",
+    "minor": "m",
+    "augmented": "aug",
+    "diminished": "dim",
+    "sus2": "sus2",
+    "sus4": "sus4"
+}
+
 function reload() {
 
-    const chordRoot = KEY_INDEXES[document.querySelector('input[name="note"]:checked').value];
+    const chordRoot = document.querySelector("input[name='note']:checked").value;
+    const chordQuality = document.querySelector("input[name='quality']:checked").value;
+    
+    const heldKeys = QUALITY_OFFSETS[chordQuality].map(offset => KEY_INDEXES[chordRoot] + offset);
 
-    const selectedKeys = [chordRoot, chordRoot + 4, chordRoot + 7];
+    var chordName = ROOT_NAMES[chordRoot] + QUALITY_NAMES[chordQuality];
+
+    document.getElementById("chord_name").innerText = chordName;
+
+    drawKeys(heldKeys);
+    
+}
+
+function drawKeys(heldKeys) {
 
     CANVAS_CONTEXT.fillStyle = "rgba(0, 0, 0, 0)";
     CANVAS_CONTEXT.fillRect(0, 0, CANVAS.width, CANVAS.height);
@@ -33,7 +78,7 @@ function reload() {
 
     for (var key = 0; key < 14; key++) {
 
-        if (selectedKeys.includes(WHITE_KEY_INDEXES[key])) {
+        if (heldKeys.includes(WHITE_KEY_INDEXES[key])) {
             CANVAS_CONTEXT.fillStyle = "red";
         }
         else {
@@ -56,7 +101,7 @@ function reload() {
             continue;
         }
 
-        if (selectedKeys.includes(BLACK_KEY_INDEXES[sharp])) {
+        if (heldKeys.includes(BLACK_KEY_INDEXES[sharp])) {
             CANVAS_CONTEXT.fillStyle = "red";
         }
         else {
@@ -70,5 +115,9 @@ function reload() {
 
     }
 }
+
+document.querySelectorAll("input[type='radio']").forEach(button => {
+    button.onchange = reload;
+});
 
 reload()

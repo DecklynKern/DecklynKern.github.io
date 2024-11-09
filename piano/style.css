@@ -1,0 +1,21 @@
+input {
+    float: right;
+}
+
+.column {
+    display: flex;
+    flex-direction: column;
+    width: fit-content;
+    padding-right: 1em;
+}
+
+#chord_name {
+    align-self: last baseline;
+}
+
+#canvas {
+    width: 80%;
+    aspect-ratio: 3;
+    padding-left: 10%;
+    image-rendering: pixelated;
+}
