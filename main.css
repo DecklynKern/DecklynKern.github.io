@@ -13,6 +13,7 @@ html {
 }
 
 body {
+    display: grid;
     margin: 0;
     color: #d0e4e6;
     font-size: large;
@@ -22,9 +23,11 @@ body {
 
 main {
     padding-top: 1.25em;
-    padding-left: 10%;
-    padding-right: 10%;
-    width: 70%;
+    justify-self: center;
+    padding-left: 15%;
+    padding-right: 15%;
+    width: fit-content;
+    min-width: 50%;
 }
 
 section {

@@ -5,8 +5,18 @@
         <link rel="stylesheet" href="../main.css">
     </head>
     <body>
+        <main>
+            <canvas id="canvas" oncontextmenu="event.preventDefault()" style="margin: auto; display: block; padding-bottom: 2em;"></canvas>
+            <section>
+                <h2>Controls</h2>
+                Z - Rotate left<br>
+                X - Rotate right<br>
+                Left+right - movement<br>
+                Up - Hard drop<br>
+                Down - Soft drop
+            </section>
+        </main>
         <script src="/main.js"></script>
-        <canvas id="canvas" oncontextmenu="event.preventDefault()" style="margin: auto; display: block; padding-top: 4em;"></canvas>
         <script type='text/javascript'>
             var Module = {
                 canvas: (function() { return document.getElementById('canvas'); })()

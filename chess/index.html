@@ -4,6 +4,7 @@
         <title>WASM Chess Engine</title>
         <link href="images/favicon.ico" rel="icon" type="image/x-icon" />
         <link href="style.css" rel="stylesheet">
+        <link href="/main.css" rel="stylesheet">
         <script src="main.js" ></script>
         <script type="module">
             import init, {calc_engine_move, get_possible_moves, play_human_move} from "./chess_web.js";
@@ -19,18 +20,23 @@
         </script>
     </head>
     <body>
-        <div id="board-container">
-            <div id="chess-board">
-            </div>
-            <div>
-                <input type="text" id="fen-entry" size="60">
-                <button onclick="setToFen(document.getElementById('fen-entry').value)">
-                    Update
-                </button>
-            </div>
-            <button onclick="setToFen('rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1');">
-                Reset
-            </button>
-        </div>
+        <main>
+            <section>
+                <div id="board-container">
+                <div id="chess-board">
+                </div>
+                <div>
+                    <input type="text" id="fen-entry" size="60">
+                    <button onclick="setToFen(document.getElementById('fen-entry').value)">
+                        Update
+                    </button>
+                </div>
+                    <button onclick="setToFen('rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1');">
+                        Reset
+                    </button>
+                </div>
+            </section>
+        </main>
     </body>
+    <script src="/main.js"></script>
 </html>
